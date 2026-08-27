@@ -1,15 +1,16 @@
 {
-  "name": "Pencatat Meter Air",
-  "short_name": "MeterAir",
-  "start_url": "/index.html",
+  "name": "Tirta Sari Giri Water System",
+  "short_name": "TirtaSari",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0284c7",
+  "background_color": "#060911",
+  "theme_color": "#060911",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3105/3105807.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚰</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
     }
   ]
 }

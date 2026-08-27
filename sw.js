@@ -1,23 +1,15 @@
-const CACHE_NAME = 'water-meter-v1';
-const urlsToCache = [
-  './index.html',
-  './app.js',
-  './manifest.json',
-  'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css'
-];
+const CACHE_NAME = 'tirta-sari-v5';
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
-  );
+self.addEventListener('install', (e) => {
+    self.skipWaiting();
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+self.addEventListener('activate', (e) => {
+    e.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', (e) => {
+    e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+    );
 });
