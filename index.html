@@ -2,59 +2,126 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencatat Meter Air - Developer Mode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Water Meter Dev Mobile</title>
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <meta name="theme-color" content="#0284c7">
+    <style>
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        * {
+            box-sizing: inherit;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col w-full m-0 p-0">
 
-    <header class="bg-sky-600 text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold">💧 Water Meter Dev PWA</h1>
-            <span id="connection-status" class="text-xs bg-yellow-500 px-2 py-1 rounded text-white font-semibold">Menghubungkan...</span>
-        </div>
+    <!-- Header Mobile -->
+    <header class="bg-sky-600 text-white p-3 shadow-md flex justify-between items-center w-full">
+        <h1 class="text-sm font-bold truncate">💧 Dev Water Meter</h1>
+        <span id="connection-status" class="text-xs bg-yellow-500 px-2 py-0.5 rounded text-white font-semibold whitespace-nowrap">Connecting</span>
     </header>
 
-    <main class="container mx-auto p-4 flex-grow max-w-xl">
-        
-        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-md font-semibold mb-4 text-gray-700">Catat Angka Meter Baru</h2>
-            <form id="meter-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">ID Pelanggan / Lokasi</label>
-                    <input type="text" id="customer-id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-sky-500 focus:border-sky-500" placeholder="Contoh: PEL-001">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Angka Meter (m³)</label>
-                    <input type="number" step="0.01" id="meter-value" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-sky-500 focus:border-sky-500" placeholder="Contoh: 125.50">
-                </div>
-                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium p-2 rounded-md transition duration-200">
-                    Kirim Data
-                </button>
-            </form>
-        </section>
+    <!-- Navigasi Menu Mobile (2 Menu Utama + 1 Menu Impor/Ekspor) -->
+    <nav class="bg-white shadow-sm border-b p-2 w-full">
+        <div class="grid grid-cols-3 gap-1">
+            <button onclick="switchTab('staf')" id="btn-staf" class="tab-btn py-2 px-1 text-xs font-medium rounded bg-sky-600 text-white text-center transition truncate">Input Staf</button>
+            <button onclick="switchTab('pengguna')" id="btn-pengguna" class="tab-btn py-2 px-1 text-xs font-medium rounded text-gray-600 bg-gray-100 text-center transition truncate">Pengguna</button>
+            <button onclick="switchTab('io')" id="btn-io" class="tab-btn py-2 px-1 text-xs font-medium rounded text-gray-600 bg-gray-100 text-center transition truncate">Impor/Ekspor</button>
+        </div>
+    </nav>
 
-        <section class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-md font-semibold mb-4 text-gray-700">Riwayat Pencatatan Realtime</h2>
-            <div id="log-container" class="space-y-3 max-h-80 overflow-y-auto">
-                <p class="text-sm text-gray-400 text-center">Belum ada data tercatat.</p>
-            </div>
-        </section>
+    <!-- Konten Utama Khusus Mobile -->
+    <main class="w-full p-3 flex-grow flex flex-col space-y-4 max-w-md mx-auto">
+        
+        <!-- TAB 1: KELOLA STAF ADMIN -->
+        <div id="tab-staf" class="tab-content space-y-4 w-full">
+            <section class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <h2 class="text-xs font-bold uppercase tracking-wider mb-3 text-gray-500">Tambah Staf Admin</h2>
+                <form id="staff-form" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">ID Staf (Kapital)</label>
+                        <input type="text" id="staff-id" required class="w-full rounded border-gray-300 shadow-sm p-2 text-sm border uppercase" placeholder="STF01" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nama Lengkap</label>
+                        <input type="text" id="staff-name" required class="w-full rounded border-gray-300 shadow-sm p-2 text-sm border" placeholder="Budi Santoso" oninput="this.value = this.value.replace(/\b\w/g, l => l.toUpperCase())">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Kata Sandi (Max 5 Digit)</label>
+                        <input type="text" id="staff-password" required maxlength="5" class="w-full rounded border-gray-300 shadow-sm p-2 text-sm border" placeholder="12345" oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2 text-sm rounded transition">
+                        Simpan Staf
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <!-- TAB 2: DATA PENGGUNA -->
+        <div id="tab-pengguna" class="tab-content hidden space-y-4 w-full">
+            <section class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Database Pengguna</h2>
+                </div>
+                <div id="users-card-container" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    <p class="text-xs text-gray-400 text-center py-2">Memuat pengguna...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 3: IMPOR / EKSPOR DATA -->
+        <div id="tab-io" class="tab-content hidden space-y-4 w-full">
+            <section class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Ekspor Data Firebase</h2>
+                <p class="text-xs text-gray-500">Unduh seluruh data pengguna dari database ke dalam format file JSON.</p>
+                <button id="btn-export" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium p-2 text-sm rounded transition">
+                    Ekspor ke JSON
+                </button>
+            </section>
+
+            <section class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Impor Data ke Firebase</h2>
+                <p class="text-xs text-gray-500">Unggah file JSON cadangan untuk memulihkan atau memasukkan data massal.</p>
+                <div>
+                    <input type="file" id="import-file" accept=".json" class="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+                </div>
+                <button id="btn-import" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium p-2 text-sm rounded transition">
+                    Impor dari JSON
+                </button>
+            </section>
+        </div>
+
     </main>
 
-    <footer class="bg-gray-200 text-gray-600 text-center p-3 text-xs">
-        Developer Module &bull; Firebase Realtime Database Integration
+    <!-- Footer Mobile -->
+    <footer class="bg-gray-100 text-gray-500 text-center p-2 text-xs w-full border-t">
+        Dev Mobile View &bull; Firebase
     </footer>
 
+    <!-- Script Utama -->
     <script type="module" src="app.js"></script>
     <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('text-gray-600', 'bg-gray-100');
+            });
+            
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('text-gray-600', 'bg-gray-100');
+            activeBtn.classList.add('bg-sky-600', 'text-white');
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker terdaftar:', reg.scope))
-                    .catch(err => console.error('Service Worker gagal:', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW error:', err));
             });
         }
     </script>
