@@ -1,5 +1,0 @@
-water-meter-pwa/
-├── index.html
-├── app.js
-├── sw.js
-└── manifest.json
