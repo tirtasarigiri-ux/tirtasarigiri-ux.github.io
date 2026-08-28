@@ -508,11 +508,37 @@ async function bagikanStrukKeWhatsApp(canvasElement, namaPelanggan, idPelanggan)
                 }
             }
         } else {
-            const link = document.createElement('a');
-            link.download = `Struk_${idPelanggan}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            alert('Perangkat tidak mendukung direct share. Struk telah diunduh ke penyimpanan.');
+            // Solusi khusus untuk WebView Android / Web2APK
+            const imgData = canvas.toDataURL('image/png');
+            const win = window.open("");
+            if (win) {
+                win.document.write(`
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+                        <style>
+                            body { background:#060911; color:#fff; font-family:monospace; text-align:center; padding:15px; }
+                            img { max-width:100%; border:2px solid #38BDF8; border-radius:10px; margin-top:10px; }
+                            .btn { padding:12px 20px; background:#2563EB; color:#fff; border:none; border-radius:8px; font-weight:bold; margin-top:15px; width:100%; }
+                        </style>
+                    </head>
+                    <body>
+                        <h3 style="color:#38BDF8; margin-bottom:5px;">STRUK SIAP DISIMPAN</h3>
+                        <p style="font-size:12px; color:#CBD5E1;">Tekan Tahan (Long Press) gambar struk di bawah ini, lalu pilih <b>"Simpan Gambar" / "Download Image"</b>.</p>
+                        <img src="${imgData}" />
+                        <br>
+                        <button class="btn" onclick="window.close()">TUTUP KEMBALI KE APLIKASI</button>
+                    </body>
+                    </html>
+                `);
+            } else {
+                // Fallback terakhir jika pop-up diblokir
+                const link = document.createElement('a');
+                link.download = `Struk_${idPelanggan}.png`;
+                link.href = imgData;
+                link.click();
+                alert('Gagal membuka pop-up penyimpanan. Pastikan perangkat mengizinkan unduhan.');
+            }
         }
     }, 'image/png');
 }
