@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" id="metaThemeColor" content="#060911">
+    
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" id="metaStatusBar" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tirta Sari Giri">
+    <title>Sistem Multi-Role - Tirta Sari Giri</title>
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    
+    <!-- Library Convert Struk HTML ke Gambar PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            color-scheme: dark light;
+
+            /* Default Dark Mode (Tema Gelap OS) */
+            --bg-main: #060911;
+            --bg-card: #121824;
+            --bg-element: #1A2332;
+            --bg-hover: #232E42;
+            --border-color: #475569;
+            --border-highlight: #38BDF8;
+            
+            --text-primary: #FFFFFF;
+            --text-secondary: #CBD5E1;
+            --text-accent: #38BDF8;
+            --input-readonly-bg: #0F172A;
+            --input-readonly-text: #94A3B8;
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.6);
+
+            --color-hijau: #4ADE80;
+            --color-merah: #F87171;
+            --btn-back-bg: #334155;
+            --btn-back-text: #FFFFFF;
+        }
+
+        /* Penyesuaian Otomatis saat HP Berada pada Mode Terang (Light Mode OS) */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-main: #F8FAFC;
+                --bg-card: #FFFFFF;
+                --bg-element: #F1F5F9;
+                --bg-hover: #E2E8F0;
+                --border-color: #94A3B8;
+                --border-highlight: #0284C7;
+                
+                --text-primary: #0F172A;
+                --text-secondary: #475569;
+                --text-accent: #0284C7;
+                --input-readonly-bg: #E2E8F0;
+                --input-readonly-text: #475569;
+                --shadow-card: 0 4px 15px rgba(15, 23, 42, 0.08);
+
+                --color-hijau: #16A34A;
+                --color-merah: #DC2626;
+                --btn-back-bg: #E2E8F0;
+                --btn-back-text: #0F172A;
+            }
+        }
+
+        * {
+            font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 12px;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 12px;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .brand-header h1 {
+            font-size: 18px;
+            color: var(--text-accent);
+            margin-bottom: 4px;
+            font-weight: 800;
+        }
+
+        .brand-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .brand-header .dev-tag {
+            font-size: 12px;
+            color: var(--text-accent);
+            margin-top: 4px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* HEADER DASHBOARD */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .dashboard-header-title h1 {
+            font-size: 15px;
+            color: var(--text-accent);
+            font-weight: 800;
+        }
+
+        .dashboard-header-title p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .dashboard-header-title .dev-tag {
+            font-size: 10px;
+            color: var(--text-accent);
+            font-weight: bold;
+        }
+
+        /* PROFIL PENGGUNA */
+        .user-profile {
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .user-profile span { color: var(--text-accent); font-weight: bold; }
+
+        .btn-logout-top {
+            background: #EF4444;
+            color: #FFFFFF;
+            border: 1px solid #FCA5A5;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .btn-logout-top:active {
+            transform: scale(0.95);
+        }
+
+        /* LAUNCHER GRID SYSTEM */
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .launcher-card {
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .launcher-card:hover {
+            border-color: var(--text-accent);
+            background: var(--bg-hover);
+        }
+
+        .launcher-card:active {
+            transform: scale(0.96);
+            background: var(--bg-hover);
+            border-color: var(--text-accent);
+        }
+
+        .launcher-icon {
+            font-size: 24px;
+        }
+
+        .launcher-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* HEADER NAVIGASI SUB-VIEW */
+        .subview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .btn-back {
+            background: var(--btn-back-bg);
+            color: var(--btn-back-text);
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-back:active {
+            transform: scale(0.95);
+        }
+
+        /* FORMS & INPUTS */
+        .grup {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        .grup label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 12px;
+            background: var(--bg-element);
+            color: var(--text-primary);
+            outline: none;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--text-accent);
+            box-shadow: 0 0 0 1px var(--text-accent);
+        }
+
+        input[readonly] {
+            opacity: 0.95;
+            background: var(--input-readonly-bg);
+            color: var(--input-readonly-text);
+        }
+
+        .checkbox-grup {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .checkbox-grup input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--text-accent);
+            cursor: pointer;
+        }
+
+        .role-badge {
+            font-size: 11px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-accent);
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            background: #2563EB;
+            transition: background 0.2s, transform 0.1s;
+            font-family: inherit;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-merah { background: #DC2626; color: #FFFFFF; }
+        .btn-hijau { background: #16A34A; color: #FFFFFF; }
+        .btn-kuning { background: #D97706; color: #FFFFFF; }
+        .btn-sm { height: 28px; padding: 0 6px; font-size: 10px; width: 100%; text-align: center; }
+
+        .view-section, .sub-view { display: none; }
+        .view-section.aktif, .sub-view.aktif { display: block; }
+
+        /* TABLES & LISTS */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1.5px solid var(--border-color);
+            white-space: nowrap;
+            color: var(--text-primary);
+        }
+
+        th {
+            background: var(--bg-element);
+            color: var(--text-accent);
+            font-weight: bold;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        /* PENGATURAN KHUSUS TABEL PELANGGAN FO */
+        #subFoPelanggan .table-responsive {
+            overflow-x: hidden;
+        }
+
+        #subFoPelanggan table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        #subFoPelanggan th, 
+        #subFoPelanggan td {
+            white-space: normal;
+            word-break: break-word;
+            padding: 6px 4px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        #subFoPelanggan th:nth-child(1), #subFoPelanggan td:nth-child(1) { width: 35%; }
+        #subFoPelanggan th:nth-child(2), #subFoPelanggan td:nth-child(2) { width: 35%; }
+        #subFoPelanggan th:nth-child(3), #subFoPelanggan td:nth-child(3) { width: 30%; }
+
+        /* PENGATURAN KHUSUS TABEL TAGIHAN FO */
+        #subFoTagihan .table-responsive {
+            overflow-x: auto;
+        }
+
+        #subFoTagihan th, 
+        #subFoTagihan td {
+            white-space: nowrap;
+            padding: 6px 8px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        /* STATS CARDS */
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat-box {
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .stat-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; font-weight: 600; }
+        .stat-value { font-size: 13px; font-weight: bold; color: var(--text-accent); }
+        .stat-value.hijau { color: var(--color-hijau); }
+        .stat-value.merah { color: var(--color-merah); }
+
+        /* INFORMASI SISTEM BOX */
+        .system-info-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .system-info-title {
+            color: var(--text-accent);
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .system-info-list {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .system-info-list span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* STRUK BOX PELANGGAN (STANDAR UKURAN 58MM - POS THERMAL DESIGN) */
+        .struk-card {
+            background: #FFFFFF;
+            color: #0F172A;
+            border: 2px solid #334155;
+            outline: 1px dashed #94A3B8;
+            outline-offset: -5px;
+            padding: 18px 14px;
+            border-radius: 12px;
+            margin: 0 auto 12px auto;
+            max-width: 320px;
+            font-size: 11px;
+            line-height: 1.5;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+            position: relative;
+        }
+
+        .struk-header {
+            text-align: center;
+            border-bottom: 2px dashed #CBD5E1;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        .struk-header .struk-icon {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .struk-header strong {
+            font-size: 16px;
+            color: #0F172A;
+            display: block;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+        }
+
+        .struk-header small {
+            color: #475569;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .struk-section-title {
+            font-size: 9px;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            margin: 8px 0 4px 0;
+        }
+
+        .struk-box-inner {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        .struk-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .struk-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .struk-divider {
+            border: 0;
+            border-top: 1px dashed #CBD5E1;
+            margin: 10px 0;
+        }
+
+        .struk-status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 10.5px;
+            letter-spacing: 0.5px;
+        }
+        .struk-status-badge.lunas {
+            background: #DCFCE7;
+            color: #15803D;
+            border: 1px solid #86EFAC;
+        }
+        .struk-status-badge.belum {
+            background: #FEE2E2;
+            color: #B91C1C;
+            border: 1px solid #FCA5A5;
+        }
+
+        .struk-total-box {
+            background: #F1F5F9;
+            border: 1.5px solid #0F172A;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .struk-total-box .total-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .struk-total-box .total-val {
+            font-size: 17px;
+            font-weight: 800;
+            color: #0F172A;
+            margin-top: 2px;
+        }
+
+        /* E-WALLET / PAYMENT BOX IN RECEIPT */
+        .struk-ewallet-box {
+            background: #F8FAFC;
+            border: 1.5px dashed #0284C7;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .struk-ewallet-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: #0284C7;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .struk-ewallet-methods {
+            font-size: 8.5px;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .struk-ewallet-detail {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .struk-footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 10px;
+            color: #64748B;
+            border-top: 1px dashed #CBD5E1;
+            padding-top: 10px;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* BOX TEKS BERJALAN / PENGUMUMAN */
+        .marquee-container {
+            background: var(--bg-element);
+            border: 1.5px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .marquee-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        #runningTextDisplay {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        /* CUSTOM MODAL OVERLAY (PENGGANTI ALERT & CONFIRM DI IFRAME) */
+        .custom-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            backdrop-filter: blur(3px);
+        }
+
+        .custom-modal-box {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 16px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-card);
+        }
+
+        .custom-modal-msg {
+            font-size: 12px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+            white-space: pre-line;
+            font-weight: 600;
+        }
+
+        .custom-modal-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CUSTOM MODAL OVERLAY DIALOG -->
+    <div id="customModal" class="custom-modal-backdrop">
+        <div class="custom-modal-box">
+            <div id="customModalMsg" class="custom-modal-msg">Pemberitahuan</div>
+            <div class="custom-modal-btns">
+                <button id="customModalBtnOk" class="btn btn-hijau btn-sm">OK</button>
+                <button id="customModalBtnCancel" class="btn btn-merah btn-sm" style="display:none;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOX TEKS BERJALAN / PENGUMUMAN -->
+    <div class="marquee-container">
+        <span class="marquee-icon">📢</span>
+        <marquee id="runningTextDisplay" scrollamount="4">Memuat pengumuman...</marquee>
+    </div>
+
+    <!-- HALAMAN LOGIN -->
+    <div id="loginView" class="view-section aktif">
+        <div class="card" style="margin-top: 20px;">
+            <div class="brand-header">
+                <h1>TIRTA SARI GIRI</h1>
+                <p>Sistem Informasi & Autentikasi Pengguna</p>
+                <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); prosesLogin();">
+                <div class="grup">
+                    <label>ID Pengguna</label>
+                    <input type="text" id="loginId" placeholder="Masukkan ID anda disini" required oninput="deteksiRole(this)">
+                </div>
+
+                <div id="roleDetected" class="role-badge">
+                    Peran Dikenali: <span id="roleText">-</span>
+                </div>
+
+                <div class="grup">
+                    <label>Kata Sandi</label>
+                    <input type="password" id="loginSandi" placeholder="Max 5 Digit" required>
+                </div>
+
+                <label class="checkbox-grup">
+                    <input type="checkbox" id="rememberMe">
+                    <span>Ingat Sandi</span>
+                </label>
+
+                <button type="submit" class="btn">Masuk ke Sistem</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD STAF OFFICE -->
+    <div id="dashOffice" class="view-section">
+        <div class="card">
+            <div class="dashboard-header">
+                <div class="dashboard-header-title">
+                    <h1>CONTROL PANEL STAF OFFICE</h1>
+                    <p>TIRTA SARI GIRI</p>
+                    <div class="dev-tag">Modul Utama Administrasi & Keuangan</div>
+                </div>
+            </div>
+            
+            <!-- PROFIL UTAMA + TOMBOL KELUAR -->
+            <div class="user-profile" id="profOffice"></div>
+
+            <!-- LAUNCHER HUB OFFICE -->
+            <div id="officeLauncher" class="launcher-grid">
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subPetugas')">
+                    <div class="launcher-icon">👥</div>
+                    <div class="launcher-title">Kelola Petugas</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTarif')">
+                    <div class="launcher-icon">⚙️</div>
+                    <div class="launcher-title">Atur Tarif & Pembayaran</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTagihan')">
+                    <div class="launcher-icon">📄</div>
+                    <div class="launcher-title">Riwayat Tagihan</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subKas')">
+                    <div class="launcher-icon">💰</div>
+                    <div class="launcher-title">Laporan Kas</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTeksBerjalan')">
+                    <div class="launcher-icon">📢</div>
+                    <div class="launcher-title">Teks Berjalan</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
+                    <div class="launcher-icon">👤</div>
+                    <div class="launcher-title">Pengaturan</div>
+                </div>
+            </div>
+
+            <!-- SUB-MENU 1: KELOLA PETUGAS -->
+            <div id="subPetugas" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Petugas Lapangan</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); simpanPetugas();">
+                    <div class="grup">
+                        <label>ID Petugas</label>
+                        <input type="text" id="foId" placeholder="Contoh: FO01" required oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div class="grup">
+                        <label>Nama Petugas</label>
+                        <input type="text" id="foNama" placeholder="Contoh: Budi Santoso" required oninput="formatNama(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Wilayah Kerja</label>
+                        <select id="foWilayah" required>
+                            <option value="RT 1">RT 1</option>
+                            <option value="RT 2">RT 2</option>
+                        </select>
+                    </div>
+                    <div class="grup">
+                        <label>Sandi</label>
+                        <input type="text" id="foSandi" placeholder="Contoh: 12345" maxlength="5" required oninput="formatSandi(this)">
+                    </div>
+                    <button type="submit" class="btn btn-hijau">Tambah Petugas Lapangan</button>
+                </form>
+
+                <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Petugas Lapangan</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama</th>
+                                <th>Wilayah</th>
+                                <th>Sandi</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelPetugas">
+                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUB-MENU 2: ATUR TARIF & E-WALLET -->
+            <div id="subTarif" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Tarif & Pembayaran</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); simpanTarif();">
+                    <div class="grup">
+                        <label>Tarif per M³ (Rp)</label>
+                        <input type="number" id="tarifM3" placeholder="Contoh: 3000" required>
+                    </div>
+                    <div class="grup">
+                        <label>Biaya Beban (Rp)</label>
+                        <input type="number" id="biayaBeban" placeholder="Contoh: 10000" required>
+                    </div>
+                    <div class="grup">
+                        <label>Nomor E-Wallet / Rekening Bank Penampung</label>
+                        <input type="text" id="tarifEwalletNo" placeholder="Contoh: 0812-3456-7890 (DANA/GoPay/OVO) / 12345678 (BCA)" required>
+                    </div>
+                    <div class="grup">
+                        <label>Nama Akun / Rekening (a.n.)</label>
+                        <input type="text" id="tarifEwalletNama" placeholder="Contoh: Tirta Sari Giri / PAMSIMAS" required>
+                    </div>
+                    <button type="submit" class="btn btn-hijau">Simpan Pengaturan</button>
+                </form>
+            </div>
+
+            <!-- SUB-MENU 3: RIWAYAT TAGIHAN -->
+            <div id="subTagihan" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Riwayat Tagihan Pelanggan</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                <div class="grup">
+                    <label>Filter Wilayah Kerja</label>
+                    <select id="filterWilayahTagihan" onchange="loadRiwayatTagihan()">
+                        <option value="SEMUA">Semua Wilayah</option>
+                        <option value="RT 1">RT 1</option>
+                        <option value="RT 2">RT 2</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pelanggan</th>
+                                <th>Rincian</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihan">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUB-MENU 4: LAPORAN KAS -->
+            <div id="subKas" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Kas & Transaksi Tirta Sari Giri</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                
+                <div class="grid-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Saldo Bulan Lalu</div>
+                        <div class="stat-value" id="kasSaldoLalu">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pemasukan Bulan Ini</div>
+                        <div class="stat-value hijau" id="kasPemasukan">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pengeluaran Bulan Ini</div>
+                        <div class="stat-value merah" id="kasPengeluaran">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Saldo Kas</div>
+                        <div class="stat-value" id="kasSaldo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
+                    </div>
+                </div>
+
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
+                <div class="table-responsive" style="margin-bottom: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Wilayah</th>
+                                <th>Sudah Bayar</th>
+                                <th>Belum Bayar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihanWilayahKas">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas</h3>
+                <form onsubmit="event.preventDefault(); simpanKas();" style="margin-bottom:16px;">
+                    <div class="grup">
+                        <label>Tanggal Transaksi</label>
+                        <input type="date" id="kasTanggal" required>
+                    </div>
+                    <div class="grup">
+                        <label>Jenis Transaksi</label>
+                        <select id="kasJenis" required>
+                            <option value="PEMASUKAN">Pemasukan</option>
+                            <option value="PENGELUARAN">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="grup">
+                        <label>Nominal (Rp)</label>
+                        <input type="number" id="kasNominal" placeholder="Contoh: 50000" required>
+                    </div>
+                    <div class="grup">
+                        <label>Keterangan</label>
+                        <input type="text" id="kasKet" placeholder="Contoh: Beli Pipa PVC" required>
+                    </div>
+                    <button type="submit" class="btn btn-hijau">Catat Transaksi Kas</button>
+                </form>
+
+                <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Keterangan</th>
+                                <th>Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelKas">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
+            <div id="subTeksBerjalan" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Kelola Teks Berjalan</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); simpanTeksBerjalan();">
+                    <div class="grup">
+                        <label>Teks Pengumuman</label>
+                        <textarea id="inputTeksBerjalan" rows="4" placeholder="Masukkan teks pengumuman di sini..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
+                </form>
+            </div>
+
+            <!-- SUB-MENU 6: PENGATURAN AKUN STAF -->
+            <div id="subAkun" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Profil & Sandi</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); updateProfilOffice();">
+                    <div class="grup">
+                        <label>ID Staf</label>
+                        <input type="text" id="akunId" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="akunNama" required oninput="formatNama(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Kata Sandi Baru (Max 5 Digit)</label>
+                        <input type="password" id="akunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
+                    </div>
+                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 12px;">Perbarui Akun</button>
+                </form>
+                
+                <div class="system-info-box" style="margin-top: 8px;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
+                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+                    </div>
+
+                   <div class="system-info-title">📌 Deskripsi Sistem</div>
+                    <div class="system-info-list" style="margin-bottom:10px;">
+                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                    </div>
+
+                    <div class="system-info-title">🚀 Account, Database,Spesifikasi & Teknologi  ⚙️ </div>
+                    <div class="system-info-list">
+						<div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                        <div>• Version: <span>5.0.0-PROD</span></div>
+                        <div>• RTDB: <span>JS v10.12.0</span></div>
+                        <div>• Architecture: <span>Mobile-First PWA Single-Page Application (SPA)</span></div>
+                        <div>• Application Architect: <span>Luhur Mulia</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PETUGAS LAPANGAN (FO) -->
+    <div id="dashFo" class="view-section">
+        <div class="card">
+            <div class="dashboard-header">
+                <div class="dashboard-header-title">
+                    <h1>PANEL PETUGAS LAPANGAN</h1>
+                    <p>TIRTA SARI GIRI</p>
+                    <div class="dev-tag">Modul Pencatatan & Kelola Pelanggan</div>
+                </div>
+            </div>
+
+            <!-- PROFIL UTAMA + TOMBOL KELUAR -->
+            <div class="user-profile" id="profFo"></div>
+
+            <!-- LAUNCHER HUB FO -->
+            <div id="foLauncher" class="launcher-grid">
+                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoPelanggan')">
+                    <div class="launcher-icon">👥</div>
+                    <div class="launcher-title">Kelola Pelanggan</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoMeter')">
+                    <div class="launcher-icon">📝</div>
+                    <div class="launcher-title">Catat Meter</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoTagihan')">
+                    <div class="launcher-icon">📋</div>
+                    <div class="launcher-title">Daftar Tagihan</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoKas')">
+                    <div class="launcher-icon">💰</div>
+                    <div class="launcher-title">Laporan Kas</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
+                    <div class="launcher-icon">👤</div>
+                    <div class="launcher-title">Pengaturan</div>
+                </div>
+            </div>
+
+            <!-- FO SUB-MENU 1: KELOLA PELANGGAN -->
+            <div id="subFoPelanggan" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Pelanggan Baru</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); simpanPelangganByFo();">
+                    <div class="grup">
+                        <label>ID Pelanggan</label>
+                        <input type="text" id="plgId" value="PLG" required oninput="kunciAwalanPlg(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="plgNama" placeholder="Contoh: Ahmad Subagja" required oninput="formatNama(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Alamat / Wilayah</label>
+                        <select id="plgAlamat" required>
+                            <option value="Sambeng RT1">Sambeng RT1</option>
+                            <option value="Sambeng RT2">Sambeng RT2</option>
+                            <option value="Puter">Puter</option>
+                            <option value="Jaten">Jaten</option>
+                        </select>
+                    </div>
+                    <div class="grup">
+                        <label>Meter Awal (m³)</label>
+                        <input type="text" inputmode="decimal" id="plgMeterAwal" placeholder="0" value="0" required>
+                    </div>
+                    <div class="grup">
+                        <label>Kata Sandi</label>
+                        <input type="text" id="plgSandi" placeholder="Otomatis mengikuti ID" readonly style="color:var(--text-accent); font-weight:bold;">
+                    </div>
+                    <button type="submit" class="btn btn-hijau">Daftarkan Pelanggan</button>
+                </form>
+
+                <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Pelanggan Saya</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID / Nama</th>
+                                <th>Alamat</th>
+                                <th>Sandi / Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelPelangganFo">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FO SUB-MENU 2: CATAT METER -->
+            <div id="subFoMeter" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pencatatan Meteran Air</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+                </div>
+                <div class="grup">
+                    <label>Pencarian ID / Nama Pelanggan</label>
+                    <div class="flex-row">
+                        <input type="text" id="cariPlgId" placeholder="Contoh: PLG001 atau Ahmad">
+                        <button class="btn btn-sm" style="width:70px;" onclick="cariPelangganMeter()">Cari</button>
+                    </div>
+                </div>
+
+                <div id="formMeterBox" style="display:none; background:var(--bg-element); padding:12px; border-radius:8px; border:1.5px solid var(--border-color); margin-top:10px;">
+                    <div class="grup">
+                        <label>Nama Pelanggan</label>
+                        <input type="text" id="meterNamaPlg" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Meter Lalu (m³)</label>
+                        <input type="text" inputmode="decimal" id="meterLalu" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Meter Sekarang (m³)</label>
+                        <input type="text" inputmode="decimal" id="meterSekarang" placeholder="Masukkan angka meteran saat ini (contoh: 12.5)" required>
+                    </div>
+                    <button type="button" class="btn btn-hijau" onclick="simpanCatatMeter()">Simpan Catat Meter</button>
+                </div>
+            </div>
+
+            <!-- FO SUB-MENU 3: TAGIHAN -->
+            <div id="subFoTagihan" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Tagihan Pelanggan Saya</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+                </div>
+
+                <div class="grid-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Sudah Bayar</div>
+                        <div class="stat-value hijau" id="foTotalSudahBayar">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Belum Bayar</div>
+                        <div class="stat-value merah" id="foTotalBelumBayar">Rp 0</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pelanggan</th>
+                                <th>Tagihan</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihanFo">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FO SUB-MENU 4: LAPORAN KAS -->
+            <div id="subFoKas" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Laporan Kas Tirta Sari</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+                </div>
+                <div class="grid-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Saldo Bulan Lalu</div>
+                        <div class="stat-value" id="kasSaldoLaluFo">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pemasukan Bulan Ini</div>
+                        <div class="stat-value hijau" id="kasPemasukanFo">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pengeluaran Bulan Ini</div>
+                        <div class="stat-value merah" id="kasPengeluaranFo">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Saldo Kas</div>
+                        <div class="stat-value" id="kasSaldoFo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
+                    </div>
+                </div>
+
+                <!-- TABEL TOTAL TAGIHAN PER WILAYAH (FO) -->
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
+                <div class="table-responsive" style="margin-bottom: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Wilayah</th>
+                                <th>Sudah Bayar</th>
+                                <th>Belum Bayar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihanWilayahKasFo">
+                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+				<h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+				<div class="table-responsive">
+					<table>
+						<thead>
+							<tr>
+								<th>Tanggal</th>
+								<th>Keterangan</th>
+								<th>Nominal</th>
+							</tr>
+						</thead>
+						<tbody id="tabelKasFo">
+							<tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+						</tbody>
+					</table>
+			    </div>
+            </div>
+
+            <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
+            <div id="subFoAkun" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Petugas</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); updateProfilFo();">
+                    <div class="grup">
+                        <label>ID Petugas</label>
+                        <input type="text" id="foAkunId" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="foAkunNama" required oninput="formatNama(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Wilayah Kerja</label>
+                        <input type="text" id="foAkunWilayah" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Kata Sandi Baru (Max 5 Digit)</label>
+                        <input type="password" id="foAkunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
+                    </div>
+                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun Saya</button>
+                </form>
+                
+                <div class="system-info-box" style="margin-top: 8px;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
+                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+                    </div>
+
+                    <div class="system-info-title">📌 Deskripsi Sistem</div>
+                    <div class="system-info-list" style="margin-bottom:10px;">
+                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                    </div>
+
+                    <div class="system-info-title">🚀 Account, Database,Spesifikasi & Teknologi  ⚙️ </div>
+                    <div class="system-info-list">
+						<div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                        <div>• Version: <span>5.0.0-PROD</span></div>
+                        <div>• RTDB: <span>JS v10.12.0</span></div>
+                        <div>• Architecture: <span>Mobile-First PWA Single-Page Application (SPA)</span></div>
+                        <div>• Application Architect: <span>Luhur Mulia</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PELANGGAN (PLG) -->
+    <div id="dashPelanggan" class="view-section">
+        <div class="card">
+            <div class="dashboard-header">
+                <div class="dashboard-header-title">
+                    <h1>PORTAL PELANGGAN</h1>
+                    <p>Informasi Tagihan & Penggunaan Air</p>
+                    <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
+                </div>
+            </div>
+
+            <!-- PROFIL UTAMA + TOMBOL KELUAR -->
+            <div class="user-profile" id="profPelanggan"></div>
+
+            <!-- LAUNCHER HUB PELANGGAN -->
+            <div id="plgLauncher" class="launcher-grid">
+                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgTagihan')">
+                    <div class="launcher-icon">🧾</div>
+                    <div class="launcher-title">Tagihan Saya</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgKas')">
+                    <div class="launcher-icon">💰</div>
+                    <div class="launcher-title">Laporan Kas</div>
+                </div>
+                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')" style="grid-column: span 2;">
+                    <div class="launcher-icon">👤</div>
+                    <div class="launcher-title">Pengaturan</div>
+                </div>
+            </div>
+
+            <!-- PELANGGAN SUB-MENU 1: TAGIHAN SAYA -->
+            <div id="subPlgTagihan" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Rincian Tagihan Air</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+                </div>
+                <div id="strukContainer">
+                    <div style="text-align:center; padding:20px; color:var(--text-secondary);">Memuat data tagihan...</div>
+                </div>
+                <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+                    <button class="btn btn-hijau" style="gap: 6px;" onclick="downloadStrukGambar()">
+                        📥 Unduh Struk Gambar
+                    </button>
+                    <a id="btnKonfirmasiWa" href="#" target="_blank" class="btn btn-kuning" style="gap: 6px; text-decoration: none; display: none;">
+                        💬 Konfirmasi Pembayaran via WhatsApp
+                    </a>
+                </div>
+            </div>
+
+            <!-- PELANGGAN SUB-MENU 2: LAPORAN KAS -->
+            <div id="subPlgKas" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Transparansi Kas Air</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+                </div>
+                <div class="grid-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Saldo Bulan Lalu</div>
+                        <div class="stat-value" id="kasSaldoLaluPlg">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pemasukan Bulan Ini</div>
+                        <div class="stat-value hijau" id="kasPemasukanPlg">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pengeluaran Bulan Ini</div>
+                        <div class="stat-value merah" id="kasPengeluaranPlg">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Saldo Kas</div>
+                        <div class="stat-value" id="kasSaldoPlg" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
+                    </div>
+                </div>
+
+				<h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+				<div class="table-responsive">
+					<table>
+						<thead>
+							<tr>
+								<th>Tanggal</th>
+								<th>Keterangan</th>
+								<th>Nominal</th>
+							</tr>
+						</thead>
+						<tbody id="tabelKasPlg">
+							<tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+						</tbody>
+					</table>
+				</div>
+            </div>
+
+            <!-- PELANGGAN SUB-MENU 3: PENGATURAN AKUN -->
+            <div id="subPlgAkun" class="sub-view">
+                <div class="subview-header">
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Pelanggan</h3>
+                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+                </div>
+                <form onsubmit="event.preventDefault(); updateProfilPelanggan();">
+                    <div class="grup">
+                        <label>ID Pelanggan</label>
+                        <input type="text" id="plgAkunId" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="plgAkunNama" required oninput="formatNama(this)">
+                    </div>
+                    <div class="grup">
+                        <label>Alamat</label>
+                        <input type="text" id="plgAkunAlamat" readonly>
+                    </div>
+                    <div class="grup">
+                        <label>Kata Sandi Baru</label>
+                        <input type="text" id="plgAkunSandi" required>
+                    </div>
+                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun</button>
+                </form>
+                
+                <div class="system-info-box" style="margin-top: 8px;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
+                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+                    </div>
+
+                    <div class="system-info-title">📌 Deskripsi Sistem</div>
+                    <div class="system-info-list" style="margin-bottom:10px;">
+                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                    </div>
+
+                    <div class="system-info-title">🚀 Account, Database,Spesifikasi & Teknologi  ⚙️ </div>
+                    <div class="system-info-list">
+						<div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                        <div>• Version: <span>5.0.0-PROD</span></div>
+                        <div>• RTDB: <span>JS v10.12.0</span></div>
+                        <div>• Architecture: <span>Mobile-First PWA Single-Page Application (SPA)</span></div>
+                        <div>• Application Architect: <span>Luhur Mulia</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// =====================================
+// KONFIGURASI PWA
+// =====================================
+(function inisialisasiPWA() {
+    const manifestObj = {
+        "name": "Tirta Sari Giri Water System",
+        "short_name": "TirtaSari",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#060911",
+        "theme_color": "#060911",
+        "orientation": "portrait",
+        "icons": [
+            {
+                "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚰</text></svg>",
+                "sizes": "192x192 512x512",
+                "type": "image/svg+xml"
+            }
+        ]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = manifestURL;
+    document.head.appendChild(manifestLink);
+
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            const CACHE_NAME = 'tirta-sari-v5';
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(
+                    fetch(e.request).catch(() => caches.match(e.request))
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'text/javascript' });
+        const swURL = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swURL).catch(() => {});
+    }
+})();
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyD0y7FSxKxWGuif3dA_-C7RuYhOk5ULygA",
+  authDomain: "tirtasarigiri-8a025.firebaseapp.com",
+  databaseURL: "https://tirtasarigiri-8a025-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "tirtasarigiri-8a025",
+  storageBucket: "tirtasarigiri-8a025.firebasestorage.app",
+  messagingSenderId: "383408076039",
+  appId: "1:383408076039:web:7e4cda3240998e51dac1a2",
+  measurementId: "G-3X0Y5YNMQY"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let currentUser = null; 
+
+// E-Wallet default fallback
+const DEFAULT_EWALLET_NO = "0812-3456-7890";
+const DEFAULT_EWALLET_NAMA = "Tirta Sari Giri / PAMSIMAS";
+
+/* SISTEM MODAL KUSTOM (PENGGANTI ALERT/CONFIRM SUPAYA AMAN DI IFRAME) */
+function showAlert(msg) {
+    const modal = document.getElementById('customModal');
+    const msgEl = document.getElementById('customModalMsg');
+    const btnOk = document.getElementById('customModalBtnOk');
+    const btnCancel = document.getElementById('customModalBtnCancel');
+
+    if (!modal || !msgEl || !btnOk) return;
+
+    msgEl.textContent = msg;
+    btnCancel.style.display = 'none';
+    btnOk.onclick = function() {
+        modal.style.display = 'none';
+    };
+    modal.style.display = 'flex';
+}
+
+function showConfirm(msg, onConfirm) {
+    const modal = document.getElementById('customModal');
+    const msgEl = document.getElementById('customModalMsg');
+    const btnOk = document.getElementById('customModalBtnOk');
+    const btnCancel = document.getElementById('customModalBtnCancel');
+
+    if (!modal || !msgEl || !btnOk || !btnCancel) return;
+
+    msgEl.textContent = msg;
+    btnCancel.style.display = 'inline-flex';
+    
+    btnOk.onclick = function() {
+        modal.style.display = 'none';
+        if (typeof onConfirm === 'function') onConfirm();
+    };
+    btnCancel.onclick = function() {
+        modal.style.display = 'none';
+    };
+    modal.style.display = 'flex';
+}
+
+function syncMetaThemeColor() {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const metaTheme = document.getElementById('metaThemeColor');
+    const metaStatus = document.getElementById('metaStatusBar');
+    if (metaTheme) {
+        metaTheme.setAttribute('content', isDark ? '#060911' : '#F8FAFC');
+    }
+    if (metaStatus) {
+        metaStatus.setAttribute('content', isDark ? 'black-translucent' : 'default');
+    }
+}
+
+if (window.matchMedia) {
+    const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (colorSchemeQuery.addEventListener) {
+        colorSchemeQuery.addEventListener('change', syncMetaThemeColor);
+    } else if (colorSchemeQuery.addListener) {
+        colorSchemeQuery.addListener(syncMetaThemeColor);
+    }
+}
+
+function parseDesimal(val) {
+    if (val === undefined || val === null || val === '') return 0;
+    return parseFloat(String(val).replace(',', '.')) || 0;
+}
+
+function formatTanggalIndo(tglInput) {
+    if (!tglInput) return '-';
+    const parts = String(tglInput).split('T')[0].split('-');
+    if (parts.length === 3) {
+        const namaBulan = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return `${parseInt(parts[2], 10)} ${namaBulan[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
+    }
+    const d = new Date(tglInput);
+    if (isNaN(d)) return '-';
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatTanggalSingkat(tglInput) {
+    if (!tglInput) return '-';
+    const parts = String(tglInput).split('T')[0].split('-');
+    if (parts.length === 3) {
+        const namaBulanSingkat = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+        ];
+        return `${parseInt(parts[2], 10)} ${namaBulanSingkat[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
+    }
+    const d = new Date(tglInput);
+    if (isNaN(d)) return '-';
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function setKasTanggalDefault() {
+    const kasTanggalEl = document.getElementById('kasTanggal');
+    if (kasTanggalEl && !kasTanggalEl.value) {
+        kasTanggalEl.value = new Date().toISOString().split('T')[0];
+    }
+}
+
+function initTeksBerjalan() {
+    db.ref('pengaturan/teks_berjalan').on('value', snapshot => {
+        const teks = snapshot.exists() ? snapshot.val() : "Selamat datang di Sistem Informasi Tirta Sari Giri.";
+        const runningTextEl = document.getElementById('runningTextDisplay');
+        const inputTeksEl = document.getElementById('inputTeksBerjalan');
+        
+        if (runningTextEl) runningTextEl.textContent = teks;
+        if (inputTeksEl) inputTeksEl.value = teks;
+    });
+}
+
+function simpanTeksBerjalan() {
+    const teksInput = document.getElementById('inputTeksBerjalan').value.trim();
+    if (!teksInput) {
+        showAlert("Teks pengumuman tidak boleh kosong!");
+        return;
+    }
+
+    db.ref('pengaturan/teks_berjalan').set(teksInput).then(() => {
+        showAlert("Teks berjalan berhasil diperbarui dan dipublikasikan!");
+    }).catch(err => showAlert("Gagal menyimpan teks: " + err.message));
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    syncMetaThemeColor();
+    setKasTanggalDefault();
+    initTeksBerjalan();
+
+    const isRemembered = localStorage.getItem('tirta_remember') === 'true';
+    const savedId = localStorage.getItem('tirta_saved_id');
+    const savedSandi = localStorage.getItem('tirta_saved_sandi');
+
+    if (isRemembered && savedId && savedSandi) {
+        document.getElementById('loginId').value = savedId;
+        document.getElementById('loginSandi').value = savedSandi;
+        document.getElementById('rememberMe').checked = true;
+        deteksiRole(document.getElementById('loginId'));
+        prosesLogin();
+    }
+});
+
+function formatNama(input) {
+    let words = input.value.split(' ');
+    for (let i = 0; i < words.length; i++) {
+        if (words[i].length > 0) {
+            words[i] = words[i][0].toUpperCase() + words[i].slice(1).toLowerCase();
+        }
+    }
+    input.value = words.join(' ');
+}
+
+function formatSandi(input) {
+    input.value = input.value.replace(/\D/g, '').slice(0, 5);
+}
+
+function formatRupiah(angka) {
+    return "Rp " + Number(angka || 0).toLocaleString('id-ID');
+}
+
+function kunciAwalanPlg(input) {
+    input.value = input.value.toUpperCase();
+    if (!input.value.startsWith('PLG')) {
+        input.value = 'PLG' + input.value.replace(/^P?L?G?/g, '');
+    }
+    document.getElementById('plgSandi').value = input.value;
+}
+
+function deteksiRole(input) {
+    input.value = input.value.toUpperCase();
+    const id = input.value.trim();
+    const roleBadge = document.getElementById('roleDetected');
+    const roleText = document.getElementById('roleText');
+    const sandiInput = document.getElementById('loginSandi');
+
+    if (id.startsWith('STAF') || id.startsWith('ADM')) {
+        roleBadge.style.display = 'block';
+        roleText.textContent = 'Staf Office';
+        if (id === 'STAF01' && !sandiInput.value) sandiInput.value = '12345';
+    } else if (id.startsWith('FO')) {
+        roleBadge.style.display = 'block';
+        roleText.textContent = 'Petugas Lapangan (FO)';
+        if (id === 'FO01' && !sandiInput.value) sandiInput.value = '12345';
+    } else if (id.startsWith('PLG')) {
+        roleBadge.style.display = 'block';
+        roleText.textContent = 'Pelanggan';
+
+        if (id === 'PLG001' && !sandiInput.value) {
+            sandiInput.value = 'PLG001';
+        } else if (id.length >= 4 && !document.getElementById('rememberMe').checked) {
+            db.ref(`pelanggan/${id}`).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    if (data && data.sandi) sandiInput.value = data.sandi;
+                }
+            }).catch(() => {});
+        }
+    } else {
+        roleBadge.style.display = 'none';
+        roleText.textContent = '-';
+    }
+}
+
+function prosesLogin() {
+    const id = document.getElementById('loginId').value.trim().toUpperCase();
+    const sandi = document.getElementById('loginSandi').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+
+    if (!id || !sandi) {
+        showAlert("Harap isi ID dan Kata Sandi!");
+        return;
+    }
+
+    let nodePath = "";
+    let targetView = "";
+    let roleTitle = "";
+
+    if (id.startsWith("STAF") || id.startsWith("ADM")) {
+        nodePath = "staf_office";
+        targetView = "dashOffice";
+        roleTitle = "Staf Office";
+    } else if (id.startsWith("FO")) {
+        nodePath = "staf_fo";
+        targetView = "dashFo";
+        roleTitle = "Petugas Lapangan (FO)";
+    } else if (id.startsWith("PLG")) {
+        nodePath = "pelanggan";
+        targetView = "dashPelanggan";
+        roleTitle = "Pelanggan";
+    } else {
+        showAlert("Format ID tidak dikenali! Gunakan awalan STAF/ADM, FO, atau PLG.");
+        return;
+    }
+
+    const defaultAccounts = {
+        'STAF01': { nama: 'Staf Office Demo', sandi: '12345', peran: 'STAF' },
+        'ADM01': { nama: 'Admin Demo', sandi: '12345', peran: 'STAF' },
+        'FO01': { nama: 'Budi Santoso (FO)', sandi: '12345', wilayah: 'RT 1', peran: 'FO' },
+        'PLG001': { nama: 'Ahmad Subagja', sandi: 'PLG001', alamat: 'Sambeng RT 1', meter_awal: 0, angka_terakhir: 15, total_tagihan: 55000, status_bayar: 'Belum Bayar', didaftarkan_oleh: 'FO01' }
+    };
+
+    db.ref(`${nodePath}/${id}`).once('value').then(snapshot => {
+        let userData = snapshot.exists() ? snapshot.val() : null;
+
+        if (!userData && defaultAccounts[id]) {
+            if (defaultAccounts[id].sandi === sandi) {
+                userData = defaultAccounts[id];
+                db.ref(`${nodePath}/${id}`).set(userData).catch(() => {});
+            }
+        }
+
+        if (!userData) {
+            showAlert(`ID ${id} tidak ditemukan!\n\nTips Akun Demo:\n- Staf Office: STAF01 (Sandi: 12345)\n- Petugas Lapangan: FO01 (Sandi: 12345)\n- Pelanggan: PLG001 (Sandi: PLG001)`);
+            return;
+        }
+
+        if (String(userData.sandi) === String(sandi)) {
+            currentUser = { ...userData, id: id };
+
+            if (rememberMe) {
+                localStorage.setItem('tirta_remember', 'true');
+                localStorage.setItem('tirta_saved_id', id);
+                localStorage.setItem('tirta_saved_sandi', sandi);
+            } else {
+                localStorage.removeItem('tirta_remember');
+                localStorage.removeItem('tirta_saved_id');
+                localStorage.removeItem('tirta_saved_sandi');
+            }
+
+            tampilkanDashboard(targetView, userData, id, roleTitle);
+        } else {
+            showAlert("Kata sandi salah!");
+        }
+    }).catch(error => {
+        if (defaultAccounts[id] && defaultAccounts[id].sandi === sandi) {
+            const userData = defaultAccounts[id];
+            currentUser = { ...userData, id: id };
+            tampilkanDashboard(targetView, userData, id, roleTitle);
+        } else {
+            showAlert("Gagal koneksi DB: " + error.message);
+        }
+    });
+}
+
+function tampilkanDashboard(viewId, userData, id, roleTitle) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('aktif'));
+    const targetViewEl = document.getElementById(viewId);
+    if (targetViewEl) targetViewEl.classList.add('aktif');
+
+    let profileHtml = `
+        <div class="user-info-details">
+            <div>ID: <span>${id}</span></div>
+            <div>Nama: <span>${(userData && userData.nama) || '-'}</span></div>
+            <div>Peran: <span>${roleTitle}</span></div>
+            ${(userData && userData.wilayah) ? `<div>Wilayah: <span>${userData.wilayah}</span></div>` : ''}
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Keluar 🚪</button>
+    `;
+
+    kembaliKeLauncher(viewId);
+
+    if (viewId === 'dashOffice') {
+        const profOffice = document.getElementById('profOffice');
+        if (profOffice) profOffice.innerHTML = profileHtml;
+        setKasTanggalDefault();
+        loadDataPetugas();
+        loadTarif();
+        loadRiwayatTagihan();
+        loadLaporanKas();
+        initAkunForm();
+    } else if (viewId === 'dashFo') {
+        const profFo = document.getElementById('profFo');
+        if (profFo) profFo.innerHTML = profileHtml;
+        initFoDashboard();
+    } else if (viewId === 'dashPelanggan') {
+        const profPelanggan = document.getElementById('profPelanggan');
+        if (profPelanggan) profPelanggan.innerHTML = profileHtml;
+        initPelangganDashboard();
+    }
+}
+
+// MANAGEMENT LAUNCHER HUB & SUB-VIEW NAVIGASI
+function bukaSubView(dashId, subViewId) {
+    const parentDash = document.getElementById(dashId);
+    if (!parentDash) return;
+    
+    const launcherGrid = parentDash.querySelector('.launcher-grid');
+    if (launcherGrid) launcherGrid.style.display = 'none';
+
+    parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
+
+    const targetSubView = document.getElementById(subViewId);
+    if (targetSubView) targetSubView.classList.add('aktif');
+}
+
+function kembaliKeLauncher(dashId) {
+    const parentDash = document.getElementById(dashId);
+    if (!parentDash) return;
+    
+    const launcherGrid = parentDash.querySelector('.launcher-grid');
+    if (launcherGrid) launcherGrid.style.display = 'grid';
+
+    parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
+}
+
+function verifikasiLunas(id) {
+    showConfirm(`Verifikasi pembayaran tagihan untuk pelanggan ${id} sebagai LUNAS?`, () => {
+        db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
+            showAlert(`Tagihan untuk pelanggan ${id} telah berhasil diverifikasi LUNAS!`);
+        }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
+    });
+}
+
+function initPelangganDashboard() {
+    if (!currentUser) return;
+    
+    const plgAkunIdEl = document.getElementById('plgAkunId');
+    if (plgAkunIdEl) plgAkunIdEl.value = currentUser.id;
+
+    const plgAkunNamaEl = document.getElementById('plgAkunNama');
+    if (plgAkunNamaEl) plgAkunNamaEl.value = currentUser.nama || '';
+
+    const plgAkunAlamatEl = document.getElementById('plgAkunAlamat');
+    if (plgAkunAlamatEl) plgAkunAlamatEl.value = currentUser.alamat || '';
+
+    const plgAkunSandiEl = document.getElementById('plgAkunSandi');
+    if (plgAkunSandiEl) plgAkunSandiEl.value = currentUser.sandi || '';
+
+    loadTagihanPelanggan();
+    loadLaporanKas();
+}
+
+function loadTagihanPelanggan() {
+    if (!currentUser) return;
+    const plgId = currentUser.id;
+    
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let ewalletNo = DEFAULT_EWALLET_NO;
+        let ewalletNama = DEFAULT_EWALLET_NAMA;
+
+        if (tariffSnap.exists()) {
+            ewalletNo = tariffSnap.val().ewalletNo || ewalletNo;
+            ewalletNama = tariffSnap.val().ewalletNama || ewalletNama;
+        }
+
+        db.ref(`pelanggan/${plgId}`).on('value', snapshot => {
+            const container = document.getElementById('strukContainer');
+            if (!container) return;
+
+            if (!snapshot.exists()) {
+                container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--text-secondary);">Data pelanggan tidak ditemukan.</div>`;
+                return;
+            }
+
+            const data = snapshot.val();
+            const meterAwal = parseDesimal(data.meter_awal);
+            const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterAwal;
+            const pemakaian = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+            const total = data.total_tagihan || 0;
+            const isLunas = data.status_bayar === 'Sudah Bayar';
+            const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
+            const foId = data.didaftarkan_oleh || '-';
+
+            // Setup WhatsApp Confirmation Link
+            const btnWa = document.getElementById('btnKonfirmasiWa');
+            if (btnWa) {
+                const cleanPhone = ewalletNo.replace(/\D/g, '');
+                const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+                const textMsg = encodeURIComponent(`Halo Admin Tirta Sari Giri, saya mengonfirmasi pembayaran tagihan air:\n\n• ID Pelanggan: ${plgId}\n• Nama: ${data.nama || '-'}\n• Total Tagihan: ${formatRupiah(total)}\n• Status Transfer: Sudah Transfer via E-Wallet/Bank\n\nMohon verifikasi lunas. Terima kasih!`);
+                btnWa.href = `https://wa.me/${waPhone}?text=${textMsg}`;
+                btnWa.style.display = isLunas ? 'none' : 'inline-flex';
+            }
+
+            if (foId !== '-') {
+                db.ref(`staf_fo/${foId}`).once('value').then(foSnap => {
+                    const foNama = (foSnap.exists() && foSnap.val().nama) ? foSnap.val().nama : foId;
+                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, foNama, ewalletNo, ewalletNama);
+                }).catch(() => {
+                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, foId, ewalletNo, ewalletNama);
+                });
+            } else {
+                renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, 'Petugas Lapangan', ewalletNo, ewalletNama);
+            }
+        });
+    });
+}
+
+function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, namaFo, ewalletNo, ewalletNama) {
+    container.innerHTML = `
+        <div class="struk-card" id="strukCardBox">
+            <div class="struk-header">
+                <span class="struk-icon">🚰</span>
+                <strong>TIRTA SARI GIRI</strong>
+                <small>STRUK PEMBAYARAN TAGIHAN AIR</small>
+            </div>
+
+            <div class="struk-section-title">📌 DATA PELANGGAN</div>
+            <div class="struk-box-inner">
+                <div class="struk-row"><span>ID Pelanggan</span><b>${plgId}</b></div>
+                <div class="struk-row"><span>Nama</span><b>${data.nama || '-'}</b></div>
+                <div class="struk-row"><span>Alamat</span><span>${data.alamat || '-'}</span></div>
+                <div class="struk-row"><span>Tgl Catat</span><span>${tglStr}</span></div>
+            </div>
+
+            <div class="struk-section-title">📊 RINCIAN PEMAKAIAN</div>
+            <div class="struk-box-inner">
+                <div class="struk-row"><span>Meter Awal</span><span>${meterAwal} m³</span></div>
+                <div class="struk-row"><span>Meter Akhir</span><span>${meterAkhir} m³</span></div>
+                <div class="struk-divider" style="margin:6px 0;"></div>
+                <div class="struk-row" style="font-weight:bold;"><span>Total Pemakaian</span><span style="color:#0284C7;">${pemakaian} m³</span></div>
+            </div>
+
+            <div class="struk-total-box">
+                <div class="total-label">TOTAL TAGIHAN</div>
+                <div class="total-val">${formatRupiah(total)}</div>
+            </div>
+
+            <div class="struk-row" style="margin-top:8px;">
+                <span>Status Bayar</span>
+                <span class="struk-status-badge ${isLunas ? 'lunas' : 'belum'}">
+                    ${isLunas ? '✔ LUNAS' : '✘ BELUM BAYAR'}
+                </span>
+            </div>
+
+            <!-- BLOK PEMBAYARAN E-WALLET / REKENING BANK -->
+            <div class="struk-ewallet-box">
+                <div class="struk-ewallet-title">💳 PEMBAYARAN E-WALLET / TRANSFER</div>
+                <div class="struk-ewallet-methods">GoPay • DANA • OVO • ShopeePay • Bank</div>
+                <div class="struk-ewallet-detail">
+                    <div style="font-size:9.5px; color:#64748B; font-weight:700;">NO. REKENING / E-WALLET:</div>
+                    <div style="font-size:14px; font-weight:800; color:#0284C7; letter-spacing:0.5px; margin:3px 0; font-family:monospace;">${ewalletNo}</div>
+                    <div style="font-size:9.5px; color:#0F172A; font-weight:700;">a.n. ${ewalletNama}</div>
+                </div>
+            </div>
+
+            <div style="margin-top:10px; text-align:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:6px 8px;">
+                <div style="font-size:8.5px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;">PETUGAS LAPANGAN</div>
+                <div style="font-weight:800; font-size:12px; color:#0F172A; margin-top:2px;">${namaFo}</div>
+            </div>
+
+            <div class="struk-footer">
+                <div>Simpan struk ini sebagai bukti pembayaran sah.</div>
+                <div style="margin-top:2px; font-weight:600;">Terima Kasih - Tirta Sari Giri</div>
+                <div style="margin-top:10px; font-size:9px; color:#64748B; text-align:center; font-weight:bold; letter-spacing:0.8px;">developed by lm</div>
+            </div>
+        </div>
+    `;
+}
+
+function downloadStrukGambar() {
+    const cardBox = document.getElementById('strukCardBox');
+    if (!cardBox) {
+        showAlert("Struk belum siap diunduh!");
+        return;
+    }
+
+    if (typeof html2canvas === 'undefined') {
+        showAlert("Library html2canvas sedang dimuat. Silakan coba sebentar lagi.");
+        return;
+    }
+
+    html2canvas(cardBox, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: "#FFFFFF"
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Struk_TirtaSariGiri_${currentUser ? currentUser.id : 'PLG'}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }).catch(err => {
+        showAlert("Gagal mengunduh struk gambar: " + err.message);
+    });
+}
+
+function updateProfilPelanggan() {
+    if (!currentUser) return;
+    const id = currentUser.id;
+    const nama = document.getElementById('plgAkunNama').value.trim();
+    const sandi = document.getElementById('plgAkunSandi').value.trim();
+
+    if (!nama || !sandi) {
+        showAlert("Isi nama dan sandi!");
+        return;
+    }
+
+    db.ref(`pelanggan/${id}`).update({ nama, sandi }).then(() => {
+        showAlert("Profil Anda berhasil diperbarui!");
+        currentUser.nama = nama;
+        currentUser.sandi = sandi;
+        tampilkanDashboard('dashPelanggan', currentUser, id, 'Pelanggan');
+    }).catch(err => showAlert("Gagal update profil: " + err.message));
+}
+
+function initFoDashboard() {
+    if (!currentUser) return;
+    const wilayah = currentUser.wilayah || 'RT 1';
+    
+    const plgAlamatEl = document.getElementById('plgAlamat');
+    if (plgAlamatEl) {
+        if (wilayah.includes('1')) {
+            plgAlamatEl.innerHTML = `
+                <option value="Sambeng RT1">Sambeng RT1</option>
+                <option value="Puter">Puter</option>
+                <option value="Jaten">Jaten</option>
+            `;
+        } else if (wilayah.includes('2')) {
+            plgAlamatEl.innerHTML = `
+                <option value="Sambeng RT2">Sambeng RT2</option>
+                <option value="Puter">Puter</option>
+                <option value="Jaten">Jaten</option>
+            `;
+        } else {
+            plgAlamatEl.innerHTML = `
+                <option value="Sambeng RT1">Sambeng RT1</option>
+                <option value="Sambeng RT2">Sambeng RT2</option>
+                <option value="Puter">Puter</option>
+                <option value="Jaten">Jaten</option>
+            `;
+        }
+    }
+
+    const plgIdEl = document.getElementById('plgId');
+    if (plgIdEl) plgIdEl.value = 'PLG';
+
+    const plgSandiEl = document.getElementById('plgSandi');
+    if (plgSandiEl) plgSandiEl.value = 'PLG';
+
+    const foAkunIdEl = document.getElementById('foAkunId');
+    if (foAkunIdEl) foAkunIdEl.value = currentUser.id;
+
+    const foAkunNamaEl = document.getElementById('foAkunNama');
+    if (foAkunNamaEl) foAkunNamaEl.value = currentUser.nama || '';
+
+    const foAkunWilayahEl = document.getElementById('foAkunWilayah');
+    if (foAkunWilayahEl) foAkunWilayahEl.value = currentUser.wilayah || 'RT 1';
+
+    const foAkunSandiEl = document.getElementById('foAkunSandi');
+    if (foAkunSandiEl) foAkunSandiEl.value = currentUser.sandi || '';
+
+    loadPelangganFo();
+    loadTagihanFo();
+    loadLaporanKas();
+}
+
+function simpanPelangganByFo() {
+    if (!currentUser) return;
+    const id = document.getElementById('plgId').value.trim().toUpperCase();
+    const nama = document.getElementById('plgNama').value.trim();
+    const alamat = document.getElementById('plgAlamat').value.trim();
+    const meterAwal = parseDesimal(document.getElementById('plgMeterAwal').value);
+    const sandi = document.getElementById('plgSandi').value.trim();
+    const wilayah = currentUser.wilayah || 'RT 1';
+
+    if (id.length <= 3) {
+        showAlert("Masukkan ID Pelanggan setelah awalan PLG! Contoh: PLG001");
+        return;
+    }
+    if (!nama || !sandi) {
+        showAlert("Lengkapi nama pelanggan!");
+        return;
+    }
+
+    const data = {
+        nama,
+        alamat,
+        wilayah,
+        sandi,
+        meter_awal: meterAwal,
+        angka_terakhir: meterAwal,
+        total_tagihan: 0,
+        status_bayar: 'Belum Bayar',
+        didaftarkan_oleh: currentUser.id
+    };
+
+    db.ref(`pelanggan/${id}`).set(data).then(() => {
+        showAlert(`Pelanggan ${nama} (${id}) berhasil didaftarkan!\nKata Sandi: ${sandi}`);
+        document.getElementById('plgId').value = 'PLG';
+        document.getElementById('plgNama').value = '';
+        document.getElementById('plgMeterAwal').value = '0';
+        document.getElementById('plgSandi').value = 'PLG';
+        loadPelangganFo();
+    }).catch(err => showAlert("Gagal mendaftar: " + err.message));
+}
+
+function loadPelangganFo() {
+    if (!currentUser) return;
+    db.ref('pelanggan').on('value', snapshot => {
+        if (!currentUser) return;
+        const tbody = document.getElementById('tabelPelangganFo');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data pelanggan.</td></tr>`;
+            return;
+        }
+
+        let count = 0;
+        snapshot.forEach(child => {
+            const plg = child.val();
+            if (plg && plg.didaftarkan_oleh === currentUser.id) {
+                count++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <b>${child.key}</b><br>
+                        <small style="color:var(--text-accent);">${plg.nama || '-'}</small>
+                    </td>
+                    <td>${plg.alamat || '-'}</td>
+                    <td>
+                        <code>${plg.sandi || '-'}</code>
+                        <div style="margin-top:4px;">
+                            <button class="btn btn-merah btn-sm" onclick="hapusPelanggan('${child.key}')">Hapus</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+
+        if (count === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada pelanggan yang Anda daftarkan.</td></tr>`;
+        }
+    });
+}
+
+function hapusPelanggan(id) {
+    showConfirm(`Hapus pelanggan ${id}?`, () => {
+        db.ref(`pelanggan/${id}`).remove().then(() => showAlert("Pelanggan berhasil dihapus!"));
+    });
+}
+
+function cariPelangganMeter() {
+    if (!currentUser) return;
+    const query = document.getElementById('cariPlgId').value.trim();
+    if (!query) {
+        showAlert("Masukkan ID atau Nama Pelanggan!");
+        return;
+    }
+
+    db.ref('pelanggan').once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+            showAlert("Data pelanggan kosong!");
+            return;
+        }
+
+        let matchKey = null;
+        let matchData = null;
+        const queryLower = query.toLowerCase();
+
+        snapshot.forEach(child => {
+            const plg = child.val();
+            if (plg && plg.didaftarkan_oleh === currentUser.id) {
+                if (child.key.toUpperCase() === query.toUpperCase()) {
+                    matchKey = child.key;
+                    matchData = plg;
+                }
+            }
+        });
+
+        if (!matchData) {
+            let matches = [];
+            snapshot.forEach(child => {
+                const plg = child.val();
+                if (plg && plg.didaftarkan_oleh === currentUser.id && plg.nama && plg.nama.toLowerCase().includes(queryLower)) {
+                    matches.push({ key: child.key, data: plg });
+                }
+            });
+
+            if (matches.length > 0) {
+                matchKey = matches[0].key;
+                matchData = matches[0].data;
+            }
+        }
+
+        if (!matchData) {
+            showAlert(`Pelanggan "${query}" tidak ditemukan atau Anda tidak memiliki hak akses terhadap pelanggan ini!`);
+            document.getElementById('formMeterBox').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('cariPlgId').value = matchKey;
+        document.getElementById('meterNamaPlg').value = matchData.nama || '';
+        document.getElementById('meterLalu').value = matchData.angka_terakhir !== undefined ? matchData.angka_terakhir : (matchData.meter_awal || 0);
+        document.getElementById('meterSekarang').value = '';
+        document.getElementById('formMeterBox').style.display = 'block';
+    });
+}
+
+function simpanCatatMeter() {
+    const id = document.getElementById('cariPlgId').value.trim().toUpperCase();
+    const meterLalu = parseDesimal(document.getElementById('meterLalu').value);
+    const meterSekarangVal = document.getElementById('meterSekarang').value.trim();
+
+    if (meterSekarangVal === '') {
+        showAlert("Masukkan angka meteran sekarang!");
+        return;
+    }
+
+    const meterSekarang = parseDesimal(meterSekarangVal);
+
+    if (meterSekarang < meterLalu) {
+        showAlert("Meter sekarang tidak boleh lebih kecil dari meter lalu!");
+        return;
+    }
+
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let hargaM3 = 3000;
+        let biayaBeban = 10000;
+
+        if (tariffSnap.exists()) {
+            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+        }
+
+        const pakai = Math.round((meterSekarang - meterLalu) * 100) / 100;
+        const totalTagihan = Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
+
+        db.ref(`pelanggan/${id}`).update({
+            angka_terakhir: meterSekarang,
+            total_tagihan: totalTagihan,
+            status_bayar: 'Belum Bayar',
+            tgl_catat: new Date().toISOString()
+        }).then(() => {
+            showAlert(`Catat meter berhasil!\nPemakaian: ${pakai} m³\nTotal Tagihan: ${formatRupiah(totalTagihan)}`);
+            document.getElementById('formMeterBox').style.display = 'none';
+            document.getElementById('cariPlgId').value = '';
+            loadTagihanFo();
+        });
+    });
+}
+
+function loadTagihanFo() {
+    if (!currentUser) return;
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let hargaM3 = 3000;
+        let biayaBeban = 10000;
+
+        if (tariffSnap.exists()) {
+            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+        }
+
+        db.ref('pelanggan').on('value', snapshot => {
+            if (!currentUser) return;
+            const tbody = document.getElementById('tabelTagihanFo');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!snapshot.exists()) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada tagihan.</td></tr>`;
+                const elSudah = document.getElementById('foTotalSudahBayar');
+                const elBelum = document.getElementById('foTotalBelumBayar');
+                if (elSudah) elSudah.textContent = formatRupiah(0);
+                if (elBelum) elBelum.textContent = formatRupiah(0);
+                return;
+            }
+
+            let count = 0;
+            let totalSudah = 0;
+            let totalBelum = 0;
+
+            snapshot.forEach(child => {
+                const plg = child.val();
+                if (plg && plg.didaftarkan_oleh === currentUser.id) {
+                    count++;
+                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
+                    const pakai = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
+                    
+                    const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) 
+                        ? plg.total_tagihan 
+                        : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
+
+                    const isLunas = plg.status_bayar === 'Sudah Bayar';
+
+                    if (isLunas) {
+                        totalSudah += totalTagihanCalculated;
+                    } else {
+                        totalBelum += totalTagihanCalculated;
+                    }
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <b>${plg.nama || '-'}</b><br>
+                            <small style="color:var(--text-secondary);">${child.key}</small>
+                        </td>
+                        <td>
+                            ${pakai} m³<br>
+                            <b style="color:var(--text-accent);">${formatRupiah(totalTagihanCalculated)}</b>
+                        </td>
+                        <td>
+                            <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold;">
+                                ${plg.status_bayar || 'Belum Bayar'}
+                            </span>
+                            <div style="margin-top:4px;">
+                                ${!isLunas 
+                                    ? `<button class="btn btn-hijau btn-sm" onclick="verifikasiLunas('${child.key}')">Verifikasi</button>` 
+                                    : `<span style="color:var(--color-hijau); font-size:10px;">✔ Terverifikasi</span>`}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            if (count === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data tagihan dari pelanggan yang Anda daftarkan.</td></tr>`;
+            }
+
+            const elSudah = document.getElementById('foTotalSudahBayar');
+            const elBelum = document.getElementById('foTotalBelumBayar');
+            if (elSudah) elSudah.textContent = formatRupiah(totalSudah);
+            if (elBelum) elBelum.textContent = formatRupiah(totalBelum);
+        });
+    });
+}
+
+function updateProfilFo() {
+    if (!currentUser) return;
+    const id = currentUser.id;
+    const nama = document.getElementById('foAkunNama').value.trim();
+    const sandi = document.getElementById('foAkunSandi').value.trim();
+
+    if (!nama || !sandi) {
+        showAlert("Isi nama dan sandi!");
+        return;
+    }
+
+    db.ref(`staf_fo/${id}`).update({ nama, sandi }).then(() => {
+        showAlert("Profil Anda berhasil diperbarui!");
+        currentUser.nama = nama;
+        currentUser.sandi = sandi;
+        tampilkanDashboard('dashFo', currentUser, id, 'Petugas Lapangan (FO)');
+    }).catch(err => showAlert("Gagal update profil: " + err.message));
+}
+
+function simpanPetugas() {
+    const id = document.getElementById('foId').value.trim().toUpperCase();
+    const nama = document.getElementById('foNama').value.trim();
+    const wilayah = document.getElementById('foWilayah').value;
+    const sandi = document.getElementById('foSandi').value.trim();
+
+    if (!id || !nama || !sandi) {
+        showAlert("Harap isi semua kolom petugas!");
+        return;
+    }
+
+    const data = { id, nama, wilayah, sandi, peran: "FO" };
+
+    db.ref(`staf_fo/${id}`).set(data).then(() => {
+        showAlert(`Petugas ${nama} berhasil disimpan!`);
+        document.getElementById('foId').value = '';
+        document.getElementById('foNama').value = '';
+        document.getElementById('foSandi').value = '';
+        loadDataPetugas();
+    }).catch(err => showAlert("Gagal menyimpan: " + err.message));
+}
+
+function loadDataPetugas() {
+    db.ref('staf_fo').on('value', snapshot => {
+        const tbody = document.getElementById('tabelPetugas');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada data petugas.</td></tr>`;
+            return;
+        }
+
+        snapshot.forEach(child => {
+            const fo = child.val();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${child.key}</b></td>
+                <td>${fo.nama || '-'}</td>
+                <td>${fo.wilayah || '-'}</td>
+                <td><code>${fo.sandi || '-'}</code></td>
+                <td>
+                    <button class="btn btn-merah btn-sm" onclick="hapusPetugas('${child.key}')">Hapus</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+function hapusPetugas(id) {
+    showConfirm(`Apakah Anda yakin ingin menghapus petugas ${id}?`, () => {
+        db.ref(`staf_fo/${id}`).remove().then(() => showAlert("Petugas berhasil dihapus!"));
+    });
+}
+
+function simpanTarif() {
+    const hargaM3 = Number(document.getElementById('tarifM3').value);
+    const biayaBeban = Number(document.getElementById('biayaBeban').value);
+    const ewalletNo = document.getElementById('tarifEwalletNo').value.trim();
+    const ewalletNama = document.getElementById('tarifEwalletNama').value.trim();
+
+    db.ref('pengaturan/tarif').set({ hargaM3, biayaBeban, ewalletNo, ewalletNama }).then(() => {
+        showAlert("Pengaturan tarif & E-Wallet berhasil diperbarui!");
+    }).catch(err => showAlert("Gagal menyimpan tarif: " + err.message));
+}
+
+function loadTarif() {
+    db.ref('pengaturan/tarif').once('value').then(snapshot => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            document.getElementById('tarifM3').value = data.hargaM3 || 0;
+            document.getElementById('biayaBeban').value = data.biayaBeban || 0;
+            const noEl = document.getElementById('tarifEwalletNo');
+            const namaEl = document.getElementById('tarifEwalletNama');
+            if (noEl) noEl.value = data.ewalletNo || DEFAULT_EWALLET_NO;
+            if (namaEl) namaEl.value = data.ewalletNama || DEFAULT_EWALLET_NAMA;
+        }
+    });
+}
+
+function loadRiwayatTagihan() {
+    const filter = document.getElementById('filterWilayahTagihan').value;
+    
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let hargaM3 = 3000;
+        let biayaBeban = 10000;
+
+        if (tariffSnap.exists()) {
+            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+        }
+
+        db.ref('pelanggan').on('value', snapshot => {
+            const tbody = document.getElementById('tabelTagihan');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!snapshot.exists()) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data tagihan.</td></tr>`;
+                return;
+            }
+
+            snapshot.forEach(child => {
+                const plg = child.val();
+                if (filter === "SEMUA" || plg.wilayah === filter) {
+                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
+                    
+                    const pemakaianM3 = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
+                    
+                    const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) 
+                        ? plg.total_tagihan 
+                        : Math.round(((pemakaianM3 * hargaM3) + biayaBeban) * 100) / 100;
+
+                    const isLunas = plg.status_bayar === "Sudah Bayar";
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <b>${plg.nama || '-'}</b><br>
+                            <small style="color:var(--text-secondary);">${child.key}</small>
+                        </td>
+                        <td>
+                            <b>Wilayah:</b> ${plg.wilayah || '-'}<br>
+                            <b>Pemakaian:</b> ${pemakaianM3} m³<br>
+                            <b>Total:</b> <span style="color:var(--text-accent); font-weight:bold;">${formatRupiah(totalTagihanCalculated)}</span>
+                        </td>
+                        <td>
+                            <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold;">
+                                ${plg.status_bayar || 'Belum Bayar'}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        });
+    });
+}
+
+function simpanKas() {
+    const tglInput = document.getElementById('kasTanggal').value;
+    const jenis = document.getElementById('kasJenis').value;
+    const nominal = Number(document.getElementById('kasNominal').value);
+    const keterangan = document.getElementById('kasKet').value.trim();
+
+    if (!tglInput || !nominal || !keterangan) {
+        showAlert("Lengkapi tanggal, nominal, dan keterangan transaksi kas!");
+        return;
+    }
+
+    const kasRef = db.ref('transaksi_kas').push();
+    kasRef.set({
+        jenis,
+        nominal,
+        keterangan,
+        tanggal: tglInput
+    }).then(() => {
+        showAlert("Transaksi kas berhasil dicatat!");
+        document.getElementById('kasNominal').value = '';
+        document.getElementById('kasKet').value = '';
+        setKasTanggalDefault();
+    });
+}
+
+function hapusKas(key) {
+    showConfirm("Apakah Anda yakin ingin menghapus transaksi kas ini?", () => {
+        db.ref(`transaksi_kas/${key}`).remove().then(() => {
+            showAlert("Transaksi kas berhasil dihapus!");
+        }).catch(err => showAlert("Gagal menghapus transaksi: " + err.message));
+    });
+}
+
+function loadTagihanPerWilayahKas() {
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let hargaM3 = 3000;
+        let biayaBeban = 10000;
+
+        if (tariffSnap.exists()) {
+            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+        }
+
+        db.ref('pelanggan').on('value', snapshot => {
+            const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
+            const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
+
+            const renderKeTabel = (tbody) => {
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data pelanggan.</td></tr>`;
+                    return;
+                }
+
+                let rekap = {};
+
+                snapshot.forEach(child => {
+                    const plg = child.val();
+                    const wil = plg.wilayah || 'Tanpa Wilayah';
+                    
+                    if (!rekap[wil]) {
+                        rekap[wil] = { sudahBayar: 0, belumBayar: 0 };
+                    }
+
+                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
+                    const pemakaianM3 = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
+                    
+                    const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) 
+                        ? plg.total_tagihan 
+                        : Math.round(((pemakaianM3 * hargaM3) + biayaBeban) * 100) / 100;
+
+                    if (plg.status_bayar === "Sudah Bayar") {
+                        rekap[wil].sudahBayar += totalTagihanCalculated;
+                    } else {
+                        rekap[wil].belumBayar += totalTagihanCalculated;
+                    }
+                });
+
+                let keys = Object.keys(rekap).sort();
+                if (keys.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data pelanggan.</td></tr>`;
+                    return;
+                }
+
+                keys.forEach(wil => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><b>${wil}</b></td>
+                        <td style="color:var(--color-hijau); font-weight:bold;">${formatRupiah(rekap[wil].sudahBayar)}</td>
+                        <td style="color:var(--color-merah); font-weight:bold;">${formatRupiah(rekap[wil].belumBayar)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            renderKeTabel(tbodyOffice);
+            renderKeTabel(tbodyFo);
+        });
+    });
+}
+
+function loadLaporanKas() {
+    loadTagihanPerWilayahKas();
+
+    db.ref('transaksi_kas').on('value', snapshot => {
+        let saldoBulanLalu = 0;
+        let pemasukanBulanIni = 0;
+        let pengeluaranBulanIni = 0;
+        let rowsOffice = '';
+        let rowsView = '';
+
+        const sekarang = new Date();
+        const tahunSekarang = sekarang.getFullYear();
+        const bulanSekarang = sekarang.getMonth();
+
+        if (!snapshot.exists()) {
+            rowsOffice = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas.</td></tr>`;
+            rowsView = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas.</td></tr>`;
+        } else {
+            snapshot.forEach(child => {
+                const kas = child.val();
+                const key = child.key;
+                const tglKas = new Date(kas.tanggal);
+                const thnKas = tglKas.getFullYear();
+                const blnKas = tglKas.getMonth();
+
+                const isBulanLalu = (thnKas < tahunSekarang) || (thnKas === tahunSekarang && blnKas < bulanSekarang);
+                const isBulanIni = (thnKas === tahunSekarang && blnKas === bulanSekarang);
+
+                if (isBulanLalu) {
+                    if (kas.jenis === "PEMASUKAN") saldoBulanLalu += kas.nominal;
+                    if (kas.jenis === "PENGELUARAN") saldoBulanLalu -= kas.nominal;
+                } else if (isBulanIni) {
+                    if (kas.jenis === "PEMASUKAN") pemasukanBulanIni += kas.nominal;
+                    if (kas.jenis === "PENGELUARAN") pengeluaranBulanIni += kas.nominal;
+                }
+
+                const tglSingkat = formatTanggalSingkat(kas.tanggal);
+                const isPemasukan = kas.jenis === "PEMASUKAN";
+                const badgeColor = isPemasukan ? 'var(--color-hijau)' : 'var(--color-merah)';
+                
+                rowsOffice += `
+                    <tr>
+                        <td><b>${tglSingkat}</b></td>
+                        <td>
+                            <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
+                            <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
+                        </td>
+                        <td>
+                            <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
+                            <div style="margin-top:4px;">
+                                <button class="btn btn-merah btn-sm" onclick="hapusKas('${key}')">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                rowsView += `
+                    <tr>
+                        <td><b>${tglSingkat}</b></td>
+                        <td>
+                            <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
+                            <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
+                        </td>
+                        <td>
+                            <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        const totalSaldoKas = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
+
+        const updateElemText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        const tOffice = document.getElementById('tabelKas');
+        if (tOffice) tOffice.innerHTML = rowsOffice;
+        updateElemText('kasSaldoLalu', formatRupiah(saldoBulanLalu));
+        updateElemText('kasPemasukan', formatRupiah(pemasukanBulanIni));
+        updateElemText('kasPengeluaran', formatRupiah(pengeluaranBulanIni));
+        updateElemText('kasSaldo', formatRupiah(totalSaldoKas));
+
+        const tFo = document.getElementById('tabelKasFo');
+        if (tFo) tFo.innerHTML = rowsView;
+        updateElemText('kasSaldoLaluFo', formatRupiah(saldoBulanLalu));
+        updateElemText('kasPemasukanFo', formatRupiah(pemasukanBulanIni));
+        updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
+        updateElemText('kasSaldoFo', formatRupiah(totalSaldoKas));
+
+        const tPlg = document.getElementById('tabelKasPlg');
+        if (tPlg) tPlg.innerHTML = rowsView;
+        updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
+        updateElemText('kasPemasukanPlg', formatRupiah(pemasukanBulanIni));
+        updateElemText('kasPengeluaranPlg', formatRupiah(pengeluaranBulanIni));
+        updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
+    });
+}
+
+function initAkunForm() {
+    if (currentUser) {
+        const akunIdEl = document.getElementById('akunId');
+        if (akunIdEl) akunIdEl.value = currentUser.id;
+
+        const akunNamaEl = document.getElementById('akunNama');
+        if (akunNamaEl) akunNamaEl.value = currentUser.nama || '';
+
+        const akunSandiEl = document.getElementById('akunSandi');
+        if (akunSandiEl) akunSandiEl.value = currentUser.sandi || '';
+    }
+}
+
+function updateProfilOffice() {
+    if (!currentUser) return;
+    const id = currentUser.id;
+    const nama = document.getElementById('akunNama').value.trim();
+    const sandi = document.getElementById('akunSandi').value.trim();
+
+    if (!nama || !sandi) {
+        showAlert("Isi nama dan sandi!");
+        return;
+    }
+
+    db.ref(`staf_office/${id}`).update({ nama, sandi }).then(() => {
+        showAlert("Profil akun berhasil diperbarui!");
+        currentUser.nama = nama;
+        currentUser.sandi = sandi;
+        tampilkanDashboard('dashOffice', currentUser, id, 'Staf Office');
+    }).catch(err => showAlert("Gagal update profil: " + err.message));
+}
+
+function logout() {
+    currentUser = null;
+
+    localStorage.removeItem('tirta_remember');
+    localStorage.removeItem('tirta_saved_id');
+    localStorage.removeItem('tirta_saved_sandi');
+
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('aktif'));
+    const loginView = document.getElementById('loginView');
+    if (loginView) loginView.classList.add('aktif');
+    
+    document.getElementById('loginId').value = '';
+    document.getElementById('loginSandi').value = '';
+    document.getElementById('rememberMe').checked = false;
+    document.getElementById('roleDetected').style.display = 'none';
+}
+</script>
+</body>
+</html>
