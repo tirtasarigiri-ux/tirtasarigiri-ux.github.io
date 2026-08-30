@@ -12,6 +12,20 @@
     <meta name="apple-mobile-web-app-title" content="Tirta Sari Giri">
     <title>Tirta Sari Giri - Sistem Manajemen Air Modern</title>
 
+	<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((reg) => {
+                    console.log('Service Worker berhasil didaftarkan: ', reg.scope);
+                })
+                .catch((err) => {
+                    console.log('Gagal mendaftarkan Service Worker: ', err);
+                });
+        });
+    }
+</script>
+	
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -690,6 +704,37 @@
     </style>
 </head>
 <body>
+
+	<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; background: #EF4444; color: #fff; margin-bottom: 10px; border-radius: 8px;">
+    ⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.
+</div>
+
+<script>
+    function updateOnlineStatus() {
+        const banner = document.getElementById('networkStatusBanner');
+        if (!navigator.onLine) {
+            if (banner) banner.style.display = 'block';
+            // Beritahu Firebase untuk masuk mode offline (jika didukung)
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().goOffline();
+            }
+        } else {
+            if (banner) banner.style.display = 'none';
+            // Kembalikan Firebase ke mode online
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().goOnline();
+            }
+        }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Jalankan saat pertama kali muat
+    window.addEventListener('DOMContentLoaded', () => {
+        updateOnlineStatus();
+    });
+</script>		
 
     <!-- Floating Theme Switcher Widget -->
     <div class="theme-switcher-float" id="themeSwitcher">
