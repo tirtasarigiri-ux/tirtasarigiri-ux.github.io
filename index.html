@@ -1587,21 +1587,7 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
     manifestLink.href = manifestURL;
     document.head.appendChild(manifestLink);
 
-    if ('serviceWorker' in navigator) {
-        const swCode = `
-            const CACHE_NAME = 'tirta-sari-v5';
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
-            self.addEventListener('fetch', (e) => {
-                e.respondWith(
-                    fetch(e.request).catch(() => caches.match(e.request))
-                );
-            });
-        `;
-        const swBlob = new Blob([swCode], { type: 'text/javascript' });
-        const swURL = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swURL).catch(() => {});
-    }
+    // BLoK KODE SERVICE WORKER VIRTUAL (GANDA) TELAH DIHAPUS DARI SINI
 })();
 
 // Firebase Config
