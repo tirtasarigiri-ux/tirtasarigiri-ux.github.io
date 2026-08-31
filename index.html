@@ -705,36 +705,60 @@
 </head>
 <body>
 
-	<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; background: #EF4444; color: #fff; margin-bottom: 10px; border-radius: 8px;">
-    ⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.
-</div>
+	<!-- BANNER NOTIFIKASI JARINGAN -->
+	<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
+	</div>
 
-<script>
-    function updateOnlineStatus() {
-        const banner = document.getElementById('networkStatusBanner');
-        if (!navigator.onLine) {
-            if (banner) banner.style.display = 'block';
-            // Beritahu Firebase untuk masuk mode offline (jika didukung)
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().goOffline();
-            }
-        } else {
-            if (banner) banner.style.display = 'none';
-            // Kembalikan Firebase ke mode online
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().goOnline();
-            }
-        }
-    }
+	<script>
+		function updateOnlineStatus(event) {
+			const banner = document.getElementById('networkStatusBanner');
+			
+			if (!navigator.onLine) {
+				// --- KONDISI OFFLINE ---
+				if (banner) {
+					banner.style.background = '#EF4444'; // Warna Merah
+					banner.style.color = '#ffffff';
+					banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
+					banner.style.display = 'block';
+				}
+				// Beritahu Firebase untuk masuk mode offline
+				if (typeof firebase !== 'undefined' && firebase.database) {
+					firebase.database().goOffline();
+				}
+			} else {
+				// --- KONDISI ONLINE ---
+				// Kembalikan Firebase ke mode online
+				if (typeof firebase !== 'undefined' && firebase.database) {
+					firebase.database().goOnline();
+				}
+				
+				// Jika perubahan status dipicu karena baru terhubung kembali
+				if (banner && event && event.type === 'online') {
+					banner.style.background = '#10B981'; // Warna Hijau Emerald
+					banner.style.color = '#ffffff';
+					banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
+					banner.style.display = 'block';
+					
+					// Hilangkan pesan sukses otomatis setelah 3 detik
+					setTimeout(() => {
+						banner.style.display = 'none';
+					}, 3000);
+				} else if (banner) {
+					// Sembunyikan langsung saat aplikasi baru pertama kali dibuka dan sudah online
+					banner.style.display = 'none';
+				}
+			}
+		}
 
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-
-    // Jalankan saat pertama kali muat
-    window.addEventListener('DOMContentLoaded', () => {
-        updateOnlineStatus();
-    });
-</script>		
+		// Pasang Event Listener untuk menangkap perubahan jaringan
+		window.addEventListener('online', updateOnlineStatus);
+		window.addEventListener('offline', updateOnlineStatus);
+		
+		// Jalankan saat halaman pertama kali selesai dimuat
+		window.addEventListener('DOMContentLoaded', () => {
+			updateOnlineStatus();
+		});
+	</script>		
 
     <!-- Floating Theme Switcher Widget -->
     <div class="theme-switcher-float" id="themeSwitcher">
