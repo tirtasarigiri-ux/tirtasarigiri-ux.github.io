@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" id="metaStatusBar" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tirta Sari Giri">
-    <title>Tirta Sari Giri - Sistem Manajemen Air Modern</title>
+    <title>Tirta Sari Giri</title>
 
-	<script>
+    <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -24,8 +24,8 @@
                 });
         });
     }
-</script>
-	
+    </script>
+    
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -653,20 +653,37 @@
 
         .flex-row { display: flex; gap: 8px; }
 
-        .marquee-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
+        .videotron-box {
+            background: #020617;
+            border: 2px solid #38BDF8;
             border-radius: 14px;
+            padding: 16px;
             margin-bottom: 14px;
+            box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.25), 0 8px 20px rgba(0,0,0,0.4);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 90px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: var(--shadow-card);
+            justify-content: center;
         }
 
-        .marquee-icon { font-size: 16px; flex-shrink: 0; }
-        #runningTextDisplay { color: var(--text-primary); font-size: 13px; font-weight: 600; width: 100%; }
+        .videotron-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: #38BDF8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            letter-spacing: 0.5px;
+            animation: videotronFade 0.6s ease-in-out;
+            line-height: 1.5;
+        }
+
+        @keyframes videotronFade {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
         .custom-modal-backdrop {
             display: none;
@@ -705,69 +722,57 @@
 </head>
 <body>
 
-	<!-- BANNER NOTIFIKASI JARINGAN -->
-	<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
-	</div>
+    <div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
+    </div>
 
-	<script>
-		function updateOnlineStatus(event) {
-			const banner = document.getElementById('networkStatusBanner');
-			
-			if (!navigator.onLine) {
-				// --- KONDISI OFFLINE ---
-				if (banner) {
-					banner.style.background = '#EF4444'; // Warna Merah
-					banner.style.color = '#ffffff';
-					banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
-					banner.style.display = 'block';
-				}
-				// Beritahu Firebase untuk masuk mode offline
-				if (typeof firebase !== 'undefined' && firebase.database) {
-					firebase.database().goOffline();
-				}
-			} else {
-				// --- KONDISI ONLINE ---
-				// Kembalikan Firebase ke mode online
-				if (typeof firebase !== 'undefined' && firebase.database) {
-					firebase.database().goOnline();
-				}
-				
-				// Jika perubahan status dipicu karena baru terhubung kembali
-				if (banner && event && event.type === 'online') {
-					banner.style.background = '#10B981'; // Warna Hijau Emerald
-					banner.style.color = '#ffffff';
-					banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
-					banner.style.display = 'block';
-					
-					// Hilangkan pesan sukses otomatis setelah 3 detik
-					setTimeout(() => {
-						banner.style.display = 'none';
-					}, 3000);
-				} else if (banner) {
-					// Sembunyikan langsung saat aplikasi baru pertama kali dibuka dan sudah online
-					banner.style.display = 'none';
-				}
-			}
-		}
+    <script>
+        function updateOnlineStatus(event) {
+            const banner = document.getElementById('networkStatusBanner');
+            
+            if (!navigator.onLine) {
+                if (banner) {
+                    banner.style.background = '#EF4444';
+                    banner.style.color = '#ffffff';
+                    banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
+                    banner.style.display = 'block';
+                }
+                if (typeof firebase !== 'undefined' && firebase.database) {
+                    firebase.database().goOffline();
+                }
+            } else {
+                if (typeof firebase !== 'undefined' && firebase.database) {
+                    firebase.database().goOnline();
+                }
+                
+                if (banner && event && event.type === 'online') {
+                    banner.style.background = '#10B981';
+                    banner.style.color = '#ffffff';
+                    banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
+                    banner.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        banner.style.display = 'none';
+                    }, 3000);
+                } else if (banner) {
+                    banner.style.display = 'none';
+                }
+            }
+        }
 
-		// Pasang Event Listener untuk menangkap perubahan jaringan
-		window.addEventListener('online', updateOnlineStatus);
-		window.addEventListener('offline', updateOnlineStatus);
-		
-		// Jalankan saat halaman pertama kali selesai dimuat
-		window.addEventListener('DOMContentLoaded', () => {
-			updateOnlineStatus();
-		});
-	</script>		
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            updateOnlineStatus();
+        });
+    </script>        
 
-    <!-- Floating Theme Switcher Widget -->
     <div class="theme-switcher-float" id="themeSwitcher">
         <button class="theme-btn" data-theme-val="dark" onclick="setTheme('dark')" title="Tema Gelap">🌙</button>
         <button class="theme-btn" data-theme-val="light" onclick="setTheme('light')" title="Tema Terang">☀️</button>
         <button class="theme-btn" data-theme-val="system" onclick="setTheme('system')" title="Ikuti Sistem">💻</button>
     </div>
 
-    <!-- CUSTOM MODAL OVERLAY DIALOG -->
     <div id="customModal" class="custom-modal-backdrop">
         <div class="custom-modal-box">
             <div id="customModalMsg" class="custom-modal-msg">Pemberitahuan</div>
@@ -778,13 +783,6 @@
         </div>
     </div>
 
-    <!-- BOX TEKS BERJALAN / PENGUMUMAN -->
-    <div class="marquee-container">
-        <span class="marquee-icon">📢</span>
-        <marquee id="runningTextDisplay" scrollamount="4">Memuat pengumuman...</marquee>
-    </div>
-
-    <!-- HALAMAN LOGIN -->
     <div id="loginView" class="view-section aktif">
         <div class="card" style="margin-top: 10px;">
             <div class="brand-header">
@@ -798,11 +796,11 @@
                     <label>ID Pengguna</label>
                     <input type="text" id="loginId" placeholder="Masukkan ID anda disini" required oninput="deteksiRole(this)">
                 </div>
-				
-				<div id="roleDetected" class="role-badge">
+                
+                <div id="roleDetected" class="role-badge">
                     <span id="roleText">-</span>
                 </div>
-				
+                
                 <div class="grup">
                     <label>Kata Sandi</label>
                     <input type="password" id="loginSandi" placeholder="Max 5 Digit" required>
@@ -818,7 +816,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD STAF OFFICE -->
     <div id="dashOffice" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1087,8 +1084,9 @@
                     <div style="text-align: center; margin-bottom: 12px;">
                         <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                         <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
                     </div>
 
                     <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1108,7 +1106,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD PETUGAS LAPANGAN (FO) -->
     <div id="dashFo" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1349,8 +1346,9 @@
                     <div style="text-align: center; margin-bottom: 12px;">
                         <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                         <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
                     </div>
 
                     <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1370,7 +1368,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD PELANGGAN (PLG) -->
     <div id="dashPelanggan" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1388,9 +1385,9 @@
                     <div class="launcher-icon">🧾</div>
                     <div class="launcher-title">Tagihan Saya</div>
                 </div>
-                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgKas')">
-                    <div class="launcher-icon">💰</div>
-                    <div class="launcher-title">Laporan Kas</div>
+                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgInfo')">
+                    <div class="launcher-icon">📢</div>
+                    <div class="launcher-title">Papan Informasi</div>
                 </div>
                 <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')" style="grid-column: span 2;">
                     <div class="launcher-icon">👤</div>
@@ -1417,12 +1414,18 @@
                 </div>
             </div>
 
-            <!-- PELANGGAN SUB-MENU 2: LAPORAN KAS -->
-            <div id="subPlgKas" class="sub-view">
+            <!-- PELANGGAN SUB-MENU 2: PAPAN INFORMASI & LAPORAN KAS -->
+            <div id="subPlgInfo" class="sub-view">
                 <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Transparansi Kas Air</h3>
+                    <h3 style="font-size:12px; color:var(--text-accent);">Papan Informasi & Transparansi Kas</h3>
                     <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
                 </div>
+
+                <!-- VIDEOTRON STYLE ANNOUNCEMENT DISPLAY -->
+                <div class="videotron-box">
+                    <div id="videotronText" class="videotron-text">Menghubungkan ke pusat informasi...</div>
+                </div>
+
                 <div class="grid-stats">
                     <div class="stat-box">
                         <div class="stat-label">Saldo Bulan Lalu</div>
@@ -1440,22 +1443,6 @@
                         <div class="stat-label">Total Saldo Kas</div>
                         <div class="stat-value" id="kasSaldoPlg" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
                     </div>
-                </div>
-
-                <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Keterangan</th>
-                                <th>Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelKasPlg">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
@@ -1489,8 +1476,9 @@
                     <div style="text-align: center; margin-bottom: 12px;">
                         <div style="font-size: 32px; margin-bottom: 4px;">🚰</div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                        <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                         <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
                     </div>
 
                     <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1583,8 +1571,6 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
     manifestLink.rel = 'manifest';
     manifestLink.href = manifestURL;
     document.head.appendChild(manifestLink);
-
-    // BLoK KODE SERVICE WORKER VIRTUAL (GANDA) TELAH DIHAPUS DARI SINI
 })();
 
 // Firebase Config
@@ -1603,6 +1589,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let currentUser = null; 
+let videotronTimer = null;
 
 const DEFAULT_EWALLET_NO = "0812-3456-7890";
 const DEFAULT_EWALLET_NAMA = "Tirta Sari Giri / PAMSIMAS";
@@ -1682,14 +1669,36 @@ function setKasTanggalDefault() {
     }
 }
 
-function initTeksBerjalan() {
+function initVideotronPengumuman() {
     db.ref('pengaturan/teks_berjalan').on('value', snapshot => {
-        const teks = snapshot.exists() ? snapshot.val() : "Selamat datang di Sistem Informasi Tirta Sari Giri.";
-        const runningTextEl = document.getElementById('runningTextDisplay');
+        const teks = snapshot.exists() ? snapshot.val() : "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
         const inputTeksEl = document.getElementById('inputTeksBerjalan');
-        
-        if (runningTextEl) runningTextEl.textContent = teks;
         if (inputTeksEl) inputTeksEl.value = teks;
+
+        const sentences = teks.split(/(?<=[.!?\n])\s+|[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+        
+        if (videotronTimer) clearInterval(videotronTimer);
+        
+        const videotronEl = document.getElementById('videotronText');
+        if (!videotronEl) return;
+
+        if (sentences.length === 0) {
+            videotronEl.textContent = teks;
+            return;
+        }
+
+        let currentIndex = 0;
+        
+        const renderNextSentence = () => {
+            videotronEl.style.animation = 'none';
+            videotronEl.offsetHeight;
+            videotronEl.style.animation = 'videotronFade 0.6s ease-in-out';
+            videotronEl.textContent = `📢 "${sentences[currentIndex]}"`;
+            currentIndex = (currentIndex + 1) % sentences.length;
+        };
+
+        renderNextSentence();
+        videotronTimer = setInterval(renderNextSentence, 4000);
     });
 }
 
@@ -1701,13 +1710,13 @@ function simpanTeksBerjalan() {
     }
 
     db.ref('pengaturan/teks_berjalan').set(teksInput).then(() => {
-        showAlert("Teks berjalan berhasil diperbarui dan dipublikasikan!");
+        showAlert("Papan informasi berhasil diperbarui dan dipublikasikan!");
     }).catch(err => showAlert("Gagal menyimpan teks: " + err.message));
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     setKasTanggalDefault();
-    initTeksBerjalan();
+    initVideotronPengumuman();
 
     const isRemembered = localStorage.getItem('tirta_remember') === 'true';
     const savedId = localStorage.getItem('tirta_saved_id');
@@ -1755,7 +1764,7 @@ function deteksiRole(input) {
     const roleText = document.getElementById('roleText');
     const sandiInput = document.getElementById('loginSandi');
 
-    if (id.startsWith('STAF') || id.startsWith('ADM')) {
+    if (id.startsWith('STAF')) {
         roleBadge.style.display = 'block';
         roleText.textContent = 'Staf Office';
         if (id === 'STAF01' && !sandiInput.value) sandiInput.value = '12345';
@@ -1797,7 +1806,7 @@ function prosesLogin() {
     let targetView = "";
     let roleTitle = "";
 
-    if (id.startsWith("STAF") || id.startsWith("ADM")) {
+    if (id.startsWith("STAF")) {
         nodePath = "staf_office";
         targetView = "dashOffice";
         roleTitle = "Staf Office";
@@ -1810,13 +1819,12 @@ function prosesLogin() {
         targetView = "dashPelanggan";
         roleTitle = "Pelanggan";
     } else {
-        showAlert("Format ID tidak dikenali! Gunakan awalan STAF/ADM, FO, atau PLG.");
+        showAlert("Format ID tidak dikenali! Gunakan awalan STAF, FO, atau PLG.");
         return;
     }
 
     const defaultAccounts = {
         'STAF01': { nama: 'Staf Office Demo', sandi: '12345', peran: 'STAF' },
-        'ADM01': { nama: 'Admin Demo', sandi: '12345', peran: 'STAF' },
         'FO01': { nama: 'Budi Santoso (FO)', sandi: '12345', wilayah: 'RT 1', peran: 'FO' },
         'PLG001': { nama: 'Ahmad Subagja', sandi: 'PLG001', alamat: 'Sambeng RT 1', meter_awal: 0, angka_terakhir: 15, total_tagihan: 55000, status_bayar: 'Belum Bayar', didaftarkan_oleh: 'FO01' }
     };
@@ -1875,6 +1883,7 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
             <div>Nama: <span>${(userData && userData.nama) || '-'}</span></div>
             <div>Peran: <span>${roleTitle}</span></div>
             ${(userData && userData.wilayah) ? `<div>Wilayah: <span>${userData.wilayah}</span></div>` : ''}
+            ${(userData && userData.alamat) ? `<div>Alamat: <span>${userData.alamat}</span></div>` : ''}
         </div>
         <button class="btn-logout-top" onclick="logout()">Keluar 🚪</button>
     `;
@@ -1908,6 +1917,9 @@ function bukaSubView(dashId, subViewId) {
     const launcherGrid = parentDash.querySelector('.launcher-grid');
     if (launcherGrid) launcherGrid.style.display = 'none';
 
+    const userProfileEl = parentDash.querySelector('.user-profile');
+    if (userProfileEl) userProfileEl.style.display = 'none';
+
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 
     const targetSubView = document.getElementById(subViewId);
@@ -1920,6 +1932,9 @@ function kembaliKeLauncher(dashId) {
     
     const launcherGrid = parentDash.querySelector('.launcher-grid');
     if (launcherGrid) launcherGrid.style.display = 'grid';
+
+    const userProfileEl = parentDash.querySelector('.user-profile');
+    if (userProfileEl) userProfileEl.style.display = 'flex';
 
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
@@ -1949,6 +1964,7 @@ function initPelangganDashboard() {
 
     loadTagihanPelanggan();
     loadLaporanKas();
+    initVideotronPengumuman();
 }
 
 function loadTagihanPelanggan() {
@@ -2644,6 +2660,7 @@ function loadTagihanPerWilayahKas() {
         db.ref('pelanggan').on('value', snapshot => {
             const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
             const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
+            const tbodyPlg = document.getElementById('tabelTagihanWilayahKasPlg');
 
             const renderKeTabel = (tbody) => {
                 if (!tbody) return;
@@ -2698,6 +2715,7 @@ function loadTagihanPerWilayahKas() {
 
             renderKeTabel(tbodyOffice);
             renderKeTabel(tbodyFo);
+            renderKeTabel(tbodyPlg);
         });
     });
 }
