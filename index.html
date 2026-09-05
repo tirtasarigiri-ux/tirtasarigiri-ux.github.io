@@ -34,7 +34,7 @@
     <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    
+
     <!-- Library Convert Struk HTML ke Gambar PNG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -722,797 +722,803 @@
 </head>
 <body>
 
-    <div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
-    </div>
+<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
+</div>
 
-    <script>
-        function updateOnlineStatus(event) {
-            const banner = document.getElementById('networkStatusBanner');
+<script>
+    function updateOnlineStatus(event) {
+        const banner = document.getElementById('networkStatusBanner');
+        
+        if (!navigator.onLine) {
+            if (banner) {
+                banner.style.background = '#EF4444';
+                banner.style.color = '#ffffff';
+                banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
+                banner.style.display = 'block';
+            }
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().goOffline();
+            }
+        } else {
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().goOnline();
+            }
             
-            if (!navigator.onLine) {
-                if (banner) {
-                    banner.style.background = '#EF4444';
-                    banner.style.color = '#ffffff';
-                    banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
-                    banner.style.display = 'block';
-                }
-                if (typeof firebase !== 'undefined' && firebase.database) {
-                    firebase.database().goOffline();
-                }
-            } else {
-                if (typeof firebase !== 'undefined' && firebase.database) {
-                    firebase.database().goOnline();
-                }
+            if (banner && event && event.type === 'online') {
+                banner.style.background = '#10B981';
+                banner.style.color = '#ffffff';
+                banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
+                banner.style.display = 'block';
                 
-                if (banner && event && event.type === 'online') {
-                    banner.style.background = '#10B981';
-                    banner.style.color = '#ffffff';
-                    banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
-                    banner.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        banner.style.display = 'none';
-                    }, 3000);
-                } else if (banner) {
+                setTimeout(() => {
                     banner.style.display = 'none';
-                }
+                }, 3000);
+            } else if (banner) {
+                banner.style.display = 'none';
             }
         }
+    }
 
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            updateOnlineStatus();
-        });
-    </script>        
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    window.addEventListener('DOMContentLoaded', () => {
+        updateOnlineStatus();
+    });
+</script>        
 
-    <div class="theme-switcher-float" id="themeSwitcher">
-        <button class="theme-btn" data-theme-val="dark" onclick="setTheme('dark')" title="Tema Gelap">🌙</button>
-        <button class="theme-btn" data-theme-val="light" onclick="setTheme('light')" title="Tema Terang">☀️</button>
-        <button class="theme-btn" data-theme-val="system" onclick="setTheme('system')" title="Ikuti Sistem">💻</button>
-    </div>
+<div class="theme-switcher-float" id="themeSwitcher">
+    <button class="theme-btn" data-theme-val="dark" onclick="setTheme('dark')" title="Tema Gelap">🌙</button>
+    <button class="theme-btn" data-theme-val="light" onclick="setTheme('light')" title="Tema Terang">☀️</button>
+    <button class="theme-btn" data-theme-val="system" onclick="setTheme('system')" title="Ikuti Sistem">💻</button>
+</div>
 
-    <div id="customModal" class="custom-modal-backdrop">
-        <div class="custom-modal-box">
-            <div id="customModalMsg" class="custom-modal-msg">Pemberitahuan</div>
-            <div class="custom-modal-btns">
-                <button id="customModalBtnOk" class="btn btn-hijau btn-sm">OK</button>
-                <button id="customModalBtnCancel" class="btn btn-merah btn-sm" style="display:none;">Batal</button>
-            </div>
+<div id="customModal" class="custom-modal-backdrop">
+    <div class="custom-modal-box">
+        <div id="customModalMsg" class="custom-modal-msg">Pemberitahuan</div>
+        <div class="custom-modal-btns">
+            <button id="customModalBtnOk" class="btn btn-hijau btn-sm">OK</button>
+            <button id="customModalBtnCancel" class="btn btn-merah btn-sm" style="display:none;">Batal</button>
         </div>
     </div>
+</div>
 
-    <!-- LOGIN VIEW -->
-    <div id="loginView" class="view-section aktif">
-        <div class="card" style="margin-top: 10px;">
-            <div class="brand-header">
-                <div style="margin-bottom: 12px; display: flex; justify-content: center;">
-                    <img id="logoLogin" src="logo3.png" alt="Logo" style="width: 75px; height: 75px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);" onerror="this.onerror=null; this.src='https://placehold.co/75x75/070B14/38BDF8?text=TSG';">
-                </div>
-                <h1>TIRTA SARI GIRI</h1>
-                <p>Sistem Informasi & Autentikasi</p>
-                <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
+<!-- LOGIN VIEW -->
+<div id="loginView" class="view-section aktif">
+    <div class="card" style="margin-top: 10px;">
+        <div class="brand-header">
+            <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+                <img id="logoLogin" src="logo3.png" alt="Logo Tirta Sari Giri" style="width: 75px; height: 75px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);" onerror="this.onerror=null; this.src='https://placehold.co/75x75/070B14/38BDF8?text=TSG';">
             </div>
-
-            <form onsubmit="event.preventDefault(); prosesLogin();">
-                <div class="grup">
-                    <label>ID Pengguna</label>
-                    <input type="text" id="loginId" placeholder="Masukkan ID anda disini" required oninput="deteksiRole(this)">
-                </div>
-                
-                <div id="roleDetected" class="role-badge">
-                    <span id="roleText">-</span>
-                </div>
-                
-                <div class="grup">
-                    <label>Kata Sandi</label>
-                    <input type="password" id="loginSandi" placeholder="Max 5 Digit" required>
-                </div>
-
-                <label class="checkbox-grup">
-                    <input type="checkbox" id="rememberMe">
-                    <span>Ingat Sandi</span>
-                </label>
-
-                <button type="submit" class="btn">Masuk ke Sistem</button>
-            </form>
+            <h1>TIRTA SARI GIRI</h1>
+            <p>Sistem Informasi & Autentikasi</p>
+            <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
         </div>
-    </div>
 
-    <!-- DASHBOARD STAF OFFICE -->
-    <div id="dashOffice" class="view-section">
-        <div class="card">
-            <div class="dashboard-header">
-                <div class="dashboard-header-title">
-                    <h1>CONTROL PANEL STAF OFFICE</h1>
-                    <p>TIRTA SARI GIRI</p>
-                    <div class="dev-tag">Modul Utama Administrasi & Keuangan</div>
-                </div>
+        <form onsubmit="event.preventDefault(); prosesLogin();">
+            <div class="grup">
+                <label>ID Pengguna</label>
+                <input type="text" id="loginId" placeholder="Masukkan ID anda disini" required oninput="deteksiRole(this)">
             </div>
             
-            <div class="user-profile" id="profOffice"></div>
-
-            <div id="officeLauncher" class="launcher-grid">
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subPetugas')">
-                    <div class="launcher-icon">👥</div>
-                    <div class="launcher-title">Kelola Petugas</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTarif')">
-                    <div class="launcher-icon">⚙️</div>
-                    <div class="launcher-title">Atur Tarif & Pembayaran</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTagihan')">
-                    <div class="launcher-icon">📄</div>
-                    <div class="launcher-title">Riwayat Tagihan</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subKas')">
-                    <div class="launcher-icon">💰</div>
-                    <div class="launcher-title">Laporan Kas</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTeksBerjalan')">
-                    <div class="launcher-icon">📢</div>
-                    <div class="launcher-title">Teks Berjalan</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
-                    <div class="launcher-icon">👤</div>
-                    <div class="launcher-title">Pengaturan</div>
-                </div>
+            <div id="roleDetected" class="role-badge">
+                <span id="roleText">-</span>
+            </div>
+            
+            <div class="grup">
+                <label>Kata Sandi</label>
+                <input type="password" id="loginSandi" placeholder="Max 5 Digit" required>
             </div>
 
-            <!-- SUB-MENU 1: KELOLA PETUGAS -->
-            <div id="subPetugas" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Petugas Lapangan</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-                </div>
-                <form onsubmit="event.preventDefault(); simpanPetugas();">
-                    <div class="grup">
-                        <label>ID Petugas</label>
-                        <input type="text" id="foId" placeholder="Contoh: FO01" required oninput="this.value = this.value.toUpperCase()">
-                    </div>
-                    <div class="grup">
-                        <label>Nama Petugas</label>
-                        <input type="text" id="foNama" placeholder="Contoh: Budi Santoso" required oninput="formatNama(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Wilayah Kerja</label>
-                        <select id="foWilayah" required>
-                            <option value="RT 1">RT 1</option>
-                            <option value="RT 2">RT 2</option>
-                        </select>
-                    </div>
-                    <div class="grup">
-                        <label>Sandi</label>
-                        <input type="text" id="foSandi" placeholder="Contoh: 12345" maxlength="5" required oninput="formatSandi(this)">
-                    </div>
-                    <button type="submit" class="btn btn-hijau">Tambah Petugas Lapangan</button>
-                </form>
+            <label class="checkbox-grup">
+                <input type="checkbox" id="rememberMe">
+                <span>Ingat Sandi</span>
+            </label>
 
-                <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Petugas Lapangan</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nama</th>
-                                <th>Wilayah</th>
-                                <th>Sandi</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelPetugas">
-                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <button type="submit" class="btn">Masuk ke Sistem</button>
+        </form>
+    </div>
+</div>
+
+<!-- DASHBOARD STAF OFFICE -->
+<div id="dashOffice" class="view-section">
+    <div class="card">
+        <div class="dashboard-header">
+            <div class="dashboard-header-title">
+                <h1>CONTROL PANEL STAF OFFICE</h1>
+                <p>TIRTA SARI GIRI</p>
+                <div class="dev-tag">Modul Utama Administrasi & Keuangan</div>
             </div>
+        </div>
+        
+        <div class="user-profile" id="profOffice"></div>
 
-            <!-- SUB-MENU 2: ATUR TARIF & E-WALLET -->
-            <div id="subTarif" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Tarif & Pembayaran</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-                </div>
-                <form onsubmit="event.preventDefault(); simpanTarif();">
-                    <div class="grup">
-                        <label>Tarif per M³ (Rp)</label>
-                        <input type="number" id="tarifM3" placeholder="Contoh: 3000" required>
-                    </div>
-                    <div class="grup">
-                        <label>Biaya Beban (Rp)</label>
-                        <input type="number" id="biayaBeban" placeholder="Contoh: 10000" required>
-                    </div>
-                    <div class="grup">
-                        <label>Nomor E-Wallet / Rekening Bank Penampung</label>
-                        <input type="text" id="tarifEwalletNo" placeholder="Contoh: 0812-3456-7890 (DANA/GoPay/OVO)" required>
-                    </div>
-                    <div class="grup">
-                        <label>Nama Akun / Rekening (a.n.)</label>
-                        <input type="text" id="tarifEwalletNama" placeholder="Contoh: Tirta Sari Giri / PAMSIMAS" required>
-                    </div>
-                    <button type="submit" class="btn btn-hijau">Simpan Pengaturan</button>
-                </form>
+        <div id="officeLauncher" class="launcher-grid">
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subPetugas')">
+                <div class="launcher-icon">👥</div>
+                <div class="launcher-title">Kelola Petugas</div>
             </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTarif')">
+                <div class="launcher-icon">⚙️</div>
+                <div class="launcher-title">Atur Tarif & Pembayaran</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTagihan')">
+                <div class="launcher-icon">📄</div>
+                <div class="launcher-title">Riwayat Tagihan</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subKas')">
+                <div class="launcher-icon">💰</div>
+                <div class="launcher-title">Laporan Kas</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTeksBerjalan')">
+                <div class="launcher-icon">📢</div>
+                <div class="launcher-title">Teks Berjalan</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
+                <div class="launcher-icon">👤</div>
+                <div class="launcher-title">Pengaturan</div>
+            </div>
+        </div>
 
-            <!-- SUB-MENU 3: RIWAYAT TAGIHAN -->
-            <div id="subTagihan" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Riwayat Tagihan Pelanggan</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+        <!-- SUB-MENU 1: KELOLA PETUGAS -->
+        <div id="subPetugas" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Petugas Lapangan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); simpanPetugas();">
+                <div class="grup">
+                    <label>ID Petugas</label>
+                    <input type="text" id="foId" placeholder="Contoh: FO01" required oninput="this.value = this.value.toUpperCase()">
                 </div>
                 <div class="grup">
-                    <label>Filter Wilayah Kerja</label>
-                    <select id="filterWilayahTagihan" onchange="loadRiwayatTagihan()">
-                        <option value="SEMUA">Semua Wilayah</option>
+                    <label>Nama Petugas</label>
+                    <input type="text" id="foNama" placeholder="Contoh: Budi Santoso" required oninput="formatNama(this)">
+                </div>
+                <div class="grup">
+                    <label>Wilayah Kerja</label>
+                    <select id="foWilayah" required>
                         <option value="RT 1">RT 1</option>
                         <option value="RT 2">RT 2</option>
                     </select>
                 </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pelanggan</th>
-                                <th>Rincian</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelTagihan">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="grup">
+                    <label>Sandi</label>
+                    <input type="text" id="foSandi" placeholder="Contoh: 12345" maxlength="5" required oninput="formatSandi(this)">
                 </div>
-            </div>
+                <button type="submit" class="btn btn-hijau">Tambah Petugas Lapangan</button>
+            </form>
 
-            <!-- SUB-MENU 4: LAPORAN KAS -->
-            <div id="subKas" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Kas & Transaksi Tirta Sari Giri</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-                </div>
-                
-                <div class="grid-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Saldo Bulan Lalu</div>
-                        <div class="stat-value" id="kasSaldoLalu">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pemasukan Bulan Ini</div>
-                        <div class="stat-value hijau" id="kasPemasukan">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pengeluaran Bulan Ini</div>
-                        <div class="stat-value merah" id="kasPengeluaran">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Saldo Kas</div>
-                        <div class="stat-value" id="kasSaldo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
-                    </div>
-                </div>
-
-                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
-                <div class="table-responsive" style="margin-bottom: 16px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Wilayah</th>
-                                <th>Sudah Bayar</th>
-                                <th>Belum Bayar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelTagihanWilayahKas">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas</h3>
-                <form onsubmit="event.preventDefault(); simpanKas();" style="margin-bottom:16px;">
-                    <div class="grup">
-                        <label>Tanggal Transaksi</label>
-                        <input type="date" id="kasTanggal" required>
-                    </div>
-                    <div class="grup">
-                        <label>Jenis Transaksi</label>
-                        <select id="kasJenis" required>
-                            <option value="PEMASUKAN">Pemasukan</option>
-                            <option value="PENGELUARAN">Pengeluaran</option>
-                        </select>
-                    </div>
-                    <div class="grup">
-                        <label>Nominal (Rp)</label>
-                        <input type="number" id="kasNominal" placeholder="Contoh: 50000" required>
-                    </div>
-                    <div class="grup">
-                        <label>Keterangan</label>
-                        <input type="text" id="kasKet" placeholder="Contoh: Beli Pipa PVC" required>
-                    </div>
-                    <button type="submit" class="btn btn-hijau">Catat Transaksi Kas</button>
-                </form>
-
-                <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Keterangan</th>
-                                <th>Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelKas">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
-            <div id="subTeksBerjalan" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Kelola Teks Berjalan</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-                </div>
-                <form onsubmit="event.preventDefault(); simpanTeksBerjalan();">
-                    <div class="grup">
-                        <label>Teks Pengumuman</label>
-                        <textarea id="inputTeksBerjalan" rows="4" placeholder="Masukkan teks pengumuman di sini..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
-                </form>
-            </div>
-
-            <!-- SUB-MENU 6: PENGATURAN AKUN STAF & UPLOAD LOGO -->
-            <div id="subAkun" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Profil, Sandi & Logo</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-                </div>
-                <form onsubmit="event.preventDefault(); updateProfilOffice();">
-                    <div class="grup">
-                        <label>ID Staf</label>
-                        <input type="text" id="akunId" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="akunNama" required oninput="formatNama(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Kata Sandi Baru (Max 5 Digit)</label>
-                        <input type="password" id="akunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
-                    </div>
-                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 12px;">Perbarui Akun</button>
-                </form>
-
-                
-                <div class="system-info-box" style="margin-top: 14px;">
-                    <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
-                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
-                        </div>
-                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
-                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
-                    </div>
-
-                    <div class="system-info-title">📌 Deskripsi Sistem</div>
-                    <div class="system-info-list" style="margin-bottom:10px;">
-                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
-                    </div>
-
-                    <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
-                    <div class="system-info-list">
-                        <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                        <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
-                        <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
-                        <div>• Application Architect: <span>Luhur Mulia</span></div>
-                    </div>
-                </div>
+            <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Petugas Lapangan</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Wilayah</th>
+                            <th>Sandi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelPetugas">
+                        <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
 
-    <!-- DASHBOARD PETUGAS LAPANGAN (FO) -->
-    <div id="dashFo" class="view-section">
-        <div class="card">
-            <div class="dashboard-header">
-                <div class="dashboard-header-title">
-                    <h1>PANEL PETUGAS LAPANGAN</h1>
-                    <p>TIRTA SARI GIRI</p>
-                    <div class="dev-tag">Modul Pencatatan & Kelola Pelanggan</div>
-                </div>
+        <!-- SUB-MENU 2: ATUR TARIF & E-WALLET -->
+        <div id="subTarif" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Tarif & Pembayaran</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
             </div>
-
-            <div class="user-profile" id="profFo"></div>
-
-            <div id="foLauncher" class="launcher-grid">
-                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoPelanggan')">
-                    <div class="launcher-icon">👥</div>
-                    <div class="launcher-title">Kelola Pelanggan</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoMeter')">
-                    <div class="launcher-icon">📝</div>
-                    <div class="launcher-title">Catat Meter</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoTagihan')">
-                    <div class="launcher-icon">📋</div>
-                    <div class="launcher-title">Daftar Tagihan</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoKas')">
-                    <div class="launcher-icon">💰</div>
-                    <div class="launcher-title">Laporan Kas</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
-                    <div class="launcher-icon">👤</div>
-                    <div class="launcher-title">Pengaturan</div>
-                </div>
-            </div>
-
-            <!-- FO SUB-MENU 1: KELOLA PELANGGAN -->
-            <div id="subFoPelanggan" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Pelanggan Baru</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
-                </div>
-                <form onsubmit="event.preventDefault(); simpanPelangganByFo();">
-                    <div class="grup">
-                        <label>ID Pelanggan</label>
-                        <input type="text" id="plgId" value="PLG" required oninput="kunciAwalanPlg(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="plgNama" placeholder="Contoh: Ahmad Subagja" required oninput="formatNama(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Alamat / Wilayah</label>
-                        <select id="plgAlamat" required>
-                            <option value="Sambeng RT1">Sambeng RT1</option>
-                            <option value="Sambeng RT2">Sambeng RT2</option>
-                            <option value="Puter">Puter</option>
-                            <option value="Jaten">Jaten</option>
-                        </select>
-                    </div>
-                    <div class="grup">
-                        <label>Meter Awal (m³)</label>
-                        <input type="text" inputmode="decimal" id="plgMeterAwal" placeholder="0" value="0" required>
-                    </div>
-                    <div class="grup">
-                        <label>Kata Sandi</label>
-                        <input type="text" id="plgSandi" placeholder="Otomatis mengikuti ID" readonly style="color:var(--text-accent); font-weight:bold;">
-                    </div>
-                    <button type="submit" class="btn btn-hijau">Daftarkan Pelanggan</button>
-                </form>
-
-                <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Pelanggan Saya</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID / Nama</th>
-                                <th>Alamat</th>
-                                <th>Sandi / Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelPelangganFo">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- FO SUB-MENU 2: CATAT METER -->
-            <div id="subFoMeter" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pencatatan Meteran Air</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            <form onsubmit="event.preventDefault(); simpanTarif();">
+                <div class="grup">
+                    <label>Tarif per M³ (Rp)</label>
+                    <input type="number" id="tarifM3" placeholder="Contoh: 3000" required>
                 </div>
                 <div class="grup">
-                    <label>Pencarian ID / Nama Pelanggan</label>
-                    <div class="flex-row">
-                        <input type="text" id="cariPlgId" placeholder="Contoh: PLG001 atau Ahmad">
-                        <button class="btn btn-sm" style="width:70px;" onclick="cariPelangganMeter()">Cari</button>
-                    </div>
+                    <label>Biaya Beban (Rp)</label>
+                    <input type="number" id="biayaBeban" placeholder="Contoh: 10000" required>
                 </div>
+                <div class="grup">
+                    <label>Nomor E-Wallet / Rekening Bank Penampung</label>
+                    <input type="text" id="tarifEwalletNo" placeholder="Contoh: 0812-3456-7890 (DANA/GoPay/OVO)" required>
+                </div>
+                <div class="grup">
+                    <label>Nama Akun / Rekening (a.n.)</label>
+                    <input type="text" id="tarifEwalletNama" placeholder="Contoh: Tirta Sari Giri / PAMSIMAS" required>
+                </div>
+                <button type="submit" class="btn btn-hijau">Simpan Pengaturan</button>
+            </form>
+        </div>
 
-                <div id="formMeterBox" style="display:none; background:var(--bg-element); padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:10px;">
-                    <div class="grup">
-                        <label>Nama Pelanggan</label>
-                        <input type="text" id="meterNamaPlg" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Meter Lalu (m³)</label>
-                        <input type="text" inputmode="decimal" id="meterLalu" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Meter Sekarang (m³)</label>
-                        <input type="text" inputmode="decimal" id="meterSekarang" placeholder="Masukkan angka meteran saat ini (contoh: 12.5)" required>
-                    </div>
-                    <button type="button" class="btn btn-hijau" onclick="simpanCatatMeter()">Simpan Catat Meter</button>
+        <!-- SUB-MENU 3: RIWAYAT TAGIHAN -->
+        <div id="subTagihan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Riwayat Tagihan Pelanggan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            <div class="grup">
+                <label>Filter Wilayah Kerja</label>
+                <select id="filterWilayahTagihan" onchange="loadRiwayatTagihan()">
+                    <option value="SEMUA">Semua Wilayah</option>
+                    <option value="RT 1">RT 1</option>
+                    <option value="RT 2">RT 2</option>
+                </select>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pelanggan</th>
+                            <th>Rincian</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelTagihan">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SUB-MENU 4: LAPORAN KAS -->
+        <div id="subKas" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Kas & Transaksi Tirta Sari Giri</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Saldo Bulan Lalu</div>
+                    <div class="stat-value" id="kasSaldoLalu">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-value hijau" id="kasPemasukan">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-value merah" id="kasPengeluaran">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Saldo Kas</div>
+                    <div class="stat-value" id="kasSaldo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
                 </div>
             </div>
 
-            <!-- FO SUB-MENU 3: TAGIHAN -->
-            <div id="subFoTagihan" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Tagihan Pelanggan Saya</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
-                </div>
-
-                <div class="grid-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Total Sudah Bayar</div>
-                        <div class="stat-value hijau" id="foTotalSudahBayar">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Belum Bayar</div>
-                        <div class="stat-value merah" id="foTotalBelumBayar">Rp 0</div>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pelanggan</th>
-                                <th>Tagihan</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelTagihanFo">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- TOMBOL SINKRONISASI PELUNASAN LAMA KE KAS -->
+            <div style="margin-bottom: 14px;">
+                <button class="btn btn-kuning btn-sm" onclick="sinkronkanPelangganLunasKeKas()" style="font-size: 11px; padding: 8px;">
+                    🔄 Sinkronkan Data Lunas Lama ke Laporan Kas
+                </button>
             </div>
 
-            <!-- FO SUB-MENU 4: LAPORAN KAS -->
-            <div id="subFoKas" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Laporan Kas Tirta Sari</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
-                </div>
-                <div class="grid-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Saldo Bulan Lalu</div>
-                        <div class="stat-value" id="kasSaldoLaluFo">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pemasukan Bulan Ini</div>
-                        <div class="stat-value hijau" id="kasPemasukanFo">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pengeluaran Bulan Ini</div>
-                        <div class="stat-value merah" id="kasPengeluaranFo">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Saldo Kas</div>
-                        <div class="stat-value" id="kasSaldoFo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
-                    </div>
-                </div>
-
-                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
-                <div class="table-responsive" style="margin-bottom: 16px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Wilayah</th>
-                                <th>Sudah Bayar</th>
-                                <th>Belum Bayar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelTagihanWilayahKasFo">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Keterangan</th>
-                                <th>Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelKasFo">
-                            <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
+            <div class="table-responsive" style="margin-bottom: 16px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wilayah</th>
+                            <th>Sudah Bayar</th>
+                            <th>Belum Bayar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelTagihanWilayahKas">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
-            <div id="subFoAkun" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Petugas</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas</h3>
+            <form onsubmit="event.preventDefault(); simpanKas();" style="margin-bottom:16px;">
+                <div class="grup">
+                    <label>Tanggal Transaksi</label>
+                    <input type="date" id="kasTanggal" required>
                 </div>
-                <form onsubmit="event.preventDefault(); updateProfilFo();">
-                    <div class="grup">
-                        <label>ID Petugas</label>
-                        <input type="text" id="foAkunId" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="foAkunNama" required oninput="formatNama(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Wilayah Kerja</label>
-                        <input type="text" id="foAkunWilayah" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Kata Sandi Baru (Max 5 Digit)</label>
-                        <input type="password" id="foAkunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
-                    </div>
-                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun Saya</button>
-                </form>
-                
-                <div class="system-info-box" style="margin-top: 8px;">
-                    <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
-                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
-                        </div>
-                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
-                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
-                    </div>
+                <div class="grup">
+                    <label>Jenis Transaksi</label>
+                    <select id="kasJenis" required>
+                        <option value="PEMASUKAN">Pemasukan</option>
+                        <option value="PENGELUARAN">Pengeluaran</option>
+                    </select>
+                </div>
+                <div class="grup">
+                    <label>Nominal (Rp)</label>
+                    <input type="number" id="kasNominal" placeholder="Contoh: 50000" required>
+                </div>
+                <div class="grup">
+                    <label>Keterangan</label>
+                    <input type="text" id="kasKet" placeholder="Contoh: Beli Pipa PVC" required>
+                </div>
+                <button type="submit" class="btn btn-hijau">Catat Transaksi Kas</button>
+            </form>
 
-                    <div class="system-info-title">📌 Deskripsi Sistem</div>
-                    <div class="system-info-list" style="margin-bottom:10px;">
-                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
-                    </div>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Keterangan</th>
+                            <th>Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKas">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                    <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
-                    <div class="system-info-list">
-                        <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                        <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
-                        <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
-                        <div>• Application Architect: <span>Luhur Mulia</span></div>
+        <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
+        <div id="subTeksBerjalan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Kelola Teks Berjalan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); simpanTeksBerjalan();">
+                <div class="grup">
+                    <label>Teks Pengumuman</label>
+                    <textarea id="inputTeksBerjalan" rows="4" placeholder="Masukkan teks pengumuman di sini..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
+            </form>
+        </div>
+
+        <!-- SUB-MENU 6: PENGATURAN AKUN STAF & UPLOAD LOGO -->
+        <div id="subAkun" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Profil, Sandi & Logo</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); updateProfilOffice();">
+                <div class="grup">
+                    <label>ID Staf</label>
+                    <input type="text" id="akunId" readonly>
+                </div>
+                <div class="grup">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="akunNama" required oninput="formatNama(this)">
+                </div>
+                <div class="grup">
+                    <label>Kata Sandi Baru (Max 5 Digit)</label>
+                    <input type="password" id="akunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
+                </div>
+                <button type="submit" class="btn btn-hijau" style="margin-bottom: 12px;">Perbarui Akun</button>
+            </form>
+
+            <div class="system-info-box" style="margin-top: 14px;">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                        <img class="appLogoDynamic" src="logo3.png" alt="Logo Aplikasi" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
                     </div>
+                    <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                     <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                    <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
+                </div>
+
+                <div class="system-info-title">📌 Deskripsi Sistem</div>
+                <div class="system-info-list" style="margin-bottom:10px;">
+                    Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                </div>
+
+                <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
+                <div class="system-info-list">
+                    <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
+                    <div>• Application Architect: <span>Luhur Mulia</span></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- DASHBOARD PELANGGAN -->
-    <div id="dashPelanggan" class="view-section">
-        <div class="card">
-            <div class="dashboard-header">
-                <div class="dashboard-header-title">
-                    <h1>PORTAL PELANGGAN</h1>
-                    <p>Informasi Tagihan & Penggunaan Air</p>
-                    <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
+<!-- DASHBOARD PETUGAS LAPANGAN (FO) -->
+<div id="dashFo" class="view-section">
+    <div class="card">
+        <div class="dashboard-header">
+            <div class="dashboard-header-title">
+                <h1>PANEL PETUGAS LAPANGAN</h1>
+                <p>TIRTA SARI GIRI</p>
+                <div class="dev-tag">Modul Pencatatan & Kelola Pelanggan</div>
+            </div>
+        </div>
+
+        <div class="user-profile" id="profFo"></div>
+
+        <div id="foLauncher" class="launcher-grid">
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoPelanggan')">
+                <div class="launcher-icon">👥</div>
+                <div class="launcher-title">Kelola Pelanggan</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoMeter')">
+                <div class="launcher-icon">📝</div>
+                <div class="launcher-title">Catat Meter</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoTagihan')">
+                <div class="launcher-icon">📋</div>
+                <div class="launcher-title">Daftar Tagihan</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoKas')">
+                <div class="launcher-icon">💰</div>
+                <div class="launcher-title">Laporan Kas</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
+                <div class="launcher-icon">👤</div>
+                <div class="launcher-title">Pengaturan</div>
+            </div>
+        </div>
+
+        <!-- FO SUB-MENU 1: KELOLA PELANGGAN -->
+        <div id="subFoPelanggan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Registrasi Pelanggan Baru</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); simpanPelangganByFo();">
+                <div class="grup">
+                    <label>ID Pelanggan</label>
+                    <input type="text" id="plgId" value="PLG" required oninput="kunciAwalanPlg(this)">
+                </div>
+                <div class="grup">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="plgNama" placeholder="Contoh: Ahmad Subagja" required oninput="formatNama(this)">
+                </div>
+                <div class="grup">
+                    <label>Alamat / Wilayah</label>
+                    <select id="plgAlamat" required>
+                        <option value="Sambeng RT1">Sambeng RT1</option>
+                        <option value="Sambeng RT2">Sambeng RT2</option>
+                        <option value="Puter">Puter</option>
+                        <option value="Jaten">Jaten</option>
+                    </select>
+                </div>
+                <div class="grup">
+                    <label>Meter Awal (m³)</label>
+                    <input type="text" inputmode="decimal" id="plgMeterAwal" placeholder="0" value="0" required>
+                </div>
+                <div class="grup">
+                    <label>Kata Sandi</label>
+                    <input type="text" id="plgSandi" placeholder="Otomatis mengikuti ID" readonly style="color:var(--text-accent); font-weight:bold;">
+                </div>
+                <button type="submit" class="btn btn-hijau">Daftarkan Pelanggan</button>
+            </form>
+
+            <h3 style="font-size:13px; margin:16px 0 8px 0; color:var(--text-accent);">Daftar Pelanggan Saya</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID / Nama</th>
+                            <th>Alamat</th>
+                            <th>Sandi / Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelPelangganFo">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FO SUB-MENU 2: CATAT METER -->
+        <div id="subFoMeter" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Pencatatan Meteran Air</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+            <div class="grup">
+                <label>Pencarian ID / Nama Pelanggan</label>
+                <div class="flex-row">
+                    <input type="text" id="cariPlgId" placeholder="Contoh: PLG001 atau Ahmad">
+                    <button class="btn btn-sm" style="width:70px;" onclick="cariPelangganMeter()">Cari</button>
                 </div>
             </div>
 
-            <div class="user-profile" id="profPelanggan"></div>
+            <div id="formMeterBox" style="display:none; background:var(--bg-element); padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:10px;">
+                <div class="grup">
+                    <label>Nama Pelanggan</label>
+                    <input type="text" id="meterNamaPlg" readonly>
+                </div>
+                <div class="grup">
+                    <label>Meter Lalu (m³)</label>
+                    <input type="text" inputmode="decimal" id="meterLalu" readonly>
+                </div>
+                <div class="grup">
+                    <label>Meter Sekarang (m³)</label>
+                    <input type="text" inputmode="decimal" id="meterSekarang" placeholder="Masukkan angka meteran saat ini (contoh: 12.5)" required>
+                </div>
+                <button type="button" class="btn btn-hijau" onclick="simpanCatatMeter()">Simpan Catat Meter</button>
+            </div>
+        </div>
 
-            <div id="plgLauncher" class="launcher-grid">
-                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgTagihan')">
-                    <div class="launcher-icon">🧾</div>
-                    <div class="launcher-title">Tagihan Saya</div>
+        <!-- FO SUB-MENU 3: TAGIHAN -->
+        <div id="subFoTagihan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Tagihan Pelanggan Saya</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Total Sudah Bayar</div>
+                    <div class="stat-value hijau" id="foTotalSudahBayar">Rp 0</div>
                 </div>
-                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgInfo')">
-                    <div class="launcher-icon">📢</div>
-                    <div class="launcher-title">Papan Informasi</div>
-                </div>
-                <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')" style="grid-column: span 2;">
-                    <div class="launcher-icon">👤</div>
-                    <div class="launcher-title">Pengaturan</div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Belum Bayar</div>
+                    <div class="stat-value merah" id="foTotalBelumBayar">Rp 0</div>
                 </div>
             </div>
 
-            <!-- PELANGGAN SUB-MENU 1: TAGIHAN SAYA -->
-            <div id="subPlgTagihan" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Rincian Tagihan Air</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pelanggan</th>
+                            <th>Tagihan</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelTagihanFo">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FO SUB-MENU 4: LAPORAN KAS -->
+        <div id="subFoKas" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Laporan Kas Tirta Sari</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Saldo Bulan Lalu</div>
+                    <div class="stat-value" id="kasSaldoLaluFo">Rp 0</div>
                 </div>
-                <div id="strukContainer">
-                    <div style="text-align:center; padding:20px; color:var(--text-secondary);">Memuat data tagihan...</div>
+                <div class="stat-box">
+                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-value hijau" id="kasPemasukanFo">Rp 0</div>
                 </div>
-                <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
-                    <button class="btn btn-hijau" style="gap: 6px;" onclick="downloadStrukGambar()">
-                        📥 Unduh Struk Gambar
-                    </button>
-                    <a id="btnKonfirmasiWa" href="#" target="_blank" class="btn btn-kuning" style="gap: 6px; text-decoration: none; display: none;">
-                        💬 Konfirmasi Pembayaran via WhatsApp
-                    </a>
+                <div class="stat-box">
+                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-value merah" id="kasPengeluaranFo">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Saldo Kas</div>
+                    <div class="stat-value" id="kasSaldoFo" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
                 </div>
             </div>
 
-            <!-- PELANGGAN SUB-MENU 2: PAPAN INFORMASI & LAPORAN KAS -->
-            <div id="subPlgInfo" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Papan Informasi & Transparansi Kas</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
-                </div>
-
-                <!-- VIDEOTRON STYLE ANNOUNCEMENT DISPLAY -->
-                <div class="videotron-box">
-                    <div id="videotronText" class="videotron-text">Menghubungkan ke pusat informasi...</div>
-                </div>
-
-                <div class="grid-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Saldo Bulan Lalu</div>
-                        <div class="stat-value" id="kasSaldoLaluPlg">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pemasukan Bulan Ini</div>
-                        <div class="stat-value hijau" id="kasPemasukanPlg">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pengeluaran Bulan Ini</div>
-                        <div class="stat-value merah" id="kasPengeluaranPlg">Rp 0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Saldo Kas</div>
-                        <div class="stat-value" id="kasSaldoPlg" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
-                    </div>
-                </div>
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
+            <div class="table-responsive" style="margin-bottom: 16px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wilayah</th>
+                            <th>Sudah Bayar</th>
+                            <th>Belum Bayar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelTagihanWilayahKasFo">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- PELANGGAN SUB-MENU 3: PENGATURAN AKUN -->
-            <div id="subPlgAkun" class="sub-view">
-                <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Pelanggan</h3>
-                    <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Keterangan</th>
+                            <th>Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKasFo">
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
+        <div id="subFoAkun" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Petugas</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); updateProfilFo();">
+                <div class="grup">
+                    <label>ID Petugas</label>
+                    <input type="text" id="foAkunId" readonly>
                 </div>
-                <form onsubmit="event.preventDefault(); updateProfilPelanggan();">
-                    <div class="grup">
-                        <label>ID Pelanggan</label>
-                        <input type="text" id="plgAkunId" readonly>
+                <div class="grup">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="foAkunNama" required oninput="formatNama(this)">
+                </div>
+                <div class="grup">
+                    <label>Wilayah Kerja</label>
+                    <input type="text" id="foAkunWilayah" readonly>
+                </div>
+                <div class="grup">
+                    <label>Kata Sandi Baru (Max 5 Digit)</label>
+                    <input type="password" id="foAkunSandi" maxlength="5" placeholder="Sandi baru" required oninput="formatSandi(this)">
+                </div>
+                <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun Saya</button>
+            </form>
+            
+            <div class="system-info-box" style="margin-top: 8px;">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                        <img class="appLogoDynamic" src="logo3.png" alt="Logo Aplikasi" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
                     </div>
-                    <div class="grup">
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="plgAkunNama" required oninput="formatNama(this)">
-                    </div>
-                    <div class="grup">
-                        <label>Alamat</label>
-                        <input type="text" id="plgAkunAlamat" readonly>
-                    </div>
-                    <div class="grup">
-                        <label>Kata Sandi Baru</label>
-                        <input type="text" id="plgAkunSandi" required>
-                    </div>
-                    <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun</button>
-                </form>
-                
-                <div class="system-info-box" style="margin-top: 8px;">
-                    <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
-                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
-                        </div>
-                        <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
-                         <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
-                        <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-						<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
-                    </div>
+                    <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                     <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                    <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
+                </div>
 
-                    <div class="system-info-title">📌 Deskripsi Sistem</div>
-                    <div class="system-info-list" style="margin-bottom:10px;">
-                        Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
-                    </div>
+                <div class="system-info-title">📌 Deskripsi Sistem</div>
+                <div class="system-info-list" style="margin-bottom:10px;">
+                    Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                </div>
 
-                    <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
-                    <div class="system-info-list">
-                        <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                        <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
-                        <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
-                        <div>• Application Architect: <span>Luhur Mulia</span></div>
-                    </div>
+                <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
+                <div class="system-info-list">
+                    <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
+                    <div>• Application Architect: <span>Luhur Mulia</span></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
+<!-- DASHBOARD PELANGGAN -->
+<div id="dashPelanggan" class="view-section">
+    <div class="card">
+        <div class="dashboard-header">
+            <div class="dashboard-header-title">
+                <h1>PORTAL PELANGGAN</h1>
+                <p>Informasi Tagihan & Penggunaan Air</p>
+                <div class="dev-tag">Bersama Untuk Sambeng Bening</div>
+            </div>
+        </div>
+
+        <div class="user-profile" id="profPelanggan"></div>
+
+        <div id="plgLauncher" class="launcher-grid">
+            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgTagihan')">
+                <div class="launcher-icon">🧾</div>
+                <div class="launcher-title">Tagihan Saya</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgInfo')">
+                <div class="launcher-icon">📢</div>
+                <div class="launcher-title">Papan Informasi</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')" style="grid-column: span 2;">
+                <div class="launcher-icon">👤</div>
+                <div class="launcher-title">Pengaturan</div>
+            </div>
+        </div>
+
+        <!-- PELANGGAN SUB-MENU 1: TAGIHAN SAYA -->
+        <div id="subPlgTagihan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Rincian Tagihan Air</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            </div>
+            <div id="strukContainer">
+                <div style="text-align:center; padding:20px; color:var(--text-secondary);">Memuat data tagihan...</div>
+            </div>
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+                <button class="btn btn-hijau" style="gap: 6px;" onclick="downloadStrukGambar()">
+                    📥 Unduh Struk Gambar
+                </button>
+                <a id="btnKonfirmasiWa" href="#" target="_blank" class="btn btn-kuning" style="gap: 6px; text-decoration: none; display: none;">
+                    💬 Konfirmasi Pembayaran via WhatsApp
+                </a>
+            </div>
+        </div>
+
+        <!-- PELANGGAN SUB-MENU 2: PAPAN INFORMASI & LAPORAN KAS -->
+        <div id="subPlgInfo" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Papan Informasi & Transparansi Kas</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            </div>
+
+            <!-- VIDEOTRON STYLE ANNOUNCEMENT DISPLAY -->
+            <div class="videotron-box">
+                <div id="videotronText" class="videotron-text">Menghubungkan ke pusat informasi...</div>
+            </div>
+
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Saldo Bulan Lalu</div>
+                    <div class="stat-value" id="kasSaldoLaluPlg">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-value hijau" id="kasPemasukanPlg">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-value merah" id="kasPengeluaranPlg">Rp 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Saldo Kas</div>
+                    <div class="stat-value" id="kasSaldoPlg" style="font-size:15px; color:var(--text-accent);">Rp 0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PELANGGAN SUB-MENU 3: PENGATURAN AKUN -->
+        <div id="subPlgAkun" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Akun Pelanggan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            </div>
+            <form onsubmit="event.preventDefault(); updateProfilPelanggan();">
+                <div class="grup">
+                    <label>ID Pelanggan</label>
+                    <input type="text" id="plgAkunId" readonly>
+                </div>
+                <div class="grup">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="plgAkunNama" required oninput="formatNama(this)">
+                </div>
+                <div class="grup">
+                    <label>Alamat</label>
+                    <input type="text" id="plgAkunAlamat" readonly>
+                </div>
+                <div class="grup">
+                    <label>Kata Sandi Baru</label>
+                    <input type="text" id="plgAkunSandi" required>
+                </div>
+                <button type="submit" class="btn btn-hijau" style="margin-bottom: 8px;">Perbarui Akun</button>
+            </form>
+            
+            <div class="system-info-box" style="margin-top: 8px;">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                        <img class="appLogoDynamic" src="logo3.png" alt="Logo Aplikasi" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
+                    </div>
+                    <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
+                     <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
+                    <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0</div>
+                </div>
+
+                <div class="system-info-title">📌 Deskripsi Sistem</div>
+                <div class="system-info-list" style="margin-bottom:10px;">
+                    Tirta Sari Giri adalah platform manajemen distribusi & tagihan air berbasis Progressive Web App. Aplikasi ini dirancang untuk memudahkan tata kelola meteran air, transparansi keuangan kas, serta efisiensi operasional petugas di wilayah Dusun Sambeng dan Sekitarnya.
+                </div>
+
+                <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
+                <div class="system-info-list">
+                    <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
+                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
+                    <div>• Application Architect: <span>Luhur Mulia</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
 // =====================================
 // MANAJEMEN TEMA DINAMIS (GELAP/TERANG/SISTEM)
 // =====================================
@@ -1528,7 +1534,6 @@ function setTheme(themeName) {
     } else {
         document.documentElement.setAttribute('data-theme', themeName);
     }
-
     localStorage.setItem('tirta_theme_mode', themeName);
 
     const metaThemeColor = document.getElementById('metaThemeColor');
@@ -1589,20 +1594,20 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 
 // Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyD0y7FSxKxWGuif3dA_-C7RuYhOk5ULygA",
-  authDomain: "tirtasarigiri-8a025.firebaseapp.com",
-  databaseURL: "https://tirtasarigiri-8a025-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tirtasarigiri-8a025",
-  storageBucket: "tirtasarigiri-8a025.firebasestorage.app",
-  messagingSenderId: "383408076039",
-  appId: "1:383408076039:web:7e4cda3240998e51dac1a2",
-  measurementId: "G-3X0Y5YNMQY"
+    apiKey: "AIzaSyD0y7FSxKxWGuif3dA_-C7RuYhOk5ULygA",
+    authDomain: "tirtasarigiri-8a025.firebaseapp.com",
+    databaseURL: "https://tirtasarigiri-8a025-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tirtasarigiri-8a025",
+    storageBucket: "tirtasarigiri-8a025.appspot.com",
+    messagingSenderId: "383408076039",
+    appId: "1:383408076039:web:7e4cda3240998e51dac1a2",
+    measurementId: "G-3X0Y5YNMQY"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let currentUser = null; 
+let currentUser = null;
 let videotronTimer = null;
 
 const DEFAULT_EWALLET_NO = "0812-3456-7890";
@@ -1632,7 +1637,7 @@ function showConfirm(msg, onConfirm) {
 
     msgEl.textContent = msg;
     btnCancel.style.display = 'inline-flex';
-    
+
     btnOk.onclick = function() {
         modal.style.display = 'none';
         if (typeof onConfirm === 'function') onConfirm();
@@ -1701,38 +1706,6 @@ function initLogoDinamis() {
         });
         
         window.currentAppLogo = logoSrc;
-    });
-}
-
-function prosesUploadLogo(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        if (file.size > 1024 * 1024) { // max 1MB
-            showAlert("Ukuran file gambar terlalu besar! Maksimal 1 MB.");
-            input.value = "";
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const base64Data = e.target.result;
-            db.ref('pengaturan/logo_url').set(base64Data).then(() => {
-                showAlert("Logo aplikasi berhasil diperbarui dan disimpan ke sistem!");
-            }).catch(err => {
-                showAlert("Gagal menyimpan logo: " + err.message);
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function resetLogoDefault() {
-    showConfirm("Kembalikan logo aplikasi ke logo bawaan (default)?", () => {
-        db.ref('pengaturan/logo_url').set("logo3.png").then(() => {
-            showAlert("Logo berhasil dikembalikan ke default!");
-            const inputUpload = document.getElementById('inputUploadLogo');
-            if (inputUpload) inputUpload.value = "";
-        });
     });
 }
 
@@ -1981,7 +1954,7 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
 function bukaSubView(dashId, subViewId) {
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
-    
+
     const launcherGrid = parentDash.querySelector('.launcher-grid');
     if (launcherGrid) launcherGrid.style.display = 'none';
 
@@ -1997,7 +1970,7 @@ function bukaSubView(dashId, subViewId) {
 function kembaliKeLauncher(dashId) {
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
-    
+
     const launcherGrid = parentDash.querySelector('.launcher-grid');
     if (launcherGrid) launcherGrid.style.display = 'grid';
 
@@ -2007,17 +1980,94 @@ function kembaliKeLauncher(dashId) {
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
 
+// OTOMATIS CATAT PEMASUKAN KAS KETIKA VERIFIKASI PEMBAYARAN LUNAS
 function verifikasiLunas(id) {
     showConfirm(`Verifikasi pembayaran tagihan untuk pelanggan ${id} sebagai LUNAS?`, () => {
-        db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
-            showAlert(`Tagihan untuk pelanggan ${id} telah berhasil diverifikasi LUNAS!`);
+        db.ref(`pelanggan/${id}`).once('value').then(snapshot => {
+            if (!snapshot.exists()) return;
+            const plgData = snapshot.val();
+            const nominalTagihan = plgData.total_tagihan || 0;
+            const namaPlg = plgData.nama || id;
+            const wilayahPlg = plgData.wilayah || plgData.alamat || 'Umum';
+
+            db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
+                const tglHariIni = new Date().toISOString().split('T')[0];
+                db.ref('transaksi_kas').push({
+                    jenis: 'PEMASUKAN',
+                    nominal: nominalTagihan,
+                    keterangan: `Pembayaran Air (${id} - ${namaPlg} / ${wilayahPlg})`,
+                    tanggal: tglHariIni
+                }).then(() => {
+                    showAlert(`Tagihan untuk pelanggan ${id} telah diverifikasi LUNAS dan otomatis masuk ke Pemasukan Kas!`);
+                });
+            });
         }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
+    });
+}
+
+// SINKRONISASI PELANGGAN YANG SUDAH LUNAS DI DATABASE KE LAPORAN KAS
+function sinkronkanPelangganLunasKeKas() {
+    showConfirm("Apakah Anda ingin menyelaraskan/memasukkan semua pelanggan yang sudah bayar ke dalam Laporan Kas Pemasukan?", () => {
+        Promise.all([
+            db.ref('pelanggan').once('value'),
+            db.ref('transaksi_kas').once('value')
+        ]).then(([plgSnap, kasSnap]) => {
+            if (!plgSnap.exists()) {
+                showAlert("Tidak ada data pelanggan.");
+                return;
+            }
+
+            let existingDescriptions = new Set();
+            if (kasSnap.exists()) {
+                kasSnap.forEach(child => {
+                    const kas = child.val();
+                    if (kas && kas.keterangan) {
+                        existingDescriptions.add(kas.keterangan);
+                    }
+                });
+            }
+
+            let tglHariIni = new Date().toISOString().split('T')[0];
+            let addedCount = 0;
+
+            let promises = [];
+            plgSnap.forEach(child => {
+                const id = child.key;
+                const plg = child.val();
+                if (plg && plg.status_bayar === 'Sudah Bayar') {
+                    const nominal = plg.total_tagihan || 0;
+                    const nama = plg.nama || id;
+                    const wilayah = plg.wilayah || plg.alamat || 'Umum';
+                    const ket = `Pembayaran Air (${id} - ${nama} / ${wilayah})`;
+
+                    if (!existingDescriptions.has(ket) && nominal > 0) {
+                        promises.push(
+                            db.ref('transaksi_kas').push({
+                                jenis: 'PEMASUKAN',
+                                nominal: nominal,
+                                keterangan: ket,
+                                tanggal: tglHariIni
+                            })
+                        );
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (promises.length > 0) {
+                Promise.all(promises).then(() => {
+                    showAlert(`Berhasil menyinkronkan ${addedCount} data pelanggan lunas ke Laporan Kas Pemasukan!`);
+                });
+            } else {
+                showAlert("Semua pelanggan lunas sudah tercatat di Laporan Kas (tidak ada data baru yang perlu disinkronkan).");
+            }
+        }).catch(err => showAlert("Gagal sinkronisasi: " + err.message));
     });
 }
 
 function initPelangganDashboard() {
     if (!currentUser) return;
-    
+
     const plgAkunIdEl = document.getElementById('plgAkunId');
     if (plgAkunIdEl) plgAkunIdEl.value = currentUser.id;
 
@@ -2038,7 +2088,7 @@ function initPelangganDashboard() {
 function loadTagihanPelanggan() {
     if (!currentUser) return;
     const plgId = currentUser.id;
-    
+
     db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
         let ewalletNo = DEFAULT_EWALLET_NO;
         let ewalletNama = DEFAULT_EWALLET_NAMA;
@@ -2203,7 +2253,7 @@ function updateProfilPelanggan() {
 function initFoDashboard() {
     if (!currentUser) return;
     const wilayah = currentUser.wilayah || 'RT 1';
-    
+
     const plgAlamatEl = document.getElementById('plgAlamat');
     if (plgAlamatEl) {
         if (wilayah.includes('1')) {
@@ -2628,7 +2678,7 @@ function loadTarif() {
 
 function loadRiwayatTagihan() {
     const filter = document.getElementById('filterWilayahTagihan').value;
-    
+
     db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
         let hargaM3 = 3000;
         let biayaBeban = 10000;
@@ -2731,7 +2781,6 @@ function loadTagihanPerWilayahKas() {
         db.ref('pelanggan').on('value', snapshot => {
             const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
             const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
-            const tbodyPlg = document.getElementById('tabelTagihanWilayahKasPlg');
 
             const renderKeTabel = (tbody) => {
                 if (!tbody) return;
@@ -2786,7 +2835,6 @@ function loadTagihanPerWilayahKas() {
 
             renderKeTabel(tbodyOffice);
             renderKeTabel(tbodyFo);
-            renderKeTabel(tbodyPlg);
         });
     });
 }
@@ -2934,12 +2982,13 @@ function logout() {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('aktif'));
     const loginView = document.getElementById('loginView');
     if (loginView) loginView.classList.add('aktif');
-    
+
     document.getElementById('loginId').value = '';
     document.getElementById('loginSandi').value = '';
     document.getElementById('rememberMe').checked = false;
     document.getElementById('roleDetected').style.display = 'none';
 }
-    </script>
+</script>
+
 </body>
 </html>
