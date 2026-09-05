@@ -991,13 +991,6 @@
                 </div>
             </div>
 
-            <!-- TOMBOL SINKRONISASI PELUNASAN LAMA KE KAS -->
-            <div style="margin-bottom: 14px;">
-                <button class="btn btn-kuning btn-sm" onclick="sinkronkanPelangganLunasKeKas()" style="font-size: 11px; padding: 8px;">
-                    🔄 Sinkronkan Data Lunas Lama ke Laporan Kas
-                </button>
-            </div>
-
             <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
             <div class="table-responsive" style="margin-bottom: 16px;">
                 <table>
@@ -1980,88 +1973,12 @@ function kembaliKeLauncher(dashId) {
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
 
-// OTOMATIS CATAT PEMASUKAN KAS KETIKA VERIFIKASI PEMBAYARAN LUNAS
+// VERIFIKASI LUNAS: HANYA MENGUBAH STATUS DI PELANGGAN (DIHITUNG OTOMATIS SEBAGAI PEMASUKAN KAS)
 function verifikasiLunas(id) {
     showConfirm(`Verifikasi pembayaran tagihan untuk pelanggan ${id} sebagai LUNAS?`, () => {
-        db.ref(`pelanggan/${id}`).once('value').then(snapshot => {
-            if (!snapshot.exists()) return;
-            const plgData = snapshot.val();
-            const nominalTagihan = plgData.total_tagihan || 0;
-            const namaPlg = plgData.nama || id;
-            const wilayahPlg = plgData.wilayah || plgData.alamat || 'Umum';
-
-            db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
-                const tglHariIni = new Date().toISOString().split('T')[0];
-                db.ref('transaksi_kas').push({
-                    jenis: 'PEMASUKAN',
-                    nominal: nominalTagihan,
-                    keterangan: `Pembayaran Air (${id} - ${namaPlg} / ${wilayahPlg})`,
-                    tanggal: tglHariIni
-                }).then(() => {
-                    showAlert(`Tagihan untuk pelanggan ${id} telah diverifikasi LUNAS dan otomatis masuk ke Pemasukan Kas!`);
-                });
-            });
+        db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
+            showAlert(`Tagihan untuk pelanggan ${id} telah berhasil diverifikasi LUNAS dan otomatis masuk ke Rekap & Total Pemasukan Kas!`);
         }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
-    });
-}
-
-// SINKRONISASI PELANGGAN YANG SUDAH LUNAS DI DATABASE KE LAPORAN KAS
-function sinkronkanPelangganLunasKeKas() {
-    showConfirm("Apakah Anda ingin menyelaraskan/memasukkan semua pelanggan yang sudah bayar ke dalam Laporan Kas Pemasukan?", () => {
-        Promise.all([
-            db.ref('pelanggan').once('value'),
-            db.ref('transaksi_kas').once('value')
-        ]).then(([plgSnap, kasSnap]) => {
-            if (!plgSnap.exists()) {
-                showAlert("Tidak ada data pelanggan.");
-                return;
-            }
-
-            let existingDescriptions = new Set();
-            if (kasSnap.exists()) {
-                kasSnap.forEach(child => {
-                    const kas = child.val();
-                    if (kas && kas.keterangan) {
-                        existingDescriptions.add(kas.keterangan);
-                    }
-                });
-            }
-
-            let tglHariIni = new Date().toISOString().split('T')[0];
-            let addedCount = 0;
-
-            let promises = [];
-            plgSnap.forEach(child => {
-                const id = child.key;
-                const plg = child.val();
-                if (plg && plg.status_bayar === 'Sudah Bayar') {
-                    const nominal = plg.total_tagihan || 0;
-                    const nama = plg.nama || id;
-                    const wilayah = plg.wilayah || plg.alamat || 'Umum';
-                    const ket = `Pembayaran Air (${id} - ${nama} / ${wilayah})`;
-
-                    if (!existingDescriptions.has(ket) && nominal > 0) {
-                        promises.push(
-                            db.ref('transaksi_kas').push({
-                                jenis: 'PEMASUKAN',
-                                nominal: nominal,
-                                keterangan: ket,
-                                tanggal: tglHariIni
-                            })
-                        );
-                        addedCount++;
-                    }
-                }
-            });
-
-            if (promises.length > 0) {
-                Promise.all(promises).then(() => {
-                    showAlert(`Berhasil menyinkronkan ${addedCount} data pelanggan lunas ke Laporan Kas Pemasukan!`);
-                });
-            } else {
-                showAlert("Semua pelanggan lunas sudah tercatat di Laporan Kas (tidak ada data baru yang perlu disinkronkan).");
-            }
-        }).catch(err => showAlert("Gagal sinkronisasi: " + err.message));
     });
 }
 
@@ -2768,7 +2685,7 @@ function hapusKas(key) {
     });
 }
 
-function loadTagihanPerWilayahKas() {
+function loadLaporanKas() {
     db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
         let hargaM3 = 3000;
         let biayaBeban = 10000;
@@ -2778,27 +2695,17 @@ function loadTagihanPerWilayahKas() {
             biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
         }
 
-        db.ref('pelanggan').on('value', snapshot => {
-            const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
-            const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
+        db.ref('pelanggan').once('value').then(plgSnap => {
+            let totalSudahBayarSemuaWilayah = 0;
+            let rekapWilayah = {};
 
-            const renderKeTabel = (tbody) => {
-                if (!tbody) return;
-                tbody.innerHTML = '';
-
-                if (!snapshot.exists()) {
-                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data pelanggan.</td></tr>`;
-                    return;
-                }
-
-                let rekap = {};
-
-                snapshot.forEach(child => {
+            if (plgSnap.exists()) {
+                plgSnap.forEach(child => {
                     const plg = child.val();
-                    const wil = plg.wilayah || 'Tanpa Wilayah';
-                    
-                    if (!rekap[wil]) {
-                        rekap[wil] = { sudahBayar: 0, belumBayar: 0 };
+                    const wil = plg.wilayah || plg.alamat || 'Tanpa Wilayah';
+
+                    if (!rekapWilayah[wil]) {
+                        rekapWilayah[wil] = { sudahBayar: 0, belumBayar: 0 };
                     }
 
                     const meterLalu = parseDesimal(plg.meter_awal);
@@ -2810,133 +2717,140 @@ function loadTagihanPerWilayahKas() {
                         : Math.round(((pemakaianM3 * hargaM3) + biayaBeban) * 100) / 100;
 
                     if (plg.status_bayar === "Sudah Bayar") {
-                        rekap[wil].sudahBayar += totalTagihanCalculated;
+                        rekapWilayah[wil].sudahBayar += totalTagihanCalculated;
+                        totalSudahBayarSemuaWilayah += totalTagihanCalculated;
                     } else {
-                        rekap[wil].belumBayar += totalTagihanCalculated;
+                        rekapWilayah[wil].belumBayar += totalTagihanCalculated;
                     }
                 });
+            }
 
-                let keys = Object.keys(rekap).sort();
+            // Render Tabel Per Wilayah
+            const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
+            const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
+            const renderWilayah = (tbody) => {
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                let keys = Object.keys(rekapWilayah).sort();
                 if (keys.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data pelanggan.</td></tr>`;
                     return;
                 }
-
                 keys.forEach(wil => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><b>${wil}</b></td>
-                        <td style="color:var(--color-hijau); font-weight:bold;">${formatRupiah(rekap[wil].sudahBayar)}</td>
-                        <td style="color:var(--color-merah); font-weight:bold;">${formatRupiah(rekap[wil].belumBayar)}</td>
+                        <td style="color:var(--color-hijau); font-weight:bold;">${formatRupiah(rekapWilayah[wil].sudahBayar)}</td>
+                        <td style="color:var(--color-merah); font-weight:bold;">${formatRupiah(rekapWilayah[wil].belumBayar)}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             };
+            renderWilayah(tbodyOffice);
+            renderWilayah(tbodyFo);
 
-            renderKeTabel(tbodyOffice);
-            renderKeTabel(tbodyFo);
-        });
-    });
-}
+            // Ambil Transaksi Kas Manual (Hanya untuk Riwayat & Pemasukan/Pengeluaran Manual)
+            db.ref('transaksi_kas').on('value', kasSnap => {
+                let saldoBulanLalu = 0;
+                let pemasukanManualBulanIni = 0;
+                let pengeluaranBulanIni = 0;
+                let rowsOffice = '';
+                let rowsView = '';
 
-function loadLaporanKas() {
-    loadTagihanPerWilayahKas();
+                const sekarang = new Date();
+                const tahunSekarang = sekarang.getFullYear();
+                const bulanSekarang = sekarang.getMonth();
 
-    db.ref('transaksi_kas').on('value', snapshot => {
-        let saldoBulanLalu = 0;
-        let pemasukanBulanIni = 0;
-        let pengeluaranBulanIni = 0;
-        let rowsOffice = '';
-        let rowsView = '';
+                if (kasSnap.exists()) {
+                    kasSnap.forEach(child => {
+                        const kas = child.val();
+                        const key = child.key;
+                        const tglKas = new Date(kas.tanggal);
+                        const thnKas = tglKas.getFullYear();
+                        const blnKas = tglKas.getMonth();
 
-        const sekarang = new Date();
-        const tahunSekarang = sekarang.getFullYear();
-        const bulanSekarang = sekarang.getMonth();
+                        const isBulanLalu = (thnKas < tahunSekarang) || (thnKas === tahunSekarang && blnKas < bulanSekarang);
+                        const isBulanIni = (thnKas === tahunSekarang && blnKas === bulanSekarang);
 
-        if (!snapshot.exists()) {
-            rowsOffice = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas.</td></tr>`;
-            rowsView = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas.</td></tr>`;
-        } else {
-            snapshot.forEach(child => {
-                const kas = child.val();
-                const key = child.key;
-                const tglKas = new Date(kas.tanggal);
-                const thnKas = tglKas.getFullYear();
-                const blnKas = tglKas.getMonth();
+                        if (isBulanLalu) {
+                            if (kas.jenis === "PEMASUKAN") saldoBulanLalu += kas.nominal;
+                            if (kas.jenis === "PENGELUARAN") saldoBulanLalu -= kas.nominal;
+                        } else if (isBulanIni) {
+                            if (kas.jenis === "PEMASUKAN") pemasukanManualBulanIni += kas.nominal;
+                            if (kas.jenis === "PENGELUARAN") pengeluaranBulanIni += kas.nominal;
+                        }
 
-                const isBulanLalu = (thnKas < tahunSekarang) || (thnKas === tahunSekarang && blnKas < bulanSekarang);
-                const isBulanIni = (thnKas === tahunSekarang && blnKas === bulanSekarang);
+                        const tglSingkat = formatTanggalSingkat(kas.tanggal);
+                        const isPemasukan = kas.jenis === "PEMASUKAN";
+                        const badgeColor = isPemasukan ? 'var(--color-hijau)' : 'var(--color-merah)';
+                        
+                        rowsOffice += `
+                            <tr>
+                                <td><b>${tglSingkat}</b></td>
+                                <td>
+                                    <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
+                                    <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
+                                </td>
+                                <td>
+                                    <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
+                                    <div style="margin-top:4px;">
+                                        <button class="btn btn-merah btn-sm" onclick="hapusKas('${key}')">Hapus</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
 
-                if (isBulanLalu) {
-                    if (kas.jenis === "PEMASUKAN") saldoBulanLalu += kas.nominal;
-                    if (kas.jenis === "PENGELUARAN") saldoBulanLalu -= kas.nominal;
-                } else if (isBulanIni) {
-                    if (kas.jenis === "PEMASUKAN") pemasukanBulanIni += kas.nominal;
-                    if (kas.jenis === "PENGELUARAN") pengeluaranBulanIni += kas.nominal;
+                        rowsView += `
+                            <tr>
+                                <td><b>${tglSingkat}</b></td>
+                                <td>
+                                    <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
+                                    <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
+                                </td>
+                                <td>
+                                    <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
+                                </td>
+                            </tr>
+                        `;
+                    });
                 }
 
-                const tglSingkat = formatTanggalSingkat(kas.tanggal);
-                const isPemasukan = kas.jenis === "PEMASUKAN";
-                const badgeColor = isPemasukan ? 'var(--color-hijau)' : 'var(--color-merah)';
-                
-                rowsOffice += `
-                    <tr>
-                        <td><b>${tglSingkat}</b></td>
-                        <td>
-                            <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
-                            <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
-                        </td>
-                        <td>
-                            <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
-                            <div style="margin-top:4px;">
-                                <button class="btn btn-merah btn-sm" onclick="hapusKas('${key}')">Hapus</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                if (!rowsOffice) {
+                    rowsOffice = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas manual.</td></tr>`;
+                    rowsView = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas manual.</td></tr>`;
+                }
 
-                rowsView += `
-                    <tr>
-                        <td><b>${tglSingkat}</b></td>
-                        <td>
-                            <b style="color:${badgeColor}; font-size:11px;">[${kas.jenis}]</b><br>
-                            <small style="color:var(--text-secondary);">${kas.keterangan || '-'}</small>
-                        </td>
-                        <td>
-                            <div style="color:${badgeColor}; font-weight:bold;">${formatRupiah(kas.nominal)}</div>
-                        </td>
-                    </tr>
-                `;
+                // Total Pemasukan Bulan Ini = Pendapatan dari Pelanggan Sudah Bayar + Pemasukan Manual Kas
+                const totalPemasukanBulanIni = totalSudahBayarSemuaWilayah + pemasukanManualBulanIni;
+                const totalSaldoKas = saldoBulanLalu + totalPemasukanBulanIni - pengeluaranBulanIni;
+
+                const updateElemText = (id, text) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = text;
+                };
+
+                const tOffice = document.getElementById('tabelKas');
+                if (tOffice) tOffice.innerHTML = rowsOffice;
+                updateElemText('kasSaldoLalu', formatRupiah(saldoBulanLalu));
+                updateElemText('kasPemasukan', formatRupiah(totalPemasukanBulanIni));
+                updateElemText('kasPengeluaran', formatRupiah(pengeluaranBulanIni));
+                updateElemText('kasSaldo', formatRupiah(totalSaldoKas));
+
+                const tFo = document.getElementById('tabelKasFo');
+                if (tFo) tFo.innerHTML = rowsView;
+                updateElemText('kasSaldoLaluFo', formatRupiah(saldoBulanLalu));
+                updateElemText('kasPemasukanFo', formatRupiah(totalPemasukanBulanIni));
+                updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
+                updateElemText('kasSaldoFo', formatRupiah(totalSaldoKas));
+
+                const tPlg = document.getElementById('tabelKasPlg');
+                if (tPlg) tPlg.innerHTML = rowsView;
+                updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
+                updateElemText('kasPemasukanPlg', formatRupiah(totalPemasukanBulanIni));
+                updateElemText('kasPengeluaranPlg', formatRupiah(pengeluaranBulanIni));
+                updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
             });
-        }
-
-        const totalSaldoKas = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
-
-        const updateElemText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-
-        const tOffice = document.getElementById('tabelKas');
-        if (tOffice) tOffice.innerHTML = rowsOffice;
-        updateElemText('kasSaldoLalu', formatRupiah(saldoBulanLalu));
-        updateElemText('kasPemasukan', formatRupiah(pemasukanBulanIni));
-        updateElemText('kasPengeluaran', formatRupiah(pengeluaranBulanIni));
-        updateElemText('kasSaldo', formatRupiah(totalSaldoKas));
-
-        const tFo = document.getElementById('tabelKasFo');
-        if (tFo) tFo.innerHTML = rowsView;
-        updateElemText('kasSaldoLaluFo', formatRupiah(saldoBulanLalu));
-        updateElemText('kasPemasukanFo', formatRupiah(pemasukanBulanIni));
-        updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
-        updateElemText('kasSaldoFo', formatRupiah(totalSaldoKas));
-
-        const tPlg = document.getElementById('tabelKasPlg');
-        if (tPlg) tPlg.innerHTML = rowsView;
-        updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
-        updateElemText('kasPemasukanFo', formatRupiah(pemasukanBulanIni));
-        updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
-        updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
+        });
     });
 }
 
