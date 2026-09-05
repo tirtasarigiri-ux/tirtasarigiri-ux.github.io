@@ -2,10 +2,10 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" id="metaThemeColor" content="#0B132B">
     
-    <!-- PWA & Mobile Web App Meta Tags -->
+    <!-- PWA & Mobile Web App Meta Tags (Hiding Address Bar in Standalone Mode) -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" id="metaStatusBar" content="black-translucent">
@@ -1031,7 +1031,7 @@
                 <button type="submit" class="btn btn-hijau">Catat Transaksi Kas</button>
             </form>
 
-            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas (Input Manual)</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -1307,7 +1307,7 @@
                 </table>
             </div>
 
-            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas (Input Manual)</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -1558,13 +1558,14 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 });
 
 // =====================================
-// KONFIGURASI PWA
+// KONFIGURASI PWA (STANDALONE MODE)
 // =====================================
 (function inisialisasiPWA() {
     const manifestObj = {
         "name": "Tirta Sari Giri Water System",
         "short_name": "TirtaSari",
         "start_url": "./",
+        "scope": "./",
         "display": "standalone",
         "background_color": "#070B14",
         "theme_color": "#070B14",
@@ -1973,11 +1974,11 @@ function kembaliKeLauncher(dashId) {
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
 
-// VERIFIKASI LUNAS: HANYA MENGUBAH STATUS DI PELANGGAN (DIHITUNG OTOMATIS SEBAGAI PEMASUKAN KAS)
+// VERIFIKASI LUNAS: HANYA MENGUBAH STATUS DI PELANGGAN (DIHITUNG OTOMATIS SEBAGAI PEMASUKAN KAS TANPA MASUK KE RIWAYAT TRANSAKSI KAS)
 function verifikasiLunas(id) {
     showConfirm(`Verifikasi pembayaran tagihan untuk pelanggan ${id} sebagai LUNAS?`, () => {
         db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
-            showAlert(`Tagihan untuk pelanggan ${id} telah berhasil diverifikasi LUNAS dan otomatis masuk ke Rekap & Total Pemasukan Kas!`);
+            showAlert(`Tagihan untuk pelanggan ${id} telah berhasil diverifikasi LUNAS dan otomatis masuk ke Total Pemasukan Kas Kasir!`);
         }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
     });
 }
@@ -2725,7 +2726,6 @@ function loadLaporanKas() {
                 });
             }
 
-            // Render Tabel Per Wilayah
             const tbodyOffice = document.getElementById('tabelTagihanWilayahKas');
             const tbodyFo = document.getElementById('tabelTagihanWilayahKasFo');
             const renderWilayah = (tbody) => {
@@ -2749,7 +2749,6 @@ function loadLaporanKas() {
             renderWilayah(tbodyOffice);
             renderWilayah(tbodyFo);
 
-            // Ambil Transaksi Kas Manual (Hanya untuk Riwayat & Pemasukan/Pengeluaran Manual)
             db.ref('transaksi_kas').on('value', kasSnap => {
                 let saldoBulanLalu = 0;
                 let pemasukanManualBulanIni = 0;
@@ -2820,7 +2819,6 @@ function loadLaporanKas() {
                     rowsView = `<tr><td colspan="3" style="text-align:center;">Belum ada transaksi kas manual.</td></tr>`;
                 }
 
-                // Total Pemasukan Bulan Ini = Pendapatan dari Pelanggan Sudah Bayar + Pemasukan Manual Kas
                 const totalPemasukanBulanIni = totalSudahBayarSemuaWilayah + pemasukanManualBulanIni;
                 const totalSaldoKas = saldoBulanLalu + totalPemasukanBulanIni - pengeluaranBulanIni;
 
