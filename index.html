@@ -783,11 +783,12 @@
         </div>
     </div>
 
+    <!-- LOGIN VIEW -->
     <div id="loginView" class="view-section aktif">
         <div class="card" style="margin-top: 10px;">
             <div class="brand-header">
-                <div style="margin-bottom: 8px;">
-                    <img src="logo.png" alt="Logo Tirta Sari Giri" style="width: 65px; height: 65px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onerror="this.onerror=null; this.src='https://placehold.co/65x65/070B14/38BDF8?text=TSG';">
+                <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+                    <img id="logoLogin" src="logo3.png" alt="Logo" style="width: 75px; height: 75px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);" onerror="this.onerror=null; this.src='https://placehold.co/75x75/070B14/38BDF8?text=TSG';">
                 </div>
                 <h1>TIRTA SARI GIRI</h1>
                 <p>Sistem Informasi & Autentikasi</p>
@@ -819,6 +820,7 @@
         </div>
     </div>
 
+    <!-- DASHBOARD STAF OFFICE -->
     <div id="dashOffice" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1061,10 +1063,10 @@
                 </form>
             </div>
 
-            <!-- SUB-MENU 6: PENGATURAN AKUN STAF -->
+            <!-- SUB-MENU 6: PENGATURAN AKUN STAF & UPLOAD LOGO -->
             <div id="subAkun" class="sub-view">
                 <div class="subview-header">
-                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Profil & Sandi</h3>
+                    <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Profil, Sandi & Logo</h3>
                     <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
                 </div>
                 <form onsubmit="event.preventDefault(); updateProfilOffice();">
@@ -1082,11 +1084,21 @@
                     </div>
                     <button type="submit" class="btn btn-hijau" style="margin-bottom: 12px;">Perbarui Akun</button>
                 </form>
+
+                <!-- FITUR UPLOAD LOGO APLIKASI OLEH STAF -->
+                <div style="background: var(--bg-element); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-top: 14px;">
+                    <h4 style="font-size: 13px; color: var(--text-accent); margin-bottom: 8px;">🖼️ Pengaturan Logo Aplikasi</h4>
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Pilih file gambar logo baru untuk mengganti logo aplikasi di seluruh halaman (Login, Struk, dll).</p>
+                    <div class="grup">
+                        <input type="file" id="inputUploadLogo" accept="image/*" onchange="prosesUploadLogo(this)">
+                    </div>
+                    <button type="button" class="btn btn-kuning btn-sm" onclick="resetLogoDefault()">Kembalikan Logo Default</button>
+                </div>
                 
-                <div class="system-info-box" style="margin-top: 8px;">
+                <div class="system-info-box" style="margin-top: 14px;">
                     <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px;">
-                            <img src="logo.png" alt="Logo Tirta Sari Giri" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
+                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
                         </div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                          <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
@@ -1111,6 +1123,7 @@
         </div>
     </div>
 
+    <!-- DASHBOARD PETUGAS LAPANGAN (FO) -->
     <div id="dashFo" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1349,8 +1362,8 @@
                 
                 <div class="system-info-box" style="margin-top: 8px;">
                     <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px;">
-                            <img src="logo.png" alt="Logo Tirta Sari Giri" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
+                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
                         </div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                          <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
@@ -1375,6 +1388,7 @@
         </div>
     </div>
 
+    <!-- DASHBOARD PELANGGAN -->
     <div id="dashPelanggan" class="view-section">
         <div class="card">
             <div class="dashboard-header">
@@ -1481,8 +1495,8 @@
                 
                 <div class="system-info-box" style="margin-top: 8px;">
                     <div style="text-align: center; margin-bottom: 12px;">
-                        <div style="margin-bottom: 6px;">
-                            <img src="logo.png" alt="Logo Tirta Sari Giri" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
+                        <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                            <img class="appLogoDynamic" src="logo3.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/50x50/070B14/38BDF8?text=TSG';">
                         </div>
                         <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                          <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
@@ -1568,7 +1582,7 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
         "orientation": "portrait",
         "icons": [
             {
-                "src": "logo.png",
+                "src": "logo3.png",
                 "sizes": "192x192 512x512",
                 "type": "image/png"
             }
@@ -1678,6 +1692,59 @@ function setKasTanggalDefault() {
     }
 }
 
+// =====================================
+// PENGELOLAAN LOGO DINAMIS OLEH STAF
+// =====================================
+function initLogoDinamis() {
+    db.ref('pengaturan/logo_url').on('value', snapshot => {
+        let logoSrc = "logo3.png";
+        if (snapshot.exists() && snapshot.val()) {
+            logoSrc = snapshot.val();
+        }
+
+        const logoLoginEl = document.getElementById('logoLogin');
+        if (logoLoginEl) logoLoginEl.src = logoSrc;
+
+        document.querySelectorAll('.appLogoDynamic').forEach(img => {
+            img.src = logoSrc;
+        });
+        
+        window.currentAppLogo = logoSrc;
+    });
+}
+
+function prosesUploadLogo(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 1024 * 1024) { // max 1MB
+            showAlert("Ukuran file gambar terlalu besar! Maksimal 1 MB.");
+            input.value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Data = e.target.result;
+            db.ref('pengaturan/logo_url').set(base64Data).then(() => {
+                showAlert("Logo aplikasi berhasil diperbarui dan disimpan ke sistem!");
+            }).catch(err => {
+                showAlert("Gagal menyimpan logo: " + err.message);
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function resetLogoDefault() {
+    showConfirm("Kembalikan logo aplikasi ke logo bawaan (default)?", () => {
+        db.ref('pengaturan/logo_url').set("logo3.png").then(() => {
+            showAlert("Logo berhasil dikembalikan ke default!");
+            const inputUpload = document.getElementById('inputUploadLogo');
+            if (inputUpload) inputUpload.value = "";
+        });
+    });
+}
+
 function initVideotronPengumuman() {
     db.ref('pengaturan/teks_berjalan').on('value', snapshot => {
         const teks = snapshot.exists() ? snapshot.val() : "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
@@ -1726,6 +1793,7 @@ function simpanTeksBerjalan() {
 window.addEventListener('DOMContentLoaded', () => {
     setKasTanggalDefault();
     initVideotronPengumuman();
+    initLogoDinamis();
 
     const isRemembered = localStorage.getItem('tirta_remember') === 'true';
     const savedId = localStorage.getItem('tirta_saved_id');
@@ -2031,11 +2099,12 @@ function loadTagihanPelanggan() {
 }
 
 function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, namaFo, ewalletNo, ewalletNama) {
+    const activeLogo = window.currentAppLogo || 'logo3.png';
     container.innerHTML = `
         <div class="struk-card" id="strukCardBox">
             <div class="struk-header">
-                <div style="margin-bottom: 4px;">
-                    <img src="logo.png" alt="Logo Tirta Sari Giri" style="width: 36px; height: 36px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/36x36/FFFFFF/0F172A?text=TSG';">
+                <div style="margin-bottom: 6px; display: flex; justify-content: center;">
+                    <img src="${activeLogo}" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='https://placehold.co/42x42/FFFFFF/0F172A?text=TSG';">
                 </div>
                 <strong>TIRTA SARI GIRI</strong>
                 <small>STRUK PEMBAYARAN TAGIHAN AIR</small>
@@ -2826,8 +2895,8 @@ function loadLaporanKas() {
         const tPlg = document.getElementById('tabelKasPlg');
         if (tPlg) tPlg.innerHTML = rowsView;
         updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
-        updateElemText('kasPemasukanPlg', formatRupiah(pemasukanBulanIni));
-        updateElemText('kasPengeluaranPlg', formatRupiah(pengeluaranBulanIni));
+        updateElemText('kasPemasukanFo', formatRupiah(pemasukanBulanIni));
+        updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
         updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
     });
 }
