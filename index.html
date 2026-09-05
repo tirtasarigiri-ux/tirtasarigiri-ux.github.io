@@ -1007,7 +1007,7 @@
                 </table>
             </div>
 
-            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas (Manual)</h3>
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas</h3>
             <form onsubmit="event.preventDefault(); simpanKas();" style="margin-bottom:16px;">
                 <div class="grup">
                     <label>Tanggal Transaksi</label>
@@ -1031,7 +1031,7 @@
                 <button type="submit" class="btn btn-hijau">Catat Transaksi Kas</button>
             </form>
 
-            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas (Hanya Input Manual)</h3>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -2778,7 +2778,11 @@ function loadTagihanPerWilayahKas() {
 function loadLaporanKas() {
     loadTagihanPerWilayahKas();
 
-    db.ref('transaksi_kas').on('value', snapshot => {
+    // Ambil data pelanggan dan transaksi kas secara bersamaan
+    Promise.all([
+        db.ref('transaksi_kas').once('value'),
+        db.ref('pelanggan').once('value')
+    ]).then(([kasSnap, plgSnap]) => {
         let saldoBulanLalu = 0;
         let pemasukanBulanIni = 0;
         let pengeluaranBulanIni = 0;
@@ -2789,8 +2793,27 @@ function loadLaporanKas() {
         const tahunSekarang = sekarang.getFullYear();
         const bulanSekarang = sekarang.getMonth();
 
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
+        // 1. Hitung pemasukan otomatis dari pelanggan yang "Sudah Bayar" pada bulan ini
+        if (plgSnap.exists()) {
+            plgSnap.forEach(child => {
+                const plg = child.val();
+                if (plg && plg.status_bayar === "Sudah Bayar" && plg.tgl_catat) {
+                    const tglPlg = new Date(plg.tgl_catat);
+                    const thnPlg = tglPlg.getFullYear();
+                    const blnPlg = tglPlg.getMonth();
+
+                    // Jika dibayar pada bulan & tahun berjalan
+                    if (thnPlg === tahunSekarang && blnPlg === bulanSekarang) {
+                        let nominalTagihan = plg.total_tagihan || 0;
+                        pemasukanBulanIni += Number(nominalTagihan);
+                    }
+                }
+            });
+        }
+
+        // 2. Hitung dari riwayat transaksi kas manual (seperti sebelumnya)
+        if (kasSnap.exists()) {
+            kasSnap.forEach(child => {
                 const kas = child.val();
                 const key = child.key;
                 if (!kas.tanggal) return;
@@ -2814,7 +2837,6 @@ function loadLaporanKas() {
                 const isPemasukan = kas.jenis === "PEMASUKAN";
                 const badgeColor = isPemasukan ? 'var(--color-hijau)' : 'var(--color-merah)';
                 
-                // Hanya render transaksi manual di tabel riwayat kas
                 if (!kas.isOtomatisTagihan) {
                     rowsOffice += `
                         <tr>
@@ -2860,6 +2882,7 @@ function loadLaporanKas() {
             if (el) el.textContent = text;
         };
 
+        // Perbarui tampilan elemen di semua dashboard (Office, FO, dan Pelanggan)
         const tOffice = document.getElementById('tabelKas');
         if (tOffice) tOffice.innerHTML = rowsOffice;
         updateElemText('kasSaldoLalu', formatRupiah(saldoBulanLalu));
@@ -2874,13 +2897,10 @@ function loadLaporanKas() {
         updateElemText('kasPengeluaranFo', formatRupiah(pengeluaranBulanIni));
         updateElemText('kasSaldoFo', formatRupiah(totalSaldoKas));
 
-        const tPlg = document.getElementById('kasSaldoLaluPlg');
-        if (tPlg) {
-            updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
-            updateElemText('kasPemasukanPlg', formatRupiah(pemasukanBulanIni));
-            updateElemText('kasPengeluaranPlg', formatRupiah(pengeluaranBulanIni));
-            updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
-        }
+        updateElemText('kasSaldoLaluPlg', formatRupiah(saldoBulanLalu));
+        updateElemText('kasPemasukanPlg', formatRupiah(pemasukanBulanIni));
+        updateElemText('kasPengeluaranPlg', formatRupiah(pengeluaranBulanIni));
+        updateElemText('kasSaldoPlg', formatRupiah(totalSaldoKas));
     });
 }
 
