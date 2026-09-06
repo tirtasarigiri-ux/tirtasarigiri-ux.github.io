@@ -640,7 +640,9 @@
             border: 1px solid #CBD5E1;
             border-radius: 8px;
             padding: 8px;
+            margin-bottom: 6px;
         }
+        .struk-ewallet-detail:last-child { margin-bottom: 0; }
 
         .struk-footer {
             margin-top: 12px;
@@ -812,6 +814,20 @@
     </div>
 </div>
 
+<!-- MODAL PILIHAN METODE PEMBAYARAN KETIKA VERIFIKASI -->
+<div id="modalMetodeBayar" class="custom-modal-backdrop">
+    <div class="custom-modal-box">
+        <div style="font-size: 15px; font-weight: 800; color: var(--text-accent); margin-bottom: 12px;">Pilih Metode Pembayaran</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Tentukan jenis pembayaran yang dilakukan oleh pelanggan:</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-hijau" onclick="prosesVerifikasiDenganMetode('Cash')">💵 Cash (Tunai)</button>
+            <button class="btn" style="background: #0284C7;" onclick="prosesVerifikasiDenganMetode('Transfer Bank')">🏦 Transfer Bank</button>
+            <button class="btn" style="background: #7C3AED;" onclick="prosesVerifikasiDenganMetode('Transfer E-Wallet')">📱 Transfer E-Wallet</button>
+            <button class="btn btn-merah" onclick="document.getElementById('modalMetodeBayar').style.display='none'">Batal</button>
+        </div>
+    </div>
+</div>
+
 <!-- LOGIN VIEW -->
 <div id="loginView" class="view-section aktif">
     <div class="card" style="margin-top: 10px;">
@@ -937,7 +953,7 @@
             </div>
         </div>
 
-        <!-- SUB-MENU 2: ATUR TARIF & E-WALLET -->
+        <!-- SUB-MENU 2: ATUR TARIF & PEMBAYARAN TRANSFER TERPISAH -->
         <div id="subTarif" class="sub-view">
             <div class="subview-header">
                 <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Tarif & Pembayaran</h3>
@@ -953,12 +969,20 @@
                     <input type="number" id="biayaBeban" placeholder="Contoh: 10000" required>
                 </div>
                 <div class="grup">
-                    <label>Nomor E-Wallet / Rekening Bank Penampung</label>
-                    <input type="text" id="tarifEwalletNo" placeholder="Contoh: 0812-3456-7890 (DANA/GoPay/OVO)" required>
+                    <label>🏦 Nomor Rekening Bank (Transfer Bank)</label>
+                    <input type="text" id="tarifBankNo" placeholder="Contoh: 1234-5678-90 (BSI / BRI / Mandiri)" required>
                 </div>
                 <div class="grup">
-                    <label>Nama Akun / Rekening (a.n.)</label>
-                    <input type="text" id="tarifEwalletNama" placeholder="Contoh: Tirta Sari Giri / PAMSIMAS" required>
+                    <label>Nama Pemilik Rekening Bank (a.n.)</label>
+                    <input type="text" id="tarifBankNama" placeholder="Contoh: Tirta Sari Giri" required>
+                </div>
+                <div class="grup">
+                    <label>📱 Nomor E-Wallet (DANA / OVO / GoPay)</label>
+                    <input type="text" id="tarifEwalletNo" placeholder="Contoh: 0812-3456-7890" required>
+                </div>
+                <div class="grup">
+                    <label>Nama Akun E-Wallet (a.n.)</label>
+                    <input type="text" id="tarifEwalletNama" placeholder="Contoh: PAMSIMAS Sambeng" required>
                 </div>
                 <button type="submit" class="btn btn-hijau">Simpan Pengaturan</button>
             </form>
@@ -1078,7 +1102,7 @@
         </div>
 
         <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
-              <div id="subTeksBerjalan" class="sub-view">
+        <div id="subTeksBerjalan" class="sub-view">
             <div class="subview-header">
                 <h3 style="font-size:12px; color:var(--text-accent);">Teks & Animasi</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
@@ -1103,6 +1127,7 @@
                 <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
             </form>
         </div>
+
         <!-- SUB-MENU 6: PENGATURAN AKUN STAF & LOGO -->
         <div id="subAkun" class="sub-view">
             <div class="subview-header">
@@ -1347,7 +1372,7 @@
                 </table>
             </div>
 
-            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas (Input Manual)</h3>
+            <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -1646,9 +1671,12 @@ const db = firebase.database();
 
 let currentUser = null;
 let videotronTimer = null;
+let targetVerifikasiId = null;
 
+const DEFAULT_BANK_NO = "1234-5678-90";
+const DEFAULT_BANK_NAMA = "Tirta Sari Giri";
 const DEFAULT_EWALLET_NO = "0812-3456-7890";
-const DEFAULT_EWALLET_NAMA = "Tirta Sari Giri / PAMSIMAS";
+const DEFAULT_EWALLET_NAMA = "PAMSIMAS Sambeng";
 
 function showAlert(msg) {
     const modal = document.getElementById('customModal');
@@ -1703,21 +1731,6 @@ function formatTanggalIndo(tglInput) {
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function formatTanggalSingkat(tglInput) {
-    if (!tglInput) return '-';
-    const parts = String(tglInput).split('T')[0].split('-');
-    if (parts.length === 3) {
-        const namaBulanSingkat = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-        ];
-        return `${parseInt(parts[2], 10)} ${namaBulanSingkat[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
-    }
-    const d = new Date(tglInput);
-    if (isNaN(d)) return '-';
-    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
 function setKasTanggalDefault() {
     const kasTanggalEl = document.getElementById('kasTanggal');
     if (kasTanggalEl && !kasTanggalEl.value) {
@@ -1763,6 +1776,7 @@ function simpanTeksBerjalan() {
         showAlert("Teks pengumuman dan jenis animasi berhasil diperbarui!");
     }).catch(err => showAlert("Gagal menyimpan: " + err.message));
 }
+
 function initVideotronPengumuman() {
     db.ref('pengaturan/videotron').on('value', snapshot => {
         let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
@@ -2025,6 +2039,10 @@ function bukaSubView(dashId, subViewId) {
 
     const targetSubView = document.getElementById(subViewId);
     if (targetSubView) targetSubView.classList.add('aktif');
+
+    if (subViewId === 'subPlgInfo') {
+        loadLaporanKas();
+    }
 }
 
 function kembaliKeLauncher(dashId) {
@@ -2040,30 +2058,47 @@ function kembaliKeLauncher(dashId) {
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
 
-// VERIFIKASI LUNAS: MENGUBAH STATUS & MENGIRIM KAS OTOMATIS (TERSEMBUNYI DARI TABEL RIWAYAT KAS)
 function verifikasiLunas(id) {
-    showConfirm(`Verifikasi pembayaran tagihan untuk pelanggan ${id} sebagai LUNAS?`, () => {
-        db.ref(`pelanggan/${id}`).once('value').then(snapshot => {
-            if (!snapshot.exists()) return;
-            const plgData = snapshot.val();
-            const nominalTagihan = plgData.total_tagihan || 0;
-            const namaPlg = plgData.nama || id;
-            const wilayahPlg = plgData.wilayah || plgData.alamat || 'Umum';
+    targetVerifikasiId = id;
+    const modal = document.getElementById('modalMetodeBayar');
+    if (modal) modal.style.display = 'flex';
+}
 
-            db.ref(`pelanggan/${id}`).update({ status_bayar: 'Sudah Bayar' }).then(() => {
-                const tglHariIni = new Date().toISOString().split('T')[0];
-                db.ref('transaksi_kas').push({
-                    jenis: 'PEMASUKAN',
-                    nominal: nominalTagihan,
-                    keterangan: `Pembayaran Air (${id} - ${namaPlg} / ${wilayahPlg})`,
-                    tanggal: tglHariIni,
-                    isOtomatisTagihan: true // Penanda agar tidak dirender di tabel riwayat kas
-                }).then(() => {
-                    showAlert(`Tagihan untuk pelanggan ${id} telah diverifikasi LUNAS dan otomatis masuk ke Pemasukan Kas!`);
-                });
+function prosesVerifikasiDenganMetode(metodeBayar) {
+    const id = targetVerifikasiId;
+    const modal = document.getElementById('modalMetodeBayar');
+    if (modal) modal.style.display = 'none';
+
+    if (!id) return;
+
+    db.ref(`pelanggan/${id}`).once('value').then(snapshot => {
+        if (!snapshot.exists()) return;
+        const plgData = snapshot.val();
+        const nominalTagihan = plgData.total_tagihan || 0;
+        const namaPlg = plgData.nama || id;
+        const wilayahPlg = plgData.wilayah || plgData.alamat || 'Umum';
+        
+        const sekarang = new Date();
+        const tglHariIni = sekarang.toISOString().split('T')[0];
+        const waktuOtomatis = sekarang.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+        db.ref(`pelanggan/${id}`).update({ 
+            status_bayar: 'Sudah Bayar',
+            tanggal_bayar: tglHariIni,
+            waktu_bayar_lengkap: waktuOtomatis,
+            metode_pembayaran: metodeBayar
+        }).then(() => {
+            db.ref('transaksi_kas').push({
+                jenis: 'PEMASUKAN',
+                nominal: nominalTagihan,
+                keterangan: `Pembayaran Air (${metodeBayar}) - (${id} - ${namaPlg} / ${wilayahPlg})`,
+                tanggal: tglHariIni,
+                isOtomatisTagihan: true 
+            }).then(() => {
+                showAlert(`Tagihan untuk pelanggan ${id} berhasil diverifikasi LUNAS (${metodeBayar}) dan tercatat otomatis di Kas!`);
             });
-        }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
-    });
+        });
+    }).catch(err => showAlert("Gagal melakukan verifikasi: " + err.message));
 }
 
 function initPelangganDashboard() {
@@ -2091,12 +2126,17 @@ function loadTagihanPelanggan() {
     const plgId = currentUser.id;
 
     db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let bankNo = DEFAULT_BANK_NO;
+        let bankNama = DEFAULT_BANK_NAMA;
         let ewalletNo = DEFAULT_EWALLET_NO;
         let ewalletNama = DEFAULT_EWALLET_NAMA;
 
         if (tariffSnap.exists()) {
-            ewalletNo = tariffSnap.val().ewalletNo || ewalletNo;
-            ewalletNama = tariffSnap.val().ewalletNama || ewalletNama;
+            const dataTarif = tariffSnap.val();
+            bankNo = dataTarif.bankNo || bankNo;
+            bankNama = dataTarif.bankNama || bankNama;
+            ewalletNo = dataTarif.ewalletNo || ewalletNo;
+            ewalletNama = dataTarif.ewalletNama || ewalletNama;
         }
 
         db.ref(`pelanggan/${plgId}`).on('value', snapshot => {
@@ -2119,43 +2159,83 @@ function loadTagihanPelanggan() {
             const total = data.total_tagihan || 0;
             const isLunas = data.status_bayar === 'Sudah Bayar';
             const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
+            const waktuBayarStr = data.waktu_bayar_lengkap || '-';
+            const metodeBayarStr = data.metode_pembayaran || '-';
             const foId = data.didaftarkan_oleh || '-';
 
-            // Pengaturan Tampilan Tombol Berdasarkan Status Lunas
+            if (!isLunas) {
+                if (actionContainer) actionContainer.style.display = 'flex';
+                if (btnWa) {
+                    const cleanPhone = ewalletNo.replace(/\D/g, '');
+                    const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+                    const textMsg = encodeURIComponent(`Halo Admin Tirta Sari Giri, saya mengonfirmasi pembayaran tagihan air:\n\n• ID Pelanggan: ${plgId}\n• Nama: ${data.nama || '-'}\n• Total Tagihan: ${formatRupiah(total)}\n• Status Transfer: Sudah Transfer (Bank / E-Wallet)\n\nMohon verifikasi lunas. Terima kasih!`);
+                    btnWa.href = `https://wa.me/${waPhone}?text=${textMsg}`;
+                    btnWa.style.display = 'inline-flex';
+                }
+
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 20px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">⏳</div>
+                        <h3 style="font-size: 15px; color: var(--text-accent); font-weight: 800; margin-bottom: 6px;">Tagihan Belum Lunas</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">Struk resmi akan muncul secara otomatis di sini setelah pembayaran Anda terverifikasi oleh petugas.</p>
+                        
+                        <div class="struk-box-inner" style="text-align: left; margin-bottom: 14px;">
+                            <div class="struk-row"><span>Total Tagihan:</span><b style="color: var(--text-accent);">${formatRupiah(total)}</b></div>
+                            <div class="struk-row"><span>Pemakaian Air:</span><span>${pemakaian} m³</span></div>
+                            <div class="struk-row"><span>Status:</span><span class="struk-status-badge belum">BELUM BAYAR</span></div>
+                        </div>
+
+                        <div class="struk-ewallet-box">
+                            <div class="struk-ewallet-title">💳 KOLOM PEMBAYARAN VIA TRANSFER</div>
+                            <div class="struk-ewallet-methods">Silakan transfer melalui rekening bank atau e-wallet berikut:</div>
+                            
+                            <!-- Rekening Bank Terpisah -->
+                            <div class="struk-ewallet-detail">
+                                <div style="font-size:9px; color:#0284C7; font-weight:800;">🏦 REKENING BANK:</div>
+                                <div style="font-size:13px; font-weight:800; color:#0F172A; letter-spacing:0.5px; margin:2px 0; font-family:monospace;">${bankNo}</div>
+                                <div style="font-size:9px; color:#475569; font-weight:700;">a.n. ${bankNama}</div>
+                            </div>
+
+                            <!-- E-Wallet Terpisah -->
+                            <div class="struk-ewallet-detail">
+                                <div style="font-size:9px; color:#7C3AED; font-weight:800;">📱 AKUN E-WALLET (DANA/OVO/GOPAY):</div>
+                                <div style="font-size:13px; font-weight:800; color:#0F172A; letter-spacing:0.5px; margin:2px 0; font-family:monospace;">${ewalletNo}</div>
+                                <div style="font-size:9px; color:#475569; font-weight:700;">a.n. ${ewalletNama}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             if (actionContainer) {
-                actionContainer.style.display = 'flex'; // Tampilkan wadah tombol aksi
+                actionContainer.style.display = 'flex';
             }
 
             const btnUnduhStruk = actionContainer ? actionContainer.querySelector('.btn-hijau') : null;
             if (btnUnduhStruk) {
-                // Tombol Unduh Struk HANYA MUNCUL jika status lunas
-                btnUnduhStruk.style.display = isLunas ? 'inline-flex' : 'none';
+                btnUnduhStruk.style.display = 'inline-flex';
             }
 
             if (btnWa) {
-                const cleanPhone = ewalletNo.replace(/\D/g, '');
-                const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
-                const textMsg = encodeURIComponent(`Halo Admin Tirta Sari Giri, saya mengonfirmasi pembayaran tagihan air:\n\n• ID Pelanggan: ${plgId}\n• Nama: ${data.nama || '-'}\n• Total Tagihan: ${formatRupiah(total)}\n• Status Transfer: Sudah Transfer via E-Wallet/Bank\n\nMohon verifikasi lunas. Terima kasih!`);
-                btnWa.href = `https://wa.me/${waPhone}?text=${textMsg}`;
-                // Tombol konfirmasi WA hanya muncul jika belum lunas
-                btnWa.style.display = isLunas ? 'none' : 'inline-flex';
+                btnWa.style.display = 'none';
             }
 
             if (foId !== '-') {
                 db.ref(`staf_fo/${foId}`).once('value').then(foSnap => {
                     const foNama = (foSnap.exists() && foSnap.val().nama) ? foSnap.val().nama : foId;
-                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, foNama, ewalletNo, ewalletNama);
+                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foNama);
                 }).catch(() => {
-                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, foId, ewalletNo, ewalletNama);
+                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foId);
                 });
             } else {
-                renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, 'Petugas Lapangan', ewalletNo, ewalletNama);
+                renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, 'Petugas Lapangan');
             }
         });
     });
 }
 
-function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, namaFo, ewalletNo, ewalletNama) {
+function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, namaFo) {
     container.innerHTML = `
         <div class="struk-card" id="strukCardBox">
             <div class="struk-header">
@@ -2169,7 +2249,7 @@ function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, t
                 <div class="struk-row"><span>ID Pelanggan</span><b>${plgId}</b></div>
                 <div class="struk-row"><span>Nama</span><b>${data.nama || '-'}</b></div>
                 <div class="struk-row"><span>Alamat</span><span>${data.alamat || '-'}</span></div>
-                <div class="struk-row"><span>Tgl Catat</span><span>${tglStr}</span></div>
+                <div class="struk-row"><span>Tgl Catat Meter</span><span>${tglStr}</span></div>
             </div>
 
             <div class="struk-section-title">📊 RINCIAN PEMAKAIAN</div>
@@ -2185,21 +2265,16 @@ function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, t
                 <div class="total-val">${formatRupiah(total)}</div>
             </div>
 
-            <div class="struk-row" style="margin-top:8px;">
-                <span>Status Bayar</span>
-                <span class="struk-status-badge ${isLunas ? 'lunas' : 'belum'}">
-                    ${isLunas ? '✔ LUNAS' : '✘ BELUM BAYAR'}
-                </span>
-            </div>
-
-            <div class="struk-ewallet-box">
-                <div class="struk-ewallet-title">💳 PEMBAYARAN E-WALLET / TRANSFER</div>
-                <div class="struk-ewallet-methods">GoPay • DANA • OVO • ShopeePay • Bank</div>
-                <div class="struk-ewallet-detail">
-                    <div style="font-size:9.5px; color:#64748B; font-weight:700;">NO. REKENING / E-WALLET:</div>
-                    <div style="font-size:14px; font-weight:800; color:#0284C7; letter-spacing:0.5px; margin:3px 0; font-family:monospace;">${ewalletNo}</div>
-                    <div style="font-size:9.5px; color:#0F172A; font-weight:700;">a.n. ${ewalletNama}</div>
+            <div class="struk-box-inner" style="margin-bottom: 8px;">
+                <div class="struk-row"><span>Status Bayar</span>
+                    <span class="struk-status-badge ${isLunas ? 'lunas' : 'belum'}">
+                        ${isLunas ? '✔ LUNAS' : '✘ BELUM BAYAR'}
+                    </span>
                 </div>
+                ${isLunas ? `
+                    <div class="struk-row" style="margin-top:4px;"><span>Metode</span><b style="color:#059669;">${metodeBayarStr}</b></div>
+                    <div class="struk-row" style="margin-top:4px;"><span>Waktu Verifikasi</span><span style="font-size:10px;">${waktuBayarStr}</span></div>
+                ` : ''}
             </div>
 
             <div style="margin-top:10px; text-align:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:6px 8px;">
@@ -2667,12 +2742,14 @@ function hapusPetugas(id) {
 function simpanTarif() {
     const hargaM3 = Number(document.getElementById('tarifM3').value);
     const biayaBeban = Number(document.getElementById('biayaBeban').value);
+    const bankNo = document.getElementById('tarifBankNo').value.trim();
+    const bankNama = document.getElementById('tarifBankNama').value.trim();
     const ewalletNo = document.getElementById('tarifEwalletNo').value.trim();
     const ewalletNama = document.getElementById('tarifEwalletNama').value.trim();
 
-    db.ref('pengaturan/tarif').set({ hargaM3, biayaBeban, ewalletNo, ewalletNama }).then(() => {
-        showAlert("Pengaturan tarif & E-Wallet berhasil diperbarui!");
-    }).catch(err => showAlert("Gagal menyimpan tarif: " + err.message));
+    db.ref('pengaturan/tarif').set({ hargaM3, biayaBeban, bankNo, bankNama, ewalletNo, ewalletNama }).then(() => {
+        showAlert("Pengaturan tarif & rekening/e-wallet berhasil diperbarui!");
+    }).catch(err => showAlert("Gagal menyimpan pengaturan: " + err.message));
 }
 
 function loadTarif() {
@@ -2681,10 +2758,15 @@ function loadTarif() {
             const data = snapshot.val();
             document.getElementById('tarifM3').value = data.hargaM3 || 0;
             document.getElementById('biayaBeban').value = data.biayaBeban || 0;
-            const noEl = document.getElementById('tarifEwalletNo');
-            const namaEl = document.getElementById('tarifEwalletNama');
-            if (noEl) noEl.value = data.ewalletNo || DEFAULT_EWALLET_NO;
-            if (namaEl) namaEl.value = data.ewalletNama || DEFAULT_EWALLET_NAMA;
+            const bankNoEl = document.getElementById('tarifBankNo');
+            const bankNamaEl = document.getElementById('tarifBankNama');
+            const ewalletNoEl = document.getElementById('tarifEwalletNo');
+            const ewalletNamaEl = document.getElementById('tarifEwalletNama');
+
+            if (bankNoEl) bankNoEl.value = data.bankNo || DEFAULT_BANK_NO;
+            if (bankNamaEl) bankNamaEl.value = data.bankNama || DEFAULT_BANK_NAMA;
+            if (ewalletNoEl) ewalletNoEl.value = data.ewalletNo || DEFAULT_EWALLET_NO;
+            if (ewalletNamaEl) ewalletNamaEl.value = data.ewalletNama || DEFAULT_EWALLET_NAMA;
         }
     });
 }
@@ -2774,11 +2856,133 @@ function simpanKas() {
     });
 }
 
-function hapusKas(key) {
-    showConfirm("Apakah Anda yakin ingin menghapus transaksi kas ini?", () => {
-        db.ref(`transaksi_kas/${key}`).remove().then(() => {
-            showAlert("Transaksi kas berhasil dihapus!");
-        }).catch(err => showAlert("Gagal menghapus transaksi: " + err.message));
+function loadLaporanKas() {
+    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
+        let hargaM3 = 3000;
+        let biayaBeban = 10000;
+        if (tariffSnap.exists()) {
+            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+        }
+
+        db.ref('pelanggan').once('value').then(plgSnap => {
+            db.ref('transaksi_kas').on('value', kasSnap => {
+                const sekarang = new Date();
+                const tahunSekarang = sekarang.getFullYear();
+                const bulanSekarang = sekarang.getMonth();
+
+                let saldoBulanLalu = 0;
+                let pemasukanBulanIni = 0;
+                let pengeluaranBulanIni = 0;
+
+                if (plgSnap.exists()) {
+                    plgSnap.forEach(child => {
+                        const plg = child.val();
+                        if (plg.status_bayar === 'Sudah Bayar') {
+                            const tglRef = plg.tanggal_bayar || plg.tgl_catat;
+                            if (!tglRef) return;
+
+                            const tglBayar = new Date(tglRef);
+                            const thn = tglBayar.getFullYear();
+                            const bln = tglBayar.getMonth();
+                            
+                            const meterAwal = parseDesimal(plg.meter_awal);
+                            const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterAwal;
+                            const pakai = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+                            const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
+
+                            if ((thn < tahunSekarang) || (thn === tahunSekarang && bln < bulanSekarang)) {
+                                saldoBulanLalu += totalTagihanCalculated;
+                            } else if (thn === tahunSekarang && bln === bulanSekarang) {
+                                pemasukanBulanIni += totalTagihanCalculated;
+                            }
+                        }
+                    });
+                }
+
+                let listKasHtml = '';
+                let arrayKas = [];
+
+                if (kasSnap.exists()) {
+                    kasSnap.forEach(child => {
+                        const dataKas = child.val();
+                        if (!dataKas.isOtomatisTagihan) {
+                            arrayKas.push({ key: child.key, ...dataKas });
+                        }
+                    });
+
+                    arrayKas.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+                    arrayKas.forEach(kas => {
+                        if (!kas.tanggal) return;
+                        const tglKas = new Date(kas.tanggal);
+                        const thnKas = tglKas.getFullYear();
+                        const blnKas = tglKas.getMonth();
+                        const nominal = Number(kas.nominal || 0);
+
+                        const isBulanLalu = (thnKas < tahunSekarang) || (thnKas === tahunSekarang && blnKas < bulanSekarang);
+                        const isBulanIni = (thnKas === tahunSekarang && blnKas === bulanSekarang);
+
+                        if (isBulanLalu) {
+                            if (kas.jenis === "PEMASUKAN") saldoBulanLalu += nominal;
+                            if (kas.jenis === "PENGELUARAN") saldoBulanLalu -= nominal;
+                        }
+
+                        if (isBulanIni) {
+                            if (kas.jenis === "PEMASUKAN") pemasukanBulanIni += nominal;
+                            if (kas.jenis === "PENGELUARAN") pengeluaranBulanIni += nominal;
+                        }
+
+                        const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
+                        listKasHtml += `
+                            <tr>
+                                <td>${kas.tanggal}</td>
+                                <td>
+                                    <b>${kas.keterangan || '-'}</b><br>
+                                    <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
+                                </td>
+                                <td style="color:${badgeColor}; font-weight:700;">
+                                    ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                if (!listKasHtml) {
+                    listKasHtml = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas manual.</td></tr>`;
+                }
+
+                const saldoAkhir = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
+
+                ['kasSaldoLalu', 'kasSaldoLaluFo', 'kasSaldoLaluPlg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = formatRupiah(saldoBulanLalu);
+                });
+
+                ['kasPemasukan', 'kasPemasukanFo', 'kasPemasukanPlg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = formatRupiah(pemasukanBulanIni);
+                });
+
+                ['kasPengeluaran', 'kasPengeluaranFo', 'kasPengeluaranPlg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = formatRupiah(pengeluaranBulanIni);
+                });
+
+                ['kasSaldo', 'kasSaldoFo', 'kasSaldoPlg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = formatRupiah(saldoAkhir);
+                });
+
+                const tabelKasEl = document.getElementById('tabelKas');
+                if (tabelKasEl) tabelKasEl.innerHTML = listKasHtml;
+
+                const tabelKasFoEl = document.getElementById('tabelKasFo');
+                if (tabelKasFoEl) tabelKasFoEl.innerHTML = listKasHtml;
+            });
+        });
+        loadTagihanPerWilayahKas();
     });
 }
 
@@ -2852,143 +3056,8 @@ function loadTagihanPerWilayahKas() {
         });
     });
 }
-
-function loadLaporanKas() {
-    db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
-        let hargaM3 = 3000;
-        let biayaBeban = 10000;
-        if (tariffSnap.exists()) {
-            hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
-            biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
-        }
-
-        db.ref('pelanggan').once('value').then(plgSnap => {
-            db.ref('transaksi_kas').on('value', kasSnap => {
-                const sekarang = new Date();
-                const tahunSekarang = sekarang.getFullYear();
-                const bulanSekarang = sekarang.getMonth(); // 0 = Januari, 8 = September, dst.
-
-                let saldoBulanLalu = 0;
-                let pemasukanBulanIni = 0;
-                let pengeluaranBulanIni = 0;
-
-                // 1. Hitung akumulasi dari bulan-bulan sebelumnya (masuk ke Saldo Bulan Lalu)
-                // Berasal dari tagihan lunas bulan lalu & kas manual bulan lalu
-                if (plgSnap.exists()) {
-                    plgSnap.forEach(child => {
-                        const plg = child.val();
-                        if (plg.status_bayar === 'Sudah Bayar' && plg.tanggal_bayar) {
-                            const tglBayar = new Date(plg.tanggal_bayar);
-                            const thn = tglBayar.getFullYear();
-                            const bln = tglBayar.getMonth();
-                            
-                            const meterAwal = parseDesimal(plg.meter_awal);
-                            const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterAwal;
-                            const pakai = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
-                            const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
-
-                            // Jika dibayar pada bulan/tahun sebelum bulan ini, masuk ke Saldo Bulan Lalu
-                            if ((thn < tahunSekarang) || (thn === tahunSekarang && bln < bulanSekarang)) {
-                                saldoBulanLalu += totalTagihanCalculated;
-                            }
-                            // Jika dibayar pada bulan ini, masuk ke Pemasukan Bulan Ini (Tagihan Air)
-                            else if (thn === tahunSekarang && bln === bulanSekarang) {
-                                pemasukanBulanIni += totalTagihanCalculated;
-                            }
-                        }
-                    });
-                }
-
-                // 2. Hitung Transaksi Kas Manual
-                let listKasHtml = '';
-                let arrayKas = [];
-
-                if (kasSnap.exists()) {
-                    kasSnap.forEach(child => {
-                        arrayKas.push({ key: child.key, ...child.val() });
-                    });
-
-                    // Urutkan berdasarkan tanggal terbaru
-                    arrayKas.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-                    arrayKas.forEach(kas => {
-                        if (!kas.tanggal) return;
-                        const tglKas = new Date(kas.tanggal);
-                        const thnKas = tglKas.getFullYear();
-                        const blnKas = tglKas.getMonth();
-                        const nominal = Number(kas.nominal || 0);
-
-                        const isBulanLalu = (thnKas < tahunSekarang) || (thnKas === tahunSekarang && blnKas < bulanSekarang);
-                        const isBulanIni = (thnKas === tahunSekarang && blnKas === bulanSekarang);
-
-                        // Akumulasi kas manual bulan lalu ke Saldo Bulan Lalu
-                        if (isBulanLalu) {
-                            if (kas.jenis === "PEMASUKAN") saldoBulanLalu += nominal;
-                            if (kas.jenis === "PENGELUARAN") saldoBulanLalu -= nominal;
-                        }
-
-                        // Akumulasi kas manual bulan berjalan ke Pemasukan/Pengeluaran Bulan Ini
-                        if (isBulanIni) {
-                            if (kas.jenis === "PEMASUKAN") pemasukanBulanIni += nominal;
-                            if (kas.jenis === "PENGELUARAN") pengeluaranBulanIni += nominal;
-                        }
-
-                        // Render baris ke tabel riwayat kas
-                        const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
-                        listKasHtml += `
-                            <tr>
-                                <td>${kas.tanggal}</td>
-                                <td>
-                                    <b>${kas.keterangan || '-'}</b><br>
-                                    <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
-                                </td>
-                                <td style="color:${badgeColor}; font-weight:700;">
-                                    ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
-                                </td>
-                                <td style="text-align:center;">
-                                    <button class="btn btn-merah btn-sm" onclick="hapusKas('${kas.key}')">Hapus</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-
-                if (!listKasHtml) {
-                    listKasHtml = `<tr><td colspan="4" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas.</td></tr>`;
-                }
-
-                // Hitung Saldo Akhir Total
-                const saldoAkhir = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
-
-                // Tampilkan ke elemen antarmuka (Dashboard Office & Staf/FO)
-                ['kasSaldoLalu', 'kasSaldoLaluFo'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = formatRupiah(saldoBulanLalu);
-                });
-
-                ['kasPemasukan', 'kasPemasukanFo'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = formatRupiah(pemasukanBulanIni);
-                });
-
-                ['kasPengeluaran', 'kasPengeluaranFo'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = formatRupiah(pengeluaranBulanIni);
-                });
-
-                ['kasSaldoAkhir', 'kasSaldoAkhirFo'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = formatRupiah(saldoAkhir);
-                });
-
-                const tabelKasEl = document.getElementById('tabelKas');
-                if (tabelKasEl) tabelKasEl.innerHTML = listKasHtml;
-            });
-        });
-    });
-}
 	
-	function initAkunForm() {
+function initAkunForm() {
     if (currentUser) {
         const akunIdEl = document.getElementById('akunId');
         if (akunIdEl) akunIdEl.value = currentUser.id;
