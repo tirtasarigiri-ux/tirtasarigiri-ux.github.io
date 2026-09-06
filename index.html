@@ -657,13 +657,13 @@
             background: #020617;
             border: 2px solid #38BDF8;
             border-radius: 14px;
-            padding: 16px;
+            padding: 12px 16px;
             margin-bottom: 14px;
             box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.25), 0 8px 20px rgba(0,0,0,0.4);
             text-align: center;
             position: relative;
             overflow: hidden;
-            min-height: 90px;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -671,20 +671,49 @@
 
         .videotron-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: #38BDF8;
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
             letter-spacing: 0.5px;
-            animation: videotronFade 0.6s ease-in-out;
             line-height: 1.5;
+            width: 100%;
         }
 
-        @keyframes videotronFade {
-            0% { opacity: 0; transform: translateY(8px); }
+        /* PILIHAN KELAS ANIMASI */
+        .anim-fade { animation: vFade 0.6s ease-in-out; }
+        .anim-slide { animation: vSlide 0.5s ease-out; }
+        .anim-zoom { animation: vZoom 0.5s ease-out; }
+        .anim-statis { animation: none; }
+
+        /* ANIMASI MARQUEE */
+        .anim-marquee {
+            white-space: nowrap;
+            display: inline-block;
+            padding-left: 100%;
+            animation: vMarquee 12s linear infinite;
+        }
+
+        /* KEYFRAMES */
+        @keyframes vFade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes vSlide {
+            0% { opacity: 0; transform: translateY(15px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes vZoom {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes vMarquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
         .custom-modal-backdrop {
             display: none;
             position: fixed;
@@ -1049,20 +1078,31 @@
         </div>
 
         <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
-        <div id="subTeksBerjalan" class="sub-view">
+              <div id="subTeksBerjalan" class="sub-view">
             <div class="subview-header">
-                <h3 style="font-size:12px; color:var(--text-accent);">Kelola Teks Berjalan</h3>
+                <h3 style="font-size:12px; color:var(--text-accent);">Kelola Teks & Animasi Videotron</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
             </div>
             <form onsubmit="event.preventDefault(); simpanTeksBerjalan();">
                 <div class="grup">
                     <label>Teks Pengumuman</label>
-                    <textarea id="inputTeksBerjalan" rows="4" placeholder="Masukkan teks pengumuman di sini..." required></textarea>
+                    <textarea id="inputTeksBerjalan" rows="3" placeholder="Masukkan teks pengumuman di sini..." required></textarea>
                 </div>
+
+                <div class="grup">
+                    <label>Gaya Animasi Videotron</label>
+                    <select id="inputAnimasiVideotron">
+                        <option value="fade">Fade In (Pergantian Memudar)</option>
+                        <option value="slide">Slide Up (Pergantian Geser Ke Atas)</option>
+                        <option value="zoom">Zoom In (Pergantian Membesar)</option>
+                        <option value="marquee">Running Text (Teks Berjalan Kanan ke Kiri)</option>
+                        <option value="statis">Statis (Teks Utuh Tanpa Animasi)</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
             </form>
         </div>
-
         <!-- SUB-MENU 6: PENGATURAN AKUN STAF & LOGO -->
         <div id="subAkun" class="sub-view">
             <div class="subview-header">
@@ -1564,8 +1604,8 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
     const defaultDataUriIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Crect width='512' height='512' fill='%23070B14' rx='120'/%3E%3Cpath d='M256 80c-70 110-140 180-140 260 0 77.3 62.7 140 140 140s140-62.7 140-140c0-80-70-150-140-260z' fill='%2338BDF8'/%3E%3C/svg%3E";
 
     const manifestObj = {
-        "name": "Tirta Sari Giri Water System",
-        "short_name": "TirtaSari",
+        "name": "Tirta Sari Giri",
+        "short_name": "TirtaSariGiri",
         "start_url": "./",
         "scope": "./",
         "display": "standalone",
@@ -1706,49 +1746,72 @@ function initLogoDinamis() {
     });
 }
 
-function initVideotronPengumuman() {
-    db.ref('pengaturan/teks_berjalan').on('value', snapshot => {
-        const teks = snapshot.exists() ? snapshot.val() : "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
-        const inputTeksEl = document.getElementById('inputTeksBerjalan');
-        if (inputTeksEl) inputTeksEl.value = teks;
-
-        const sentences = teks.split(/(?<=[.!?\n])\s+|[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0);
-        
-        if (videotronTimer) clearInterval(videotronTimer);
-        
-        const videotronEl = document.getElementById('videotronText');
-        if (!videotronEl) return;
-
-        if (sentences.length === 0) {
-            videotronEl.textContent = teks;
-            return;
-        }
-
-        let currentIndex = 0;
-        
-        const renderNextSentence = () => {
-            videotronEl.style.animation = 'none';
-            videotronEl.offsetHeight;
-            videotronEl.style.animation = 'videotronFade 0.6s ease-in-out';
-            videotronEl.textContent = `📢 "${sentences[currentIndex]}"`;
-            currentIndex = (currentIndex + 1) % sentences.length;
-        };
-
-        renderNextSentence();
-        videotronTimer = setInterval(renderNextSentence, 4000);
-    });
-}
-
+// SIMPAN TEKS DAN ANIMASI KE DATABASE
 function simpanTeksBerjalan() {
     const teksInput = document.getElementById('inputTeksBerjalan').value.trim();
+    const animasiInput = document.getElementById('inputAnimasiVideotron').value;
+
     if (!teksInput) {
         showAlert("Teks pengumuman tidak boleh kosong!");
         return;
     }
 
-    db.ref('pengaturan/teks_berjalan').set(teksInput).then(() => {
-        showAlert("Papan informasi berhasil diperbarui dan dipublikasikan!");
-    }).catch(err => showAlert("Gagal menyimpan teks: " + err.message));
+    db.ref('pengaturan/videotron').set({
+        teks: teksInput,
+        animasi: animasiInput
+    }).then(() => {
+        showAlert("Teks pengumuman dan jenis animasi berhasil diperbarui!");
+    }).catch(err => showAlert("Gagal menyimpan: " + err.message));
+}
+function initVideotronPengumuman() {
+    db.ref('pengaturan/videotron').on('value', snapshot => {
+        let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
+        let animasi = "fade";
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (typeof data === 'object') {
+                teks = data.teks || teks;
+                animasi = data.animasi || 'fade';
+            } else {
+                teks = data;
+            }
+        }
+
+        const inputTeksEl = document.getElementById('inputTeksBerjalan');
+        const inputAnimasiEl = document.getElementById('inputAnimasiVideotron');
+        if (inputTeksEl) inputTeksEl.value = teks;
+        if (inputAnimasiEl) inputAnimasiEl.value = animasi;
+
+        if (videotronTimer) clearInterval(videotronTimer);
+
+        const videotronEl = document.getElementById('videotronText');
+        if (!videotronEl) return;
+
+        videotronEl.className = 'videotron-text';
+
+        if (animasi === 'statis') {
+            videotronEl.classList.add('anim-statis');
+            videotronEl.textContent = `📢 ${teks}`;
+        } else if (animasi === 'marquee') {
+            videotronEl.classList.add('anim-marquee');
+            videotronEl.textContent = `📢 ${teks}`;
+        } else {
+            const kalimat = teks.split('.').map(s => s.trim()).filter(s => s.length > 0);
+            let index = 0;
+
+            const renderSentence = () => {
+                videotronEl.textContent = `📢 ${kalimat[index]}`;
+                videotronEl.className = `videotron-text anim-${animasi}`;
+                index = (index + 1) % kalimat.length;
+            };
+
+            renderSentence();
+            if (kalimat.length > 1) {
+                videotronTimer = setInterval(renderSentence, 4000);
+            }
+        }
+    });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
