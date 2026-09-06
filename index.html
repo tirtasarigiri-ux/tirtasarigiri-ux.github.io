@@ -1455,7 +1455,7 @@
             <div id="strukContainer">
                 <div style="text-align:center; padding:20px; color:var(--text-secondary);">Memuat data tagihan...</div>
             </div>
-            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+            <div id="actionStrukContainer" style="margin-top: 14px; display: none; flex-direction: column; gap: 8px; text-align: center;">
                 <button class="btn btn-hijau" style="gap: 6px;" onclick="downloadStrukGambar()">
                     📥 Unduh Struk Gambar
                 </button>
@@ -2101,10 +2101,14 @@ function loadTagihanPelanggan() {
 
         db.ref(`pelanggan/${plgId}`).on('value', snapshot => {
             const container = document.getElementById('strukContainer');
+            const actionContainer = document.getElementById('actionStrukContainer');
+            const btnWa = document.getElementById('btnKonfirmasiWa');
+            
             if (!container) return;
 
             if (!snapshot.exists()) {
                 container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--text-secondary);">Data pelanggan tidak ditemukan.</div>`;
+                if (actionContainer) actionContainer.style.display = 'none';
                 return;
             }
 
@@ -2117,12 +2121,23 @@ function loadTagihanPelanggan() {
             const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
             const foId = data.didaftarkan_oleh || '-';
 
-            const btnWa = document.getElementById('btnKonfirmasiWa');
+            // Pengaturan Tampilan Tombol Berdasarkan Status Lunas
+            if (actionContainer) {
+                actionContainer.style.display = 'flex'; // Tampilkan wadah tombol aksi
+            }
+
+            const btnUnduhStruk = actionContainer ? actionContainer.querySelector('.btn-hijau') : null;
+            if (btnUnduhStruk) {
+                // Tombol Unduh Struk HANYA MUNCUL jika status lunas
+                btnUnduhStruk.style.display = isLunas ? 'inline-flex' : 'none';
+            }
+
             if (btnWa) {
                 const cleanPhone = ewalletNo.replace(/\D/g, '');
                 const waPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
                 const textMsg = encodeURIComponent(`Halo Admin Tirta Sari Giri, saya mengonfirmasi pembayaran tagihan air:\n\n• ID Pelanggan: ${plgId}\n• Nama: ${data.nama || '-'}\n• Total Tagihan: ${formatRupiah(total)}\n• Status Transfer: Sudah Transfer via E-Wallet/Bank\n\nMohon verifikasi lunas. Terima kasih!`);
                 btnWa.href = `https://wa.me/${waPhone}?text=${textMsg}`;
+                // Tombol konfirmasi WA hanya muncul jika belum lunas
                 btnWa.style.display = isLunas ? 'none' : 'inline-flex';
             }
 
