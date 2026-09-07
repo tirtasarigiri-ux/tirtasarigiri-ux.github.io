@@ -135,6 +135,7 @@
             background: var(--bg-hover);
         }
 
+        /* 1 TOMBOL TEMA TUNGGAL DI KANAN BAWAH */
         .theme-switcher-float {
             position: fixed;
             bottom: 20px;
@@ -146,33 +147,16 @@
             border-radius: 50px;
             display: flex;
             align-items: center;
-            padding: 4px 8px;
-            gap: 4px;
+            padding: 6px 14px;
+            gap: 6px;
             backdrop-filter: blur(12px);
-        }
-
-        .theme-btn {
-            background: transparent;
-            border: none;
             cursor: pointer;
-            color: var(--text-secondary);
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 12px;
             font-weight: 700;
+            color: var(--text-accent);
         }
 
-        .theme-btn.active {
-            background: var(--text-accent);
-            color: var(--bg-card-solid);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .theme-btn:hover:not(.active) {
-            color: var(--text-primary);
+        .theme-switcher-float:hover {
             background: var(--bg-hover);
         }
 
@@ -840,10 +824,10 @@
     });
 </script>        
 
-<div class="theme-switcher-float" id="themeSwitcher">
-    <button class="theme-btn" data-theme-val="dark" onclick="setTheme('dark')" title="Tema Gelap">🌙</button>
-    <button class="theme-btn" data-theme-val="light" onclick="setTheme('light')" title="Tema Terang">☀️</button>
-    <button class="theme-btn" data-theme-val="system" onclick="setTheme('system')" title="Ikuti Sistem">💻</button>
+<!-- 1 TOMBOL TEMA TUNGGAL DI KANAN BAWAH -->
+<div class="theme-switcher-float" id="themeSwitcherBtn" onclick="toggleTheme()" title="Ubah Tema">
+    <span id="themeIcon">🌙</span>
+    <span id="themeText" style="font-size: 11px;">Gelap</span>
 </div>
 
 <div id="customModal" class="custom-modal-backdrop">
@@ -902,7 +886,7 @@
                 <span>Ingat Sandi</span>
             </label>
 
-            <button type="submit" class="btn" onclick="cobaPutarMusikOtomatis()">Masuk ke Sistem</button>
+            <button type="submit" class="btn">Masuk ke Sistem</button>
         </form>
     </div>
 </div>
@@ -1620,59 +1604,42 @@
 
 <script>
 // =====================================
-// MANAJEMEN TEMA DINAMIS (GELAP/TERANG/SISTEM)
+// MANAJEMEN TEMA DINAMIS (1 TOMBOL TOGGLE TUNGGAL)
 // =====================================
-function getSystemTheme() {
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-}
-
 function setTheme(themeName) {
-    let activeTheme = themeName;
-    if (themeName === 'system') {
-        activeTheme = getSystemTheme();
-        document.documentElement.setAttribute('data-theme', activeTheme);
-    } else {
-        document.documentElement.setAttribute('data-theme', themeName);
-    }
+    document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('tirta_theme_mode', themeName);
 
     const metaThemeColor = document.getElementById('metaThemeColor');
     const metaStatusBar = document.getElementById('metaStatusBar');
-    if (activeTheme === 'light') {
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+
+    if (themeName === 'light') {
         if (metaThemeColor) metaThemeColor.setAttribute('content', '#F8FAFC');
         if (metaStatusBar) metaStatusBar.setAttribute('content', 'default');
+        if (themeIcon) themeIcon.textContent = '☀️';
+        if (themeText) themeText.textContent = 'Terang';
     } else {
         if (metaThemeColor) metaThemeColor.setAttribute('content', '#070B14');
         if (metaStatusBar) metaStatusBar.setAttribute('content', 'black-translucent');
+        if (themeIcon) themeIcon.textContent = '🌙';
+        if (themeText) themeText.textContent = 'Gelap';
     }
-
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        if (btn.getAttribute('data-theme-val') === themeName) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
 }
 
-const savedTheme = localStorage.getItem('tirta_theme_mode') || 'system';
-setTheme(savedTheme);
-
-window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-    if (localStorage.getItem('tirta_theme_mode') === 'system') {
-        setTheme('system');
+function toggleTheme() {
+    cobaPutarMusikOtomatis();
+    const currentTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
+    if (currentTheme === 'dark') {
+        setTheme('light');
+    } else {
+        setTheme('dark');
     }
-});
+}
 
-// =====================================
-// FITUR AUDIO / MUSIK LATAR BELAKANG
-// =====================================
-const playlistMusik = [
-    { nama: "Lagu 1", src: "musik1.mp3" },
-    { nama: "Lagu 2", src: "musik2.mp3" },
-    { nama: "Lagu 3", src: "musik3.mp3" }
-	{ nama: "Lagu 4", src: "musik4.mp3" }// Anda bisa menambah sebanyak yang diinginkan
-];
+const savedTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
+setTheme(savedTheme);
 
 // =====================================
 // PENGATURAN PLAYLIST & KONTROL MUSIK LENGKAP
@@ -1680,10 +1647,18 @@ const playlistMusik = [
 const playlistMusik = [
     { nama: "Lagu 1", src: "musik1.mp3" },
     { nama: "Lagu 2", src: "musik2.mp3" },
-    { nama: "Lagu 3", src: "musik3.mp3" } // Sesuaikan dengan file lagu Anda
+    { nama: "Lagu 3", src: "musik3.mp3" },
+    { nama: "Lagu 4", src: "musik4.mp3" }
 ];
 
 let indeksLaguAktif = 0;
+
+function cobaPutarMusikOtomatis() {
+    const audio = document.getElementById('bgMusic');
+    if (audio && audio.paused && (!audio.src || audio.src === window.location.href)) {
+        muatDanPutarLagu(indeksLaguAktif);
+    }
+}
 
 function muatDanPutarLagu(indeks) {
     const audio = document.getElementById('bgMusic');
@@ -1693,8 +1668,7 @@ function muatDanPutarLagu(indeks) {
 
     indeksLaguAktif = (indeks + playlistMusik.length) % playlistMusik.length;
     
-    // Cek jika sumber lagu belum diset atau berbeda
-    if (!audio.src.includes(playlistMusik[indeksLaguAktif].src)) {
+    if (!audio.src || !audio.src.includes(playlistMusik[indeksLaguAktif].src)) {
         audio.src = playlistMusik[indeksLaguAktif].src;
     }
     
@@ -1702,7 +1676,7 @@ function muatDanPutarLagu(indeks) {
         if (musicText) musicText.textContent = playlistMusik[indeksLaguAktif].nama;
         if (musicIcon) musicIcon.textContent = "⏸";
     }).catch(err => {
-        console.log("Gagal memutar audio: ", err);
+        console.log("Audio menunggu interaksi pengguna: ", err);
     });
 }
 
@@ -1744,13 +1718,12 @@ function stopMusik() {
 
     if (!audio) return;
     audio.pause();
-    audio.currentTime = 0; // Kembalikan ke detik ke-0
+    audio.currentTime = 0;
     
     if (musicText) musicText.textContent = "Play";
     if (musicIcon) musicIcon.textContent = "▶";
 }
 
-// Event otomatis untuk memutar lagu berikutnya saat lagu selesai
 document.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('bgMusic');
     if (audio) {
