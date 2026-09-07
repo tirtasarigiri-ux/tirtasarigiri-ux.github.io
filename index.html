@@ -111,6 +111,30 @@
             padding-bottom: 80px;
         }
 
+        .music-control-float {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 999999;
+            background: var(--bg-card-solid);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            gap: 6px;
+            backdrop-filter: blur(12px);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-accent);
+            cursor: pointer;
+        }
+
+        .music-control-float:hover {
+            background: var(--bg-hover);
+        }
+
         .theme-switcher-float {
             position: fixed;
             bottom: 20px;
@@ -753,6 +777,18 @@
 </head>
 <body>
 
+<!-- ELEMEN AUDIO LATAR BELAKANG (DARI HOSTING SENDIRI) -->
+<audio id="bgMusic" loop preload="auto">
+    <source src="musik.mp3" type="audio/mpeg">
+    Browser Anda tidak mendukung elemen audio.
+</audio>
+
+<!-- TOMBOL KONTROL MUSIK MENGAPUNG DI KIRI BAWAH -->
+<div class="music-control-float" id="musicControlBtn" onclick="toggleBackgroundMusic()" title="Putar / Jeda Musik">
+    <span id="musicIcon">🎵</span>
+    <span id="musicText">Musik: Mati</span>
+</div>
+
 <div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
 </div>
 
@@ -860,7 +896,7 @@
                 <span>Ingat Sandi</span>
             </label>
 
-            <button type="submit" class="btn">Masuk ke Sistem</button>
+            <button type="submit" class="btn" onclick="cobaPutarMusikOtomatis()">Masuk ke Sistem</button>
         </form>
     </div>
 </div>
@@ -1623,6 +1659,44 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 });
 
 // =====================================
+// FITUR AUDIO / MUSIK LATAR BELAKANG
+// =====================================
+function toggleBackgroundMusic() {
+    const audio = document.getElementById('bgMusic');
+    const musicText = document.getElementById('musicText');
+    const musicIcon = document.getElementById('musicIcon');
+
+    if (!audio) return;
+
+    if (audio.paused) {
+        audio.play().then(() => {
+            musicText.textContent = "Musik: Hidup";
+            musicIcon.textContent = "🔊";
+        }).catch(err => {
+            console.log("Gagal memutar audio: ", err);
+            showAlert("Ketuk layar terlebih dahulu untuk mengizinkan pemutaran musik.");
+        });
+    } else {
+        audio.pause();
+        musicText.textContent = "Musik: Mati";
+        musicIcon.textContent = "🎵";
+    }
+}
+
+function cobaPutarMusikOtomatis() {
+    const audio = document.getElementById('bgMusic');
+    const musicText = document.getElementById('musicText');
+    const musicIcon = document.getElementById('musicIcon');
+
+    if (audio && audio.paused) {
+        audio.play().then(() => {
+            musicText.textContent = "Musik: Hidup";
+            musicIcon.textContent = "🔊";
+        }).catch(() => {});
+    }
+}
+
+// =====================================
 // KONFIGURASI PWA & PENGAMANAN URL BAR
 // =====================================
 (function inisialisasiPWA() {
@@ -1908,6 +1982,7 @@ function deteksiRole(input) {
 }
 
 function prosesLogin() {
+    cobaPutarMusikOtomatis();
     const id = document.getElementById('loginId').value.trim().toUpperCase();
     const sandi = document.getElementById('loginSandi').value.trim();
     const rememberMe = document.getElementById('rememberMe').checked;
@@ -2026,6 +2101,7 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
 }
 
 function bukaSubView(dashId, subViewId) {
+    cobaPutarMusikOtomatis();
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
 
@@ -2046,6 +2122,7 @@ function bukaSubView(dashId, subViewId) {
 }
 
 function kembaliKeLauncher(dashId) {
+    cobaPutarMusikOtomatis();
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
 
@@ -2059,6 +2136,7 @@ function kembaliKeLauncher(dashId) {
 }
 
 function verifikasiLunas(id) {
+    cobaPutarMusikOtomatis();
     targetVerifikasiId = id;
     const modal = document.getElementById('modalMetodeBayar');
     if (modal) modal.style.display = 'flex';
@@ -2292,6 +2370,7 @@ function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, t
 }
 
 function downloadStrukGambar() {
+    cobaPutarMusikOtomatis();
     const cardBox = document.getElementById('strukCardBox');
     if (!cardBox) {
         showAlert("Struk belum siap diunduh!");
@@ -2320,6 +2399,7 @@ function downloadStrukGambar() {
 }
 
 function updateProfilPelanggan() {
+    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('plgAkunNama').value.trim();
@@ -2390,6 +2470,7 @@ function initFoDashboard() {
 }
 
 function simpanPelangganByFo() {
+    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = document.getElementById('plgId').value.trim().toUpperCase();
     const nama = document.getElementById('plgNama').value.trim();
@@ -2472,12 +2553,14 @@ function loadPelangganFo() {
 }
 
 function hapusPelanggan(id) {
+    cobaPutarMusikOtomatis();
     showConfirm(`Hapus pelanggan ${id}?`, () => {
         db.ref(`pelanggan/${id}`).remove().then(() => showAlert("Pelanggan berhasil dihapus!"));
     });
 }
 
 function cariPelangganMeter() {
+    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const query = document.getElementById('cariPlgId').value.trim();
     if (!query) {
@@ -2535,6 +2618,7 @@ function cariPelangganMeter() {
 }
 
 function simpanCatatMeter() {
+    cobaPutarMusikOtomatis();
     const id = document.getElementById('cariPlgId').value.trim().toUpperCase();
     const meterLalu = parseDesimal(document.getElementById('meterLalu').value);
     const meterSekarangVal = document.getElementById('meterSekarang').value.trim();
@@ -2665,6 +2749,7 @@ function loadTagihanFo() {
 }
 
 function updateProfilFo() {
+    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('foAkunNama').value.trim();
@@ -2684,6 +2769,7 @@ function updateProfilFo() {
 }
 
 function simpanPetugas() {
+    cobaPutarMusikOtomatis();
     const id = document.getElementById('foId').value.trim().toUpperCase();
     const nama = document.getElementById('foNama').value.trim();
     const wilayah = document.getElementById('foWilayah').value;
@@ -2734,12 +2820,14 @@ function loadDataPetugas() {
 }
 
 function hapusPetugas(id) {
+    cobaPutarMusikOtomatis();
     showConfirm(`Apakah Anda yakin ingin menghapus petugas ${id}?`, () => {
         db.ref(`staf_fo/${id}`).remove().then(() => showAlert("Petugas berhasil dihapus!"));
     });
 }
 
 function simpanTarif() {
+    cobaPutarMusikOtomatis();
     const hargaM3 = Number(document.getElementById('tarifM3').value);
     const biayaBeban = Number(document.getElementById('biayaBeban').value);
     const bankNo = document.getElementById('tarifBankNo').value.trim();
@@ -2831,6 +2919,7 @@ function loadRiwayatTagihan() {
 }
 
 function simpanKas() {
+    cobaPutarMusikOtomatis();
     const tglInput = document.getElementById('kasTanggal').value;
     const jenis = document.getElementById('kasJenis').value;
     const nominal = Number(document.getElementById('kasNominal').value);
@@ -3071,6 +3160,7 @@ function initAkunForm() {
 }
 
 function updateProfilOffice() {
+    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('akunNama').value.trim();
@@ -3090,6 +3180,7 @@ function updateProfilOffice() {
 }
 
 function logout() {
+    cobaPutarMusikOtomatis();
     currentUser = null;
 
     localStorage.removeItem('tirta_remember');
