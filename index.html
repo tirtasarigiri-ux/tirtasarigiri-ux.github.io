@@ -777,19 +777,25 @@
 </head>
 <body>
 
-<!-- ELEMEN AUDIO LATAR BELAKANG (DARI HOSTING SENDIRI) -->
-<audio id="bgMusic" loop preload="auto">
-    <source src="musik.mp3" type="audio/mpeg">
+<!-- ELEMEN AUDIO LATAR BELAKANG DENGAN PLAYLIST -->
+<audio id="bgMusic" preload="auto">
     Browser Anda tidak mendukung elemen audio.
 </audio>
 
-<!-- TOMBOL KONTROL MUSIK MENGAPUNG DI KIRI BAWAH -->
-<div class="music-control-float" id="musicControlBtn" onclick="toggleBackgroundMusic()" title="Putar / Jeda Musik">
-    <span id="musicIcon">🎵</span>
-    <span id="musicText">Musik: Mati</span>
-</div>
+<!-- TOMBOL KONTROL MUSIK LENGKAP: PREV, PLAY/PAUSE, NEXT, STOP -->
+<div class="music-control-float" id="musicControlContainer" style="gap: 8px; padding: 6px 10px;">
+    <button type="button" onclick="laguSebelumnya()" title="Lagu Sebelumnya" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px;">⏮</button>
+    
+    <button type="button" id="btnPlayPause" onclick="toggleBackgroundMusic()" title="Putar / Jeda Musik" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px; display:flex; align-items:center; gap:4px; font-weight:700;">
+        <span id="musicIcon">▶</span>
+        <span id="musicText" style="font-size:11px;">Play</span>
+    </button>
 
-<div id="networkStatusBanner" style="display: none; padding: 6px 12px; text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 10px; border-radius: 8px; transition: background-color 0.3s ease;">
+    <button type="button" onclick="laguBerikutnya()" title="Lagu Berikutnya" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px;">⏭</button>
+
+    <span style="color: var(--border-color); font-size: 14px;">|</span>
+
+    <button type="button" onclick="stopMusik()" title="Hentikan Musik" style="background:transparent; border:none; color:var(--color-merah, #F87171); cursor:pointer; font-size:13px; padding:2px;">⏹</button>
 </div>
 
 <script>
@@ -1661,6 +1667,45 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 // =====================================
 // FITUR AUDIO / MUSIK LATAR BELAKANG
 // =====================================
+const playlistMusik = [
+    { nama: "Lagu 1", src: "musik1.mp3" },
+    { nama: "Lagu 2", src: "musik2.mp3" },
+    { nama: "Lagu 3", src: "musik3.mp3" }
+	{ nama: "Lagu 4", src: "musik4.mp3" }// Anda bisa menambah sebanyak yang diinginkan
+];
+
+// =====================================
+// PENGATURAN PLAYLIST & KONTROL MUSIK LENGKAP
+// =====================================
+const playlistMusik = [
+    { nama: "Lagu 1", src: "musik1.mp3" },
+    { nama: "Lagu 2", src: "musik2.mp3" },
+    { nama: "Lagu 3", src: "musik3.mp3" } // Sesuaikan dengan file lagu Anda
+];
+
+let indeksLaguAktif = 0;
+
+function muatDanPutarLagu(indeks) {
+    const audio = document.getElementById('bgMusic');
+    const musicText = document.getElementById('musicText');
+    const musicIcon = document.getElementById('musicIcon');
+    if (!audio) return;
+
+    indeksLaguAktif = (indeks + playlistMusik.length) % playlistMusik.length;
+    
+    // Cek jika sumber lagu belum diset atau berbeda
+    if (!audio.src.includes(playlistMusik[indeksLaguAktif].src)) {
+        audio.src = playlistMusik[indeksLaguAktif].src;
+    }
+    
+    audio.play().then(() => {
+        if (musicText) musicText.textContent = playlistMusik[indeksLaguAktif].nama;
+        if (musicIcon) musicIcon.textContent = "⏸";
+    }).catch(err => {
+        console.log("Gagal memutar audio: ", err);
+    });
+}
+
 function toggleBackgroundMusic() {
     const audio = document.getElementById('bgMusic');
     const musicText = document.getElementById('musicText');
@@ -1669,32 +1714,51 @@ function toggleBackgroundMusic() {
     if (!audio) return;
 
     if (audio.paused) {
-        audio.play().then(() => {
-            musicText.textContent = "Musik: Hidup";
-            musicIcon.textContent = "🔊";
-        }).catch(err => {
-            console.log("Gagal memutar audio: ", err);
-            showAlert("Ketuk layar terlebih dahulu untuk mengizinkan pemutaran musik.");
-        });
+        if (!audio.src || audio.src === window.location.href || audio.src === "") {
+            muatDanPutarLagu(indeksLaguAktif);
+        } else {
+            audio.play().then(() => {
+                if (musicText) musicText.textContent = playlistMusik[indeksLaguAktif].nama;
+                if (musicIcon) musicIcon.textContent = "⏸";
+            }).catch(() => {});
+        }
     } else {
         audio.pause();
-        musicText.textContent = "Musik: Mati";
-        musicIcon.textContent = "🎵";
+        if (musicText) musicText.textContent = "Pause";
+        if (musicIcon) musicIcon.textContent = "▶";
     }
 }
 
-function cobaPutarMusikOtomatis() {
+function laguSebelumnya() {
+    muatDanPutarLagu(indeksLaguAktif - 1);
+}
+
+function laguBerikutnya() {
+    muatDanPutarLagu(indeksLaguAktif + 1);
+}
+
+function stopMusik() {
     const audio = document.getElementById('bgMusic');
     const musicText = document.getElementById('musicText');
     const musicIcon = document.getElementById('musicIcon');
 
-    if (audio && audio.paused) {
-        audio.play().then(() => {
-            musicText.textContent = "Musik: Hidup";
-            musicIcon.textContent = "🔊";
-        }).catch(() => {});
-    }
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0; // Kembalikan ke detik ke-0
+    
+    if (musicText) musicText.textContent = "Play";
+    if (musicIcon) musicIcon.textContent = "▶";
 }
+
+// Event otomatis untuk memutar lagu berikutnya saat lagu selesai
+document.addEventListener('DOMContentLoaded', () => {
+    const audio = document.getElementById('bgMusic');
+    if (audio) {
+        audio.addEventListener('ended', () => {
+            laguBerikutnya();
+        });
+    }
+});
 
 // =====================================
 // KONFIGURASI PWA & PENGAMANAN URL BAR
