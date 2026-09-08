@@ -1944,11 +1944,16 @@ window.addEventListener('DOMContentLoaded', () => {
     initVideotronPengumuman();
     initLogoDinamis();
 
+    const activeSession = sessionStorage.getItem('tirta_active_session');
     const isRemembered = localStorage.getItem('tirta_remember') === 'true';
     const savedId = localStorage.getItem('tirta_saved_id');
     const savedSandi = localStorage.getItem('tirta_saved_sandi');
 
-    if (isRemembered && savedId && savedSandi) {
+    if (activeSession) {
+        const sessionData = JSON.parse(activeSession);
+        currentUser = sessionData.userData;
+        tampilkanDashboard(sessionData.viewId, sessionData.userData, sessionData.id, sessionData.roleTitle);
+    } else if (isRemembered && savedId && savedSandi) {
         document.getElementById('loginId').value = savedId;
         document.getElementById('loginSandi').value = savedSandi;
         document.getElementById('rememberMe').checked = true;
@@ -2104,6 +2109,8 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
     const targetViewEl = document.getElementById(viewId);
     if (targetViewEl) targetViewEl.classList.add('aktif');
 
+    sessionStorage.setItem('tirta_active_session', JSON.stringify({ viewId, userData, id, roleTitle }));
+
     let profileHtml = `
         <div class="user-info-details">
             <div>ID: <span>${id}</span></div>
@@ -2139,6 +2146,7 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
 
 function bukaSubView(dashId, subViewId) {
     cobaPutarMusikOtomatis();
+    history.pushState({ dashId, subViewId }, "");
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
 
@@ -2171,6 +2179,23 @@ function kembaliKeLauncher(dashId) {
 
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
+
+// Menangani Tombol Kembali / Gestur HP
+window.addEventListener('popstate', (event) => {
+    const activeView = document.querySelector('.view-section.aktif');
+    if (!activeView) return;
+
+    const activeSubView = activeView.querySelector('.sub-view.aktif');
+    if (activeSubView) {
+        if (activeView.id === 'dashOffice') kembaliKeLauncher('dashOffice');
+        else if (activeView.id === 'dashFo') kembaliKeLauncher('dashFo');
+        else if (activeView.id === 'dashPelanggan') kembaliKeLauncher('dashPelanggan');
+    } else if (activeView.id !== 'loginView') {
+        showConfirm("Apakah Anda ingin keluar dari akun?", () => {
+            logout();
+        });
+    }
+});
 
 function verifikasiLunas(id) {
     cobaPutarMusikOtomatis();
@@ -3223,6 +3248,7 @@ function logout() {
     localStorage.removeItem('tirta_remember');
     localStorage.removeItem('tirta_saved_id');
     localStorage.removeItem('tirta_saved_sandi');
+    sessionStorage.removeItem('tirta_active_session');
 
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('aktif'));
     const loginView = document.getElementById('loginView');
