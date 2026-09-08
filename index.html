@@ -757,6 +757,48 @@
         }
 
         .custom-modal-btns { display: flex; gap: 10px; justify-content: center; }
+		
+		/* Styling Walkie Talkie khusus Petugas */
+.walkie-container {
+    text-align: center;
+    padding: 10px;
+}
+.ptt-btn {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #EF4444, #B91C1C);
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 20px auto;
+    transition: transform 0.1s ease, background 0.2s ease;
+    outline: none;
+}
+.ptt-btn:active, .ptt-btn.transmitting {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.5);
+}
+.walkie-log {
+    background: var(--bg-element);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    text-align: left;
+    font-size: 11px;
+    margin-top: 10px;
+}
     </style>
 </head>
 <body>
@@ -925,6 +967,10 @@
                 <div class="launcher-icon">📢</div>
                 <div class="launcher-title">Videotron</div>
             </div>
+			<div class="launcher-card" onclick="bukaSubView('dashOffice', 'subWalkieTalkie')">
+				<div class="launcher-icon">📻</div>
+				<div class="launcher-title">Walkie Talkie</div>
+			</div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
@@ -1153,6 +1199,27 @@
                 <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
             </form>
         </div>
+		
+		<!-- SUB-MENU WALKIE TALKIE STAF OFFICE -->
+		<div id="subWalkieTalkie" class="sub-view">
+			<div class="subview-header">
+				<h3 style="font-size:12px; color:var(--text-accent);">Radio Walkie Talkie Petugas</h3>
+				<button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+			</div>
+			<div class="walkie-container">
+				<p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Tekan dan tahan tombol di bawah untuk berbicara dengan sesama petugas secara langsung.</p>
+				<button id="pttButtonOffice" class="ptt-btn" onmousedown="mulaiBicaraWalkie()" onmouseup="hentiBicaraWalkie()" ontouchstart="mulaiBicaraWalkie()" ontouchend="hentiBicaraWalkie()">
+					<span style="font-size: 32px;">🎙️</span>
+					<span id="pttText">TEKAN & BICARA</span>
+				</button>
+				<div id="walkieStatus" style="font-size: 12px; font-weight: 700; color: var(--text-accent); margin-bottom: 8px;">Status: Standby (Siaga)</div>
+				
+				<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: left; margin-top: 10px;">Log Transmisi Suara:</div>
+				<div class="walkie-log" id="walkieLogOffice">
+					<div>- Sistem Walkie Talkie siap terhubung -</div>
+				</div>
+			</div>
+		</div>
 
         <!-- SUB-MENU 6: PENGATURAN AKUN STAF & LOGO -->
         <div id="subAkun" class="sub-view">
@@ -1234,6 +1301,10 @@
                 <div class="launcher-icon">💰</div>
                 <div class="launcher-title">Laporan Kas</div>
             </div>
+			<div class="launcher-card" onclick="bukaSubView('dashFo', 'subWalkieTalkieFo')">
+				<div class="launcher-icon">📻</div>
+				<div class="launcher-title">Walkie Talkie</div>
+			</div>
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
@@ -1414,6 +1485,27 @@
                 </table>
             </div>
         </div>
+		
+		<!-- SUB-MENU WALKIE TALKIE FO -->
+		<div id="subWalkieTalkieFo" class="sub-view">
+			<div class="subview-header">
+				<h3 style="font-size:12px; color:var(--text-accent);">Radio Walkie Talkie Petugas</h3>
+				<button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+			</div>
+			<div class="walkie-container">
+				<p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Tekan dan tahan tombol di bawah untuk berbicara dengan sesama petugas secara langsung.</p>
+				<button id="pttButtonFo" class="ptt-btn" onmousedown="mulaiBicaraWalkie()" onmouseup="hentiBicaraWalkie()" ontouchstart="mulaiBicaraWalkie()" ontouchend="hentiBicaraWalkie()">
+					<span style="font-size: 32px;">🎙️</span>
+					<span id="pttTextFo">TEKAN & BICARA</span>
+				</button>
+				<div id="walkieStatusFo" style="font-size: 12px; font-weight: 700; color: var(--text-accent); margin-bottom: 8px;">Status: Standby (Siaga)</div>
+				
+				<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: left; margin-top: 10px;">Log Transmisi Suara:</div>
+				<div class="walkie-log" id="walkieLogFo">
+					<div>- Sistem Walkie Talkie siap terhubung -</div>
+				</div>
+			</div>
+		</div>
 
         <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
         <div id="subFoAkun" class="sub-view">
@@ -1640,6 +1732,119 @@ function toggleTheme() {
 
 const savedTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
 setTheme(savedTheme);
+
+// =====================================
+// FITUR WALKIE TALKIE KHUSUS PETUGAS
+// =====================================
+let mediaRecorder = null;
+let audioChunks = [];
+
+function mulaiBicaraWalkie() {
+    cobaPutarMusikOtomatis();
+    const btn1 = document.getElementById('pttButtonOffice');
+    const btn2 = document.getElementById('pttButtonFo');
+    const status1 = document.getElementById('walkieStatus');
+    const status2 = document.getElementById('walkieStatusFo');
+
+    if (btn1) btn1.classList.add('transmitting');
+    if (btn2) btn2.classList.add('transmitting');
+    if (status1) status1.textContent = "Status: 🔴 Sedang Mengirim Suara...";
+    if (status2) status2.textContent = "Status: 🔴 Sedang Mengirim Suara...";
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = function() {
+                const base64Audio = reader.result;
+                kirimSuaraKeDatabase(base64Audio);
+            };
+        };
+
+        mediaRecorder.start();
+    }).catch(err => {
+        showAlert("Gagal mengakses mikrofon: " + err.message);
+        hentiBicaraWalkie();
+    });
+}
+
+function hentiBicaraWalkie() {
+    const btn1 = document.getElementById('pttButtonOffice');
+    const btn2 = document.getElementById('pttButtonFo');
+    const status1 = document.getElementById('walkieStatus');
+    const status2 = document.getElementById('walkieStatusFo');
+
+    if (btn1) btn1.classList.remove('transmitting');
+    if (btn2) btn2.classList.remove('transmitting');
+    if (status1) status1.textContent = "Status: Standby (Siaga)";
+    if (status2) status2.textContent = "Status: Standby (Siaga)";
+
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+    }
+}
+
+function kirimSuaraKeDatabase(audioBase64) {
+    if (!currentUser) return;
+    const pengirim = `${currentUser.id} - ${currentUser.nama || 'Petugas'}`;
+    
+    db.ref('walkie_talkie_channel').set({
+        pengirim: pengirim,
+        audio: audioBase64,
+        waktu: Date.now()
+    }).catch(err => {
+        console.log("Gagal mengirim siaran suara: ", err);
+    });
+}
+
+// Mendengarkan siaran masuk dari petugas lain secara real-time
+function initListenerWalkieTalkie() {
+    db.ref('walkie_talkie_channel').on('value', snapshot => {
+        if (!snapshot.exists()) return;
+        const data = snapshot.val();
+        
+        // Hindari memutar suara milik sendiri yang baru saja dikirim
+        if (currentUser && data.pengirim && data.pengirim.startsWith(currentUser.id)) {
+            tambahLogWalkie(`[Anda mengirim pesan suara]`);
+            return;
+        }
+
+        if (data.audio) {
+            tambahLogWalkie(`Pesan masuk dari: ${data.pengirim}`);
+            const audioPlay = new Audio(data.audio);
+            audioPlay.play().catch(e => console.log("Gagal memutar audio walkie:", e));
+        }
+    });
+}
+
+function tambahLogWalkie(pesan) {
+    const logOffice = document.getElementById('walkieLogOffice');
+    const logFo = document.getElementById('walkieLogFo');
+    const waktuFormat = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const logHtml = `<div>[${waktuFormat}] ${pesan}</div>`;
+
+    if (logOffice) {
+        logOffice.innerHTML += logHtml;
+        logOffice.scrollTop = logOffice.scrollHeight;
+    }
+    if (logFo) {
+        logFo.innerHTML += logHtml;
+        logFo.scrollTop = logFo.scrollHeight;
+    }
+}
+
+// Aktifkan listener saat halaman dimuat
+window.addEventListener('DOMContentLoaded', () => {
+    initListenerWalkieTalkie();
+});
 
 // =====================================
 // PENGATURAN PLAYLIST & KONTROL MUSIK LENGKAP
