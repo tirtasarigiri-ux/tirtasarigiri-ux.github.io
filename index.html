@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" id="metaThemeColor" content="#0B132B">
     
-    <!-- PWA & Mobile Web App Meta Tags (Hiding Address Bar in Standalone Mode) -->
+    <!-- PWA & Mobile Web App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" id="metaStatusBar" content="black-translucent">
@@ -42,11 +42,10 @@
         :root {
             color-scheme: dark light;
 
-            /* Default Modern Dark Theme */
             --bg-main: #070B14;
-            --bg-card: rgba(17, 24, 39, 0.8);
+            --bg-card: rgba(17, 24, 39, 0.85);
             --bg-card-solid: #111827;
-            --bg-element: rgba(31, 41, 55, 0.65);
+            --bg-element: rgba(31, 41, 55, 0.7);
             --bg-hover: rgba(55, 65, 81, 0.85);
             --border-color: rgba(75, 85, 99, 0.4);
             --border-highlight: #38BDF8;
@@ -64,7 +63,6 @@
             --btn-back-text: #F9FAFB;
         }
 
-        /* Light Mode Theme Customization */
         [data-theme="light"] {
             color-scheme: light;
             --bg-main: #F8FAFC;
@@ -111,36 +109,11 @@
             padding-bottom: 80px;
         }
 
-        .music-control-float {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 999999;
-            background: var(--bg-card-solid);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-card);
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            padding: 6px 12px;
-            gap: 6px;
-            backdrop-filter: blur(12px);
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-accent);
-            cursor: pointer;
-        }
-
-        .music-control-float:hover {
-            background: var(--bg-hover);
-        }
-
-        /* 1 TOMBOL TEMA TUNGGAL DI KANAN BAWAH */
         .theme-switcher-float {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 999999;
+            z-index: 10000;
             background: var(--bg-card-solid);
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-card);
@@ -469,6 +442,18 @@
         #subFoPelanggan th:nth-child(2), #subFoPelanggan td:nth-child(2) { width: 35%; }
         #subFoPelanggan th:nth-child(3), #subFoPelanggan td:nth-child(3) { width: 30%; }
 
+        #subFoTagihan .table-responsive { overflow-x: hidden; }
+        #subFoTagihan table { table-layout: fixed; width: 100%; }
+        #subFoTagihan th, #subFoTagihan td {
+            white-space: normal;
+            word-break: break-word;
+            padding: 8px 6px;
+            font-size: 11px;
+            vertical-align: middle;
+        }
+        #subFoTagihan th:nth-child(1), #subFoTagihan td:nth-child(1) { width: 55%; }
+        #subFoTagihan th:nth-child(2), #subFoTagihan td:nth-child(2) { width: 45%; }
+
         .grid-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -673,7 +658,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            height: 150px;
+            height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -690,24 +675,15 @@
             width: 100%;
         }
 
-        /* PILIHAN KELAS ANIMASI */
-        .anim-fade { animation: vFade 0.6s ease-in-out; }
+        /* Pilihan Animasi Videotron (Slide, Zoom, Marquee) */
         .anim-slide { animation: vSlide 0.5s ease-out; }
         .anim-zoom { animation: vZoom 0.5s ease-out; }
-        .anim-statis { animation: none; }
 
-        /* ANIMASI MARQUEE */
         .anim-marquee {
             white-space: nowrap;
             display: inline-block;
             padding-left: 100%;
             animation: vMarquee 12s linear infinite;
-        }
-
-        /* KEYFRAMES */
-        @keyframes vFade {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
         }
 
         @keyframes vSlide {
@@ -724,12 +700,13 @@
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
+
         .custom-modal-backdrop {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            z-index: 9999999;
+            z-index: 10001;
             justify-content: center;
             align-items: center;
             padding: 16px;
@@ -757,116 +734,11 @@
         }
 
         .custom-modal-btns { display: flex; gap: 10px; justify-content: center; }
-		
-		/* Styling Walkie Talkie khusus Petugas */
-.walkie-container {
-    text-align: center;
-    padding: 10px;
-}
-.ptt-btn {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #EF4444, #B91C1C);
-    color: white;
-    font-size: 16px;
-    font-weight: 800;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-    cursor: pointer;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin: 20px auto;
-    transition: transform 0.1s ease, background 0.2s ease;
-    outline: none;
-}
-.ptt-btn:active, .ptt-btn.transmitting {
-    transform: scale(0.95);
-    background: linear-gradient(135deg, #10B981, #059669);
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.5);
-}
-.walkie-log {
-    background: var(--bg-element);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-    text-align: left;
-    font-size: 11px;
-    margin-top: 10px;
-}
     </style>
 </head>
 <body>
 
-<!-- ELEMEN AUDIO LATAR BELAKANG DENGAN PLAYLIST -->
-<audio id="bgMusic" preload="auto">
-    Browser Anda tidak mendukung elemen audio.
-</audio>
-
-<!-- TOMBOL KONTROL MUSIK LENGKAP: PREV, PLAY/PAUSE, NEXT, STOP -->
-<div class="music-control-float" id="musicControlContainer" style="gap: 8px; padding: 6px 10px;">
-    <button type="button" onclick="laguSebelumnya()" title="Lagu Sebelumnya" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px;">⏮</button>
-    
-    <button type="button" id="btnPlayPause" onclick="toggleBackgroundMusic()" title="Putar / Jeda Musik" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px; display:flex; align-items:center; gap:4px; font-weight:700;">
-        <span id="musicIcon">▶</span>
-        <span id="musicText" style="font-size:11px;">Play</span>
-    </button>
-
-    <button type="button" onclick="laguBerikutnya()" title="Lagu Berikutnya" style="background:transparent; border:none; color:var(--text-accent); cursor:pointer; font-size:14px; padding:2px;">⏭</button>
-
-    <span style="color: var(--border-color); font-size: 14px;">|</span>
-
-    <button type="button" onclick="stopMusik()" title="Hentikan Musik" style="background:transparent; border:none; color:var(--color-merah, #F87171); cursor:pointer; font-size:13px; padding:2px;">⏹</button>
-</div>
-
-<script>
-    function updateOnlineStatus(event) {
-        const banner = document.getElementById('networkStatusBanner');
-        
-        if (!navigator.onLine) {
-            if (banner) {
-                banner.style.background = '#EF4444';
-                banner.style.color = '#ffffff';
-                banner.innerHTML = '⚠️ Anda sedang offline. Data akan disinkronkan otomatis saat terhubung kembali.';
-                banner.style.display = 'block';
-            }
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().goOffline();
-            }
-        } else {
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().goOnline();
-            }
-            
-            if (banner && event && event.type === 'online') {
-                banner.style.background = '#10B981';
-                banner.style.color = '#ffffff';
-                banner.innerHTML = '✅ Terhubung kembali ke jaringan internet!';
-                banner.style.display = 'block';
-                
-                setTimeout(() => {
-                    banner.style.display = 'none';
-                }, 3000);
-            } else if (banner) {
-                banner.style.display = 'none';
-            }
-        }
-    }
-
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    
-    window.addEventListener('DOMContentLoaded', () => {
-        updateOnlineStatus();
-    });
-</script>        
-
-<!-- 1 TOMBOL TEMA TUNGGAL DI KANAN BAWAH -->
+<!-- TOMBOL TEMA TUNGGAL DI KANAN BAWAH -->
 <div class="theme-switcher-float" id="themeSwitcherBtn" onclick="toggleTheme()" title="Ubah Tema">
     <span id="themeIcon">🌙</span>
     <span id="themeText" style="font-size: 11px;">Gelap</span>
@@ -967,10 +839,6 @@
                 <div class="launcher-icon">📢</div>
                 <div class="launcher-title">Videotron</div>
             </div>
-			<div class="launcher-card" onclick="bukaSubView('dashOffice', 'subWalkieTalkie')">
-				<div class="launcher-icon">📻</div>
-				<div class="launcher-title">Walkie Talkie</div>
-			</div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
@@ -1011,21 +879,18 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nama</th>
-                            <th>Wilayah</th>
-                            <th>Sandi</th>
-                            <th>Aksi</th>
+                            <th>ID / Nama / Sandi</th>
+                            <th>Wilayah & Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelPetugas">
-                        <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SUB-MENU 2: ATUR TARIF & PEMBAYARAN TRANSFER TERPISAH -->
+        <!-- SUB-MENU 2: ATUR TARIF & PEMBAYARAN -->
         <div id="subTarif" class="sub-view">
             <div class="subview-header">
                 <h3 style="font-size:12px; color:var(--text-accent);">Pengaturan Tarif & Pembayaran</h3>
@@ -1042,7 +907,7 @@
                 </div>
                 <div class="grup">
                     <label>🏦 Nomor Rekening Bank (Transfer Bank)</label>
-                    <input type="text" id="tarifBankNo" placeholder="Contoh: 1234-5678-90 (BSI / BRI / Mandiri)" required>
+                    <input type="text" id="tarifBankNo" placeholder="Contoh: 1234-5678-90" required>
                 </div>
                 <div class="grup">
                     <label>Nama Pemilik Rekening Bank (a.n.)</label>
@@ -1078,13 +943,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Pelanggan</th>
-                            <th>Rincian</th>
-                            <th>Status</th>
+                            <th>Nama / ID / Wilayah</th>
+                            <th>Pemakaian / Total / Status</th>
                         </tr>
                     </thead>
                     <tbody id="tabelTagihan">
-                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1161,22 +1025,21 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Tanggal</th>
-                            <th>Keterangan</th>
-                            <th>Nominal</th>
+                            <th>Tanggal / Jenis</th>
+                            <th>Keterangan / Nominal</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKas">
-                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SUB-MENU 5: KELOLA TEKS BERJALAN / PENGUMUMAN -->
+        <!-- SUB-MENU 5: VIDEOTRON & PENGATURAN ANIMASI -->
         <div id="subTeksBerjalan" class="sub-view">
             <div class="subview-header">
-                <h3 style="font-size:12px; color:var(--text-accent);">Teks & Animasi</h3>
+                <h3 style="font-size:12px; color:var(--text-accent);">Papan Videotron & Animasi</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
             </div>
             <form onsubmit="event.preventDefault(); simpanTeksBerjalan();">
@@ -1186,40 +1049,17 @@
                 </div>
 
                 <div class="grup">
-                    <label>Gaya Animasi</label>
+                    <label>Gaya Animasi Videotron</label>
                     <select id="inputAnimasiVideotron">
-                        <option value="fade">Fade In</option>
-                        <option value="slide">Slide Up</option>
-                        <option value="zoom">Zoom In</option>
-                        <option value="marquee">Running Text</option>
-                        <option value="statis">Statis</option>
+                        <option value="slide">Slide Up (Geser Dari Bawah)</option>
+                        <option value="zoom">Zoom In (Membesar Perlahan)</option>
+                        <option value="marquee">Running Text (Berjalan Ke Kiri)</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-hijau">Simpan & Dipublikasikan</button>
+                <button type="submit" class="btn btn-hijau">Simpan & Publikasikan</button>
             </form>
         </div>
-		
-		<!-- SUB-MENU WALKIE TALKIE STAF OFFICE -->
-		<div id="subWalkieTalkie" class="sub-view">
-			<div class="subview-header">
-				<h3 style="font-size:12px; color:var(--text-accent);">Radio Walkie Talkie Petugas</h3>
-				<button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
-			</div>
-			<div class="walkie-container">
-				<p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Tekan dan tahan tombol di bawah untuk berbicara dengan sesama petugas secara langsung.</p>
-				<button id="pttButtonOffice" class="ptt-btn" onmousedown="mulaiBicaraWalkie()" onmouseup="hentiBicaraWalkie()" ontouchstart="mulaiBicaraWalkie()" ontouchend="hentiBicaraWalkie()">
-					<span style="font-size: 32px;">🎙️</span>
-					<span id="pttText">TEKAN & BICARA</span>
-				</button>
-				<div id="walkieStatus" style="font-size: 12px; font-weight: 700; color: var(--text-accent); margin-bottom: 8px;">Status: Standby (Siaga)</div>
-				
-				<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: left; margin-top: 10px;">Log Transmisi Suara:</div>
-				<div class="walkie-log" id="walkieLogOffice">
-					<div>- Sistem Walkie Talkie siap terhubung -</div>
-				</div>
-			</div>
-		</div>
 
         <!-- SUB-MENU 6: PENGATURAN AKUN STAF & LOGO -->
         <div id="subAkun" class="sub-view">
@@ -1251,7 +1091,7 @@
                     <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                      <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                     <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0 (Standalone PWA)</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.4.2 (Standalone PWA)</div>
                 </div>
 
                 <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1262,7 +1102,7 @@
                 <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
                 <div class="system-info-list">
                     <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• Version: <span>5.4.3-ANIM-VIDEOTRON</span></div>
                     <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
                     <div>• Application Architect: <span>Luhur Mulia</span></div>
                 </div>
@@ -1301,10 +1141,6 @@
                 <div class="launcher-icon">💰</div>
                 <div class="launcher-title">Laporan Kas</div>
             </div>
-			<div class="launcher-card" onclick="bukaSubView('dashFo', 'subWalkieTalkieFo')">
-				<div class="launcher-icon">📻</div>
-				<div class="launcher-title">Walkie Talkie</div>
-			</div>
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
@@ -1416,13 +1252,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Pelanggan</th>
-                            <th>Tagihan</th>
-                            <th>Status</th>
+                            <th>Nama / ID / Pemakaian / Total</th>
+                            <th>Status / Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelTagihanFo">
-                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1474,38 +1309,16 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Tanggal</th>
-                            <th>Keterangan</th>
-                            <th>Nominal</th>
+                            <th>Tanggal / Jenis</th>
+                            <th>Keterangan / Nominal</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKasFo">
-                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-		
-		<!-- SUB-MENU WALKIE TALKIE FO -->
-		<div id="subWalkieTalkieFo" class="sub-view">
-			<div class="subview-header">
-				<h3 style="font-size:12px; color:var(--text-accent);">Radio Walkie Talkie Petugas</h3>
-				<button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
-			</div>
-			<div class="walkie-container">
-				<p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Tekan dan tahan tombol di bawah untuk berbicara dengan sesama petugas secara langsung.</p>
-				<button id="pttButtonFo" class="ptt-btn" onmousedown="mulaiBicaraWalkie()" onmouseup="hentiBicaraWalkie()" ontouchstart="mulaiBicaraWalkie()" ontouchend="hentiBicaraWalkie()">
-					<span style="font-size: 32px;">🎙️</span>
-					<span id="pttTextFo">TEKAN & BICARA</span>
-				</button>
-				<div id="walkieStatusFo" style="font-size: 12px; font-weight: 700; color: var(--text-accent); margin-bottom: 8px;">Status: Standby (Siaga)</div>
-				
-				<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: left; margin-top: 10px;">Log Transmisi Suara:</div>
-				<div class="walkie-log" id="walkieLogFo">
-					<div>- Sistem Walkie Talkie siap terhubung -</div>
-				</div>
-			</div>
-		</div>
 
         <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
         <div id="subFoAkun" class="sub-view">
@@ -1541,7 +1354,7 @@
                     <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                      <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                     <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0 (Standalone PWA)</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.4.2 (Standalone PWA)</div>
                 </div>
 
                 <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1552,7 +1365,7 @@
                 <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
                 <div class="system-info-list">
                     <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• Version: <span>5.4.3-ANIM-VIDEOTRON</span></div>
                     <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
                     <div>• Application Architect: <span>Luhur Mulia</span></div>
                 </div>
@@ -1615,7 +1428,7 @@
                 <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
             </div>
 
-            <!-- VIDEOTRON STYLE ANNOUNCEMENT DISPLAY -->
+            <!-- VIDEOTRON DENGAN ANIMASI -->
             <div class="videotron-box">
                 <div id="videotronText" class="videotron-text">Menghubungkan ke pusat informasi...</div>
             </div>
@@ -1674,7 +1487,7 @@
                     <h2 style="font-size:15px; color:var(--text-accent); font-weight:800;">TIRTA SARI GIRI</h2>
                      <p style="font-size:10px; color:var(--text-secondary);">Water Management & Accounting System</p>
                     <div class="dev-tag" style="font-size:10px; color:var(--text-accent); margin-top:4px;">"Bersama Untuk Sambeng Bening"</div>
-					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.3.0 (Standalone PWA)</div>
+					<div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 2px; margin-bottom: 4px;">Versi Aplikasi: V3.4.2 (Standalone PWA)</div>
                 </div>
 
                 <div class="system-info-title">📌 Deskripsi Sistem</div>
@@ -1685,7 +1498,7 @@
                 <div class="system-info-title">🚀 Account, Database, Spesifikasi & Teknologi ⚙️</div>
                 <div class="system-info-list">
                     <div>• Email: <span>tirtasari.giri@gmail.com</span></div>
-                    <div>• Version: <span>5.3.0-HYBRID-BACKUP</span></div>
+                    <div>• Version: <span>5.4.3-ANIM-VIDEOTRON</span></div>
                     <div>• DB Engine: <span>Hybrid LocalCache + Firebase RTDB</span></div>
                     <div>• Application Architect: <span>Luhur Mulia</span></div>
                 </div>
@@ -1696,7 +1509,7 @@
 
 <script>
 // =====================================
-// MANAJEMEN TEMA DINAMIS (1 TOMBOL TOGGLE TUNGGAL)
+// MANAJEMEN TEMA DINAMIS
 // =====================================
 function setTheme(themeName) {
     document.documentElement.setAttribute('data-theme', themeName);
@@ -1721,7 +1534,6 @@ function setTheme(themeName) {
 }
 
 function toggleTheme() {
-    cobaPutarMusikOtomatis();
     const currentTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
     if (currentTheme === 'dark') {
         setTheme('light');
@@ -1732,211 +1544,6 @@ function toggleTheme() {
 
 const savedTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
 setTheme(savedTheme);
-
-// =====================================
-// FITUR WALKIE TALKIE KHUSUS PETUGAS
-// =====================================
-let mediaRecorder = null;
-let audioChunks = [];
-
-function mulaiBicaraWalkie() {
-    cobaPutarMusikOtomatis();
-    const btn1 = document.getElementById('pttButtonOffice');
-    const btn2 = document.getElementById('pttButtonFo');
-    const status1 = document.getElementById('walkieStatus');
-    const status2 = document.getElementById('walkieStatusFo');
-
-    if (btn1) btn1.classList.add('transmitting');
-    if (btn2) btn2.classList.add('transmitting');
-    if (status1) status1.textContent = "Status: 🔴 Sedang Mengirim Suara...";
-    if (status2) status2.textContent = "Status: 🔴 Sedang Mengirim Suara...";
-
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
-        };
-
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = function() {
-                const base64Audio = reader.result;
-                kirimSuaraKeDatabase(base64Audio);
-            };
-        };
-
-        mediaRecorder.start();
-    }).catch(err => {
-        showAlert("Gagal mengakses mikrofon: " + err.message);
-        hentiBicaraWalkie();
-    });
-}
-
-function hentiBicaraWalkie() {
-    const btn1 = document.getElementById('pttButtonOffice');
-    const btn2 = document.getElementById('pttButtonFo');
-    const status1 = document.getElementById('walkieStatus');
-    const status2 = document.getElementById('walkieStatusFo');
-
-    if (btn1) btn1.classList.remove('transmitting');
-    if (btn2) btn2.classList.remove('transmitting');
-    if (status1) status1.textContent = "Status: Standby (Siaga)";
-    if (status2) status2.textContent = "Status: Standby (Siaga)";
-
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
-    }
-}
-
-function kirimSuaraKeDatabase(audioBase64) {
-    if (!currentUser) return;
-    const pengirim = `${currentUser.id} - ${currentUser.nama || 'Petugas'}`;
-    
-    db.ref('walkie_talkie_channel').set({
-        pengirim: pengirim,
-        audio: audioBase64,
-        waktu: Date.now()
-    }).catch(err => {
-        console.log("Gagal mengirim siaran suara: ", err);
-    });
-}
-
-// Mendengarkan siaran masuk dari petugas lain secara real-time
-function initListenerWalkieTalkie() {
-    db.ref('walkie_talkie_channel').on('value', snapshot => {
-        if (!snapshot.exists()) return;
-        const data = snapshot.val();
-        
-        // Hindari memutar suara milik sendiri yang baru saja dikirim
-        if (currentUser && data.pengirim && data.pengirim.startsWith(currentUser.id)) {
-            tambahLogWalkie(`[Anda mengirim pesan suara]`);
-            return;
-        }
-
-        if (data.audio) {
-            tambahLogWalkie(`Pesan masuk dari: ${data.pengirim}`);
-            const audioPlay = new Audio(data.audio);
-            audioPlay.play().catch(e => console.log("Gagal memutar audio walkie:", e));
-        }
-    });
-}
-
-function tambahLogWalkie(pesan) {
-    const logOffice = document.getElementById('walkieLogOffice');
-    const logFo = document.getElementById('walkieLogFo');
-    const waktuFormat = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const logHtml = `<div>[${waktuFormat}] ${pesan}</div>`;
-
-    if (logOffice) {
-        logOffice.innerHTML += logHtml;
-        logOffice.scrollTop = logOffice.scrollHeight;
-    }
-    if (logFo) {
-        logFo.innerHTML += logHtml;
-        logFo.scrollTop = logFo.scrollHeight;
-    }
-}
-
-// Aktifkan listener saat halaman dimuat
-window.addEventListener('DOMContentLoaded', () => {
-    initListenerWalkieTalkie();
-});
-
-// =====================================
-// PENGATURAN PLAYLIST & KONTROL MUSIK LENGKAP
-// =====================================
-const playlistMusik = [
-    { nama: "Lagu 1", src: "musik1.mp3" },
-    { nama: "Lagu 2", src: "musik2.mp3" },
-    { nama: "Lagu 3", src: "musik3.mp3" },
-    { nama: "Lagu 4", src: "musik4.mp3" }
-];
-
-let indeksLaguAktif = 0;
-
-function cobaPutarMusikOtomatis() {
-    const audio = document.getElementById('bgMusic');
-    if (audio && audio.paused && (!audio.src || audio.src === window.location.href)) {
-        muatDanPutarLagu(indeksLaguAktif);
-    }
-}
-
-function muatDanPutarLagu(indeks) {
-    const audio = document.getElementById('bgMusic');
-    const musicText = document.getElementById('musicText');
-    const musicIcon = document.getElementById('musicIcon');
-    if (!audio) return;
-
-    indeksLaguAktif = (indeks + playlistMusik.length) % playlistMusik.length;
-    
-    if (!audio.src || !audio.src.includes(playlistMusik[indeksLaguAktif].src)) {
-        audio.src = playlistMusik[indeksLaguAktif].src;
-    }
-    
-    audio.play().then(() => {
-        if (musicText) musicText.textContent = playlistMusik[indeksLaguAktif].nama;
-        if (musicIcon) musicIcon.textContent = "⏸";
-    }).catch(err => {
-        console.log("Audio menunggu interaksi pengguna: ", err);
-    });
-}
-
-function toggleBackgroundMusic() {
-    const audio = document.getElementById('bgMusic');
-    const musicText = document.getElementById('musicText');
-    const musicIcon = document.getElementById('musicIcon');
-
-    if (!audio) return;
-
-    if (audio.paused) {
-        if (!audio.src || audio.src === window.location.href || audio.src === "") {
-            muatDanPutarLagu(indeksLaguAktif);
-        } else {
-            audio.play().then(() => {
-                if (musicText) musicText.textContent = playlistMusik[indeksLaguAktif].nama;
-                if (musicIcon) musicIcon.textContent = "⏸";
-            }).catch(() => {});
-        }
-    } else {
-        audio.pause();
-        if (musicText) musicText.textContent = "Pause";
-        if (musicIcon) musicIcon.textContent = "▶";
-    }
-}
-
-function laguSebelumnya() {
-    muatDanPutarLagu(indeksLaguAktif - 1);
-}
-
-function laguBerikutnya() {
-    muatDanPutarLagu(indeksLaguAktif + 1);
-}
-
-function stopMusik() {
-    const audio = document.getElementById('bgMusic');
-    const musicText = document.getElementById('musicText');
-    const musicIcon = document.getElementById('musicIcon');
-
-    if (!audio) return;
-    audio.pause();
-    audio.currentTime = 0;
-    
-    if (musicText) musicText.textContent = "Play";
-    if (musicIcon) musicIcon.textContent = "▶";
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const audio = document.getElementById('bgMusic');
-    if (audio) {
-        audio.addEventListener('ended', () => {
-            laguBerikutnya();
-        });
-    }
-});
 
 // =====================================
 // KONFIGURASI PWA & PENGAMANAN URL BAR
@@ -2075,7 +1682,7 @@ function initLogoDinamis() {
     });
 }
 
-// SIMPAN TEKS DAN ANIMASI KE DATABASE
+// SIMPAN TEKS DAN ANIMASI VIDEOTRON KE DATABASE
 function simpanTeksBerjalan() {
     const teksInput = document.getElementById('inputTeksBerjalan').value.trim();
     const animasiInput = document.getElementById('inputAnimasiVideotron').value;
@@ -2096,13 +1703,13 @@ function simpanTeksBerjalan() {
 function initVideotronPengumuman() {
     db.ref('pengaturan/videotron').on('value', snapshot => {
         let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
-        let animasi = "fade";
+        let animasi = "slide";
 
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (typeof data === 'object') {
                 teks = data.teks || teks;
-                animasi = data.animasi || 'fade';
+                animasi = data.animasi || 'slide';
             } else {
                 teks = data;
             }
@@ -2120,10 +1727,7 @@ function initVideotronPengumuman() {
 
         videotronEl.className = 'videotron-text';
 
-        if (animasi === 'statis') {
-            videotronEl.classList.add('anim-statis');
-            videotronEl.textContent = `📢 ${teks}`;
-        } else if (animasi === 'marquee') {
+        if (animasi === 'marquee') {
             videotronEl.classList.add('anim-marquee');
             videotronEl.textContent = `📢 ${teks}`;
         } else {
@@ -2229,7 +1833,6 @@ function deteksiRole(input) {
 }
 
 function prosesLogin() {
-    cobaPutarMusikOtomatis();
     const id = document.getElementById('loginId').value.trim().toUpperCase();
     const sandi = document.getElementById('loginSandi').value.trim();
     const rememberMe = document.getElementById('rememberMe').checked;
@@ -2350,7 +1953,6 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
 }
 
 function bukaSubView(dashId, subViewId) {
-    cobaPutarMusikOtomatis();
     history.pushState({ dashId, subViewId }, "");
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
@@ -2372,7 +1974,6 @@ function bukaSubView(dashId, subViewId) {
 }
 
 function kembaliKeLauncher(dashId) {
-    cobaPutarMusikOtomatis();
     const parentDash = document.getElementById(dashId);
     if (!parentDash) return;
 
@@ -2385,7 +1986,6 @@ function kembaliKeLauncher(dashId) {
     parentDash.querySelectorAll('.sub-view').forEach(v => v.classList.remove('aktif'));
 }
 
-// Menangani Tombol Kembali / Gestur HP
 window.addEventListener('popstate', (event) => {
     const activeView = document.querySelector('.view-section.aktif');
     if (!activeView) return;
@@ -2403,7 +2003,6 @@ window.addEventListener('popstate', (event) => {
 });
 
 function verifikasiLunas(id) {
-    cobaPutarMusikOtomatis();
     targetVerifikasiId = id;
     const modal = document.getElementById('modalMetodeBayar');
     if (modal) modal.style.display = 'flex';
@@ -2534,14 +2133,12 @@ function loadTagihanPelanggan() {
                             <div class="struk-ewallet-title">💳 KOLOM PEMBAYARAN VIA TRANSFER</div>
                             <div class="struk-ewallet-methods">Silakan transfer melalui rekening bank atau e-wallet berikut:</div>
                             
-                            <!-- Rekening Bank Terpisah -->
                             <div class="struk-ewallet-detail">
                                 <div style="font-size:9px; color:#0284C7; font-weight:800;">🏦 REKENING BANK:</div>
                                 <div style="font-size:13px; font-weight:800; color:#0F172A; letter-spacing:0.5px; margin:2px 0; font-family:monospace;">${bankNo}</div>
                                 <div style="font-size:9px; color:#475569; font-weight:700;">a.n. ${bankNama}</div>
                             </div>
 
-                            <!-- E-Wallet Terpisah -->
                             <div class="struk-ewallet-detail">
                                 <div style="font-size:9px; color:#7C3AED; font-weight:800;">📱 AKUN E-WALLET (DANA/OVO/GOPAY):</div>
                                 <div style="font-size:13px; font-weight:800; color:#0F172A; letter-spacing:0.5px; margin:2px 0; font-family:monospace;">${ewalletNo}</div>
@@ -2637,7 +2234,6 @@ function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, t
 }
 
 function downloadStrukGambar() {
-    cobaPutarMusikOtomatis();
     const cardBox = document.getElementById('strukCardBox');
     if (!cardBox) {
         showAlert("Struk belum siap diunduh!");
@@ -2666,7 +2262,6 @@ function downloadStrukGambar() {
 }
 
 function updateProfilPelanggan() {
-    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('plgAkunNama').value.trim();
@@ -2737,7 +2332,6 @@ function initFoDashboard() {
 }
 
 function simpanPelangganByFo() {
-    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = document.getElementById('plgId').value.trim().toUpperCase();
     const nama = document.getElementById('plgNama').value.trim();
@@ -2820,14 +2414,12 @@ function loadPelangganFo() {
 }
 
 function hapusPelanggan(id) {
-    cobaPutarMusikOtomatis();
     showConfirm(`Hapus pelanggan ${id}?`, () => {
         db.ref(`pelanggan/${id}`).remove().then(() => showAlert("Pelanggan berhasil dihapus!"));
     });
 }
 
 function cariPelangganMeter() {
-    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const query = document.getElementById('cariPlgId').value.trim();
     if (!query) {
@@ -2885,7 +2477,6 @@ function cariPelangganMeter() {
 }
 
 function simpanCatatMeter() {
-    cobaPutarMusikOtomatis();
     const id = document.getElementById('cariPlgId').value.trim().toUpperCase();
     const meterLalu = parseDesimal(document.getElementById('meterLalu').value);
     const meterSekarangVal = document.getElementById('meterSekarang').value.trim();
@@ -2946,7 +2537,7 @@ function loadTagihanFo() {
             tbody.innerHTML = '';
 
             if (!snapshot.exists()) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada tagihan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Belum ada tagihan.</td></tr>`;
                 const elSudah = document.getElementById('foTotalSudahBayar');
                 const elBelum = document.getElementById('foTotalBelumBayar');
                 if (elSudah) elSudah.textContent = formatRupiah(0);
@@ -2982,17 +2573,17 @@ function loadTagihanFo() {
                     tr.innerHTML = `
                         <td>
                             <b>${plg.nama || '-'}</b><br>
-                            <small style="color:var(--text-secondary);">${child.key}</small>
-                        </td>
-                        <td>
-                            ${pakai} m³<br>
+                            <small style="color:var(--text-secondary);">${child.key}</small><br>
+                            <span>Pemakaian: ${pakai} m³</span><br>
                             <b style="color:var(--text-accent);">${formatRupiah(totalTagihanCalculated)}</b>
                         </td>
                         <td>
-                            <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold;">
-                                ${plg.status_bayar || 'Belum Bayar'}
-                            </span>
-                            <div style="margin-top:4px;">
+                            <div style="margin-bottom:4px;">
+                                <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold;">
+                                    ${plg.status_bayar || 'Belum Bayar'}
+                                </span>
+                            </div>
+                            <div>
                                 ${!isLunas 
                                     ? `<button class="btn btn-hijau btn-sm" onclick="verifikasiLunas('${child.key}')">Verifikasi</button>` 
                                     : `<span style="color:var(--color-hijau); font-size:10px;">✔ Terverifikasi</span>`}
@@ -3004,7 +2595,7 @@ function loadTagihanFo() {
             });
 
             if (count === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data tagihan dari pelanggan yang Anda daftarkan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Belum ada data tagihan dari pelanggan yang Anda daftarkan.</td></tr>`;
             }
 
             const elSudah = document.getElementById('foTotalSudahBayar');
@@ -3016,7 +2607,6 @@ function loadTagihanFo() {
 }
 
 function updateProfilFo() {
-    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('foAkunNama').value.trim();
@@ -3036,7 +2626,6 @@ function updateProfilFo() {
 }
 
 function simpanPetugas() {
-    cobaPutarMusikOtomatis();
     const id = document.getElementById('foId').value.trim().toUpperCase();
     const nama = document.getElementById('foNama').value.trim();
     const wilayah = document.getElementById('foWilayah').value;
@@ -3065,7 +2654,7 @@ function loadDataPetugas() {
         tbody.innerHTML = '';
 
         if (!snapshot.exists()) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada data petugas.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Belum ada data petugas.</td></tr>`;
             return;
         }
 
@@ -3073,12 +2662,16 @@ function loadDataPetugas() {
             const fo = child.val();
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${child.key}</b></td>
-                <td>${fo.nama || '-'}</td>
-                <td>${fo.wilayah || '-'}</td>
-                <td><code>${fo.sandi || '-'}</code></td>
                 <td>
-                    <button class="btn btn-merah btn-sm" onclick="hapusPetugas('${child.key}')">Hapus</button>
+                    <b>${child.key}</b><br>
+                    <span style="color:var(--text-accent); font-weight:700;">${fo.nama || '-'}</span><br>
+                    <code style="font-size:10px;">Sandi: ${fo.sandi || '-'}</code>
+                </td>
+                <td>
+                    <div style="margin-bottom:6px;"><b>${fo.wilayah || '-'}</b></div>
+                    <div>
+                        <button class="btn btn-merah btn-sm" onclick="hapusPetugas('${child.key}')">Hapus</button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -3087,14 +2680,12 @@ function loadDataPetugas() {
 }
 
 function hapusPetugas(id) {
-    cobaPutarMusikOtomatis();
     showConfirm(`Apakah Anda yakin ingin menghapus petugas ${id}?`, () => {
         db.ref(`staf_fo/${id}`).remove().then(() => showAlert("Petugas berhasil dihapus!"));
     });
 }
 
 function simpanTarif() {
-    cobaPutarMusikOtomatis();
     const hargaM3 = Number(document.getElementById('tarifM3').value);
     const biayaBeban = Number(document.getElementById('biayaBeban').value);
     const bankNo = document.getElementById('tarifBankNo').value.trim();
@@ -3144,7 +2735,7 @@ function loadRiwayatTagihan() {
             tbody.innerHTML = '';
 
             if (!snapshot.exists()) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data tagihan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Belum ada data tagihan.</td></tr>`;
                 return;
             }
 
@@ -3165,17 +2756,17 @@ function loadRiwayatTagihan() {
                     tr.innerHTML = `
                         <td>
                             <b>${plg.nama || '-'}</b><br>
-                            <small style="color:var(--text-secondary);">${child.key}</small>
+                            <span style="color:var(--text-accent); font-weight:700;">${child.key}</span><br>
+                            <code style="font-size:10px;">${plg.wilayah || '-'}</code>
                         </td>
                         <td>
-                            <b>Wilayah:</b> ${plg.wilayah || '-'}<br>
-                            <b>Pemakaian:</b> ${pemakaianM3} m³<br>
-                            <b>Total:</b> <span style="color:var(--text-accent); font-weight:bold;">${formatRupiah(totalTagihanCalculated)}</span>
-                        </td>
-                        <td>
-                            <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold;">
-                                ${plg.status_bayar || 'Belum Bayar'}
-                            </span>
+                            <div style="margin-bottom:2px;"><b>${pemakaianM3} m³</b></div>
+                            <div style="color:var(--text-accent); font-weight:800; margin-bottom:4px;">${formatRupiah(totalTagihanCalculated)}</div>
+                            <div>
+                                <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold; font-size:11px;">
+                                    ${plg.status_bayar || 'Belum Bayar'}
+                                </span>
+                            </div>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -3186,7 +2777,6 @@ function loadRiwayatTagihan() {
 }
 
 function simpanKas() {
-    cobaPutarMusikOtomatis();
     const tglInput = document.getElementById('kasTanggal').value;
     const jenis = document.getElementById('kasJenis').value;
     const nominal = Number(document.getElementById('kasNominal').value);
@@ -3292,13 +2882,15 @@ function loadLaporanKas() {
                         const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
                         listKasHtml += `
                             <tr>
-                                <td>${kas.tanggal}</td>
                                 <td>
-                                    <b>${kas.keterangan || '-'}</b><br>
+                                    <b>${kas.tanggal}</b><br>
                                     <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
                                 </td>
-                                <td style="color:${badgeColor}; font-weight:700;">
-                                    ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                                <td>
+                                    <div style="margin-bottom:2px;"><b>${kas.keterangan || '-'}</b></div>
+                                    <div style="color:${badgeColor}; font-weight:800;">
+                                        ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -3306,7 +2898,7 @@ function loadLaporanKas() {
                 }
 
                 if (!listKasHtml) {
-                    listKasHtml = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas manual.</td></tr>`;
+                    listKasHtml = `<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas manual.</td></tr>`;
                 }
 
                 const saldoAkhir = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
@@ -3427,7 +3019,6 @@ function initAkunForm() {
 }
 
 function updateProfilOffice() {
-    cobaPutarMusikOtomatis();
     if (!currentUser) return;
     const id = currentUser.id;
     const nama = document.getElementById('akunNama').value.trim();
@@ -3447,7 +3038,6 @@ function updateProfilOffice() {
 }
 
 function logout() {
-    cobaPutarMusikOtomatis();
     currentUser = null;
 
     localStorage.removeItem('tirta_remember');
