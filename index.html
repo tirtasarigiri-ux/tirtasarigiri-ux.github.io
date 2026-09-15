@@ -102,9 +102,8 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-primary);
-			width: 100%;
-            max-width: 100%;
-            margin: 0;
+            max-width: 480px;
+            margin: 0 auto;
             padding: 14px;
             min-height: 100vh;
             padding-bottom: 80px;
@@ -455,6 +454,52 @@
         #subFoTagihan th:nth-child(1), #subFoTagihan td:nth-child(1) { width: 55%; }
         #subFoTagihan th:nth-child(2), #subFoTagihan td:nth-child(2) { width: 45%; }
 
+        /* FORMAT TABEL LAPORAN KAS, ARSIP & RIWAYAT PELANGGAN AGAR TEKS TURUN KE BAWAH TANPA HORIZONTAL SCROLL */
+        #subKas .table-responsive, 
+        #subFoKas .table-responsive,
+        #subLaporanTahunan .table-responsive,
+        #subFoLaporanTahunan .table-responsive,
+        #subPlgRiwayat .table-responsive { 
+            overflow-x: hidden; 
+        }
+        
+        #subKas table, 
+        #subFoKas table,
+        #subLaporanTahunan table,
+        #subFoLaporanTahunan table,
+        #subPlgRiwayat table { 
+            table-layout: fixed; 
+            width: 100%; 
+        }
+        
+        #subKas th, #subKas td, 
+        #subFoKas th, #subFoKas td,
+        #subLaporanTahunan th, #subLaporanTahunan td,
+        #subFoLaporanTahunan th, #subFoLaporanTahunan td,
+        #subPlgRiwayat th, #subPlgRiwayat td {
+            white-space: normal; 
+            word-break: break-word;
+            padding: 10px 6px;
+            font-size: 11px;
+            vertical-align: middle;
+        }
+
+        #subKas #tabelKas tr td:nth-child(1) { width: 30%; }
+        #subKas #tabelKas tr td:nth-child(2) { width: 50%; }
+        #subKas #tabelKas tr td:nth-child(3) { width: 20%; }
+        
+        #subFoKas #tabelKasFo tr td:nth-child(1) { width: 40%; }
+        #subFoKas #tabelKasFo tr td:nth-child(2) { width: 60%; }
+
+        #subLaporanTahunan th:nth-child(1), #subLaporanTahunan td:nth-child(1) { width: 45%; }
+        #subLaporanTahunan th:nth-child(2), #subLaporanTahunan td:nth-child(2) { width: 55%; }
+
+        #subFoLaporanTahunan th:nth-child(1), #subFoLaporanTahunan td:nth-child(1) { width: 45%; }
+        #subFoLaporanTahunan th:nth-child(2), #subFoLaporanTahunan td:nth-child(2) { width: 55%; }
+
+        #subPlgRiwayat th:nth-child(1), #subPlgRiwayat td:nth-child(1) { width: 45%; }
+        #subPlgRiwayat th:nth-child(2), #subPlgRiwayat td:nth-child(2) { width: 55%; }
+
         .grid-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -676,7 +721,6 @@
             width: 100%;
         }
 
-        /* Pilihan Animasi Videotron (Slide, Zoom, Marquee) */
         .anim-slide { animation: vSlide 0.5s ease-out; }
         .anim-zoom { animation: vZoom 0.5s ease-out; }
 
@@ -844,6 +888,10 @@
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
             </div>
+            <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subLaporanTahunan')" style="grid-column: span 2;">
+                <div class="launcher-icon">📊</div>
+                <div class="launcher-title">Laporan Tahunan (Arsip)</div>
+            </div>
         </div>
 
         <!-- SUB-MENU 1: KELOLA PETUGAS -->
@@ -997,6 +1045,12 @@
                 </table>
             </div>
 
+            <div style="background: rgba(220, 38, 38, 0.1); border: 1px dashed var(--color-merah); padding: 12px; border-radius: 12px; margin-bottom: 16px; text-align: center;">
+                <h3 style="font-size:12px; color:var(--color-merah); margin-bottom:6px;">⚠️ Pengarsipan Akhir Tahun</h3>
+                <p style="font-size:10px; color:var(--text-secondary); margin-bottom:10px;">Fitur ini akan mengarsipkan seluruh transaksi tahun ini, mereset meteran pelanggan, dan menyisakan Saldo Akhir sebagai Saldo Awal tahun depan.</p>
+                <button class="btn btn-merah btn-sm" style="width: auto; padding: 0 16px;" onclick="prosesTutupBukuAkhirTahun()">Tutup Buku & Arsipkan Tahun Ini</button>
+            </div>
+
             <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Transaksi Kas</h3>
             <form onsubmit="event.preventDefault(); simpanKas();" style="margin-bottom:16px;">
                 <div class="grup">
@@ -1028,10 +1082,11 @@
                         <tr>
                             <th>Tanggal / Jenis</th>
                             <th>Keterangan / Nominal</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKas">
-                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="3" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1109,6 +1164,68 @@
                 </div>
             </div>
         </div>
+
+        <!-- SUB-MENU 7: LAPORAN TAHUNAN -->
+        <div id="subLaporanTahunan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Arsip & Laporan Tahunan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
+            </div>
+            
+            <div class="grup">
+                <label>Pilih Tahun Arsip</label>
+                <div class="flex-row">
+                    <select id="filterTahunArsip" style="flex: 1;">
+                        <option value="">Memuat data tahun...</option>
+                    </select>
+                    <button class="btn btn-sm" style="width:80px;" onclick="loadDataArsipTahunan()">Tampilkan</button>
+                </div>
+            </div>
+
+            <div id="boxHasilArsip" style="display: none;">
+                <div class="grid-stats">
+                    <div class="stat-box" style="grid-column: span 2; text-align: center;">
+                        <div class="stat-label">Total Saldo Pindahan (Tutup Buku)</div>
+                        <div class="stat-value" id="arsipSaldoAkhir" style="font-size:18px; color:var(--text-accent);">Rp 0</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;" id="arsipWaktu">Diarsipkan pada: -</div>
+                    </div>
+                </div>
+
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+                <div class="table-responsive" style="margin-bottom: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal / Jenis</th>
+                                <th>Keterangan / Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelKasArsip">
+                            <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Rekap Pelanggan Lunas</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID / Nama Pelanggan</th>
+                                <th>Total Tagihan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihanArsip">
+                            <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="boxArsipKosong" style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px; border: 1px dashed var(--border-color); border-radius: 12px;">
+                Silakan pilih tahun arsip di atas dan klik tombol "Tampilkan".
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1141,6 +1258,10 @@
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoKas')">
                 <div class="launcher-icon">💰</div>
                 <div class="launcher-title">Laporan Kas</div>
+            </div>
+            <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoLaporanTahunan')" style="grid-column: span 2;">
+                <div class="launcher-icon">📊</div>
+                <div class="launcher-title">Laporan Tahunan (Arsip)</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
                 <div class="launcher-icon">👤</div>
@@ -1321,6 +1442,68 @@
             </div>
         </div>
 
+        <!-- FO SUB-MENU: LAPORAN TAHUNAN ARSIP -->
+        <div id="subFoLaporanTahunan" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Arsip & Laporan Tahunan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
+            </div>
+            
+            <div class="grup">
+                <label>Pilih Tahun Arsip</label>
+                <div class="flex-row">
+                    <select id="filterTahunArsipFo" style="flex: 1;">
+                        <option value="">Memuat data tahun...</option>
+                    </select>
+                    <button class="btn btn-sm" style="width:80px;" onclick="loadDataArsipTahunanFo()">Tampilkan</button>
+                </div>
+            </div>
+
+            <div id="boxHasilArsipFo" style="display: none;">
+                <div class="grid-stats">
+                    <div class="stat-box" style="grid-column: span 2; text-align: center;">
+                        <div class="stat-label">Total Saldo Pindahan (Tutup Buku)</div>
+                        <div class="stat-value" id="arsipSaldoAkhirFo" style="font-size:18px; color:var(--text-accent);">Rp 0</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;" id="arsipWaktuFo">Diarsipkan pada: -</div>
+                    </div>
+                </div>
+
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
+                <div class="table-responsive" style="margin-bottom: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal / Jenis</th>
+                                <th>Keterangan / Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelKasArsipFo">
+                            <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Rekap Pelanggan Lunas</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID / Nama Pelanggan</th>
+                                <th>Total Tagihan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelTagihanArsipFo">
+                            <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="boxArsipKosongFo" style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px; border: 1px dashed var(--border-color); border-radius: 12px;">
+                Silakan pilih tahun arsip di atas dan klik tombol "Tampilkan".
+            </div>
+        </div>
+
         <!-- FO SUB-MENU 5: PENGATURAN AKUN FO -->
         <div id="subFoAkun" class="sub-view">
             <div class="subview-header">
@@ -1393,11 +1576,15 @@
                 <div class="launcher-icon">🧾</div>
                 <div class="launcher-title">Tagihan Saya</div>
             </div>
+            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgRiwayat')">
+                <div class="launcher-icon">📋</div>
+                <div class="launcher-title">Riwayat Tagihan</div>
+            </div>
             <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgInfo')">
                 <div class="launcher-icon">📢</div>
                 <div class="launcher-title">Papan Informasi</div>
             </div>
-            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')" style="grid-column: span 2;">
+            <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')">
                 <div class="launcher-icon">👤</div>
                 <div class="launcher-title">Pengaturan</div>
             </div>
@@ -1419,6 +1606,27 @@
                 <a id="btnKonfirmasiWa" href="#" target="_blank" class="btn btn-kuning" style="gap: 6px; text-decoration: none; display: none;">
                     💬 Konfirmasi Pembayaran via WhatsApp
                 </a>
+            </div>
+        </div>
+
+        <!-- PELANGGAN SUB-MENU: RIWAYAT TAGIHAN -->
+        <div id="subPlgRiwayat" class="sub-view">
+            <div class="subview-header">
+                <h3 style="font-size:12px; color:var(--text-accent);">Riwayat & Arsip Tagihan</h3>
+                <button class="btn-back" onclick="kembaliKeLauncher('dashPelanggan')">Dashboard</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Periode / Catat</th>
+                            <th>Pemakaian / Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelRiwayatPelanggan">
+                        <tr><td colspan="2" style="text-align:center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -1942,6 +2150,7 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
         loadRiwayatTagihan();
         loadLaporanKas();
         initAkunForm();
+        initDropdownArsip();
     } else if (viewId === 'dashFo') {
         const profFo = document.getElementById('profFo');
         if (profFo) profFo.innerHTML = profileHtml;
@@ -1971,6 +2180,8 @@ function bukaSubView(dashId, subViewId) {
 
     if (subViewId === 'subPlgInfo') {
         loadLaporanKas();
+    } else if (subViewId === 'subPlgRiwayat') {
+        loadRiwayatPelanggan();
     }
 }
 
@@ -2062,6 +2273,7 @@ function initPelangganDashboard() {
     if (plgAkunSandiEl) plgAkunSandiEl.value = currentUser.sandi || '';
 
     loadTagihanPelanggan();
+    loadRiwayatPelanggan();
     loadLaporanKas();
     initVideotronPengumuman();
 }
@@ -2175,6 +2387,45 @@ function loadTagihanPelanggan() {
                 renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, 'Petugas Lapangan');
             }
         });
+    });
+}
+
+function loadRiwayatPelanggan() {
+    if (!currentUser) return;
+    const plgId = currentUser.id;
+
+    db.ref(`pelanggan/${plgId}`).on('value', snapshot => {
+        const tbody = document.getElementById('tabelRiwayatPelanggan');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Tidak ada riwayat.</td></tr>`;
+            return;
+        }
+
+        const data = snapshot.val();
+        const meterAwal = parseDesimal(data.meter_awal);
+        const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterAwal;
+        const pemakaian = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+        const total = data.total_tagihan || 0;
+        const isLunas = data.status_bayar === 'Sudah Bayar';
+        const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <b>${tglStr}</b><br>
+                <small style="color:var(--text-secondary);">Pemakaian: ${pemakaian} m³</small>
+            </td>
+            <td>
+                <div style="color:var(--text-accent); font-weight:800; margin-bottom:2px;">${formatRupiah(total)}</div>
+                <span style="color:${isLunas ? 'var(--color-hijau)' : 'var(--color-merah)'}; font-weight:bold; font-size:11px;">
+                    ${data.status_bayar || 'Belum Bayar'}
+                </span>
+            </td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
@@ -2330,6 +2581,7 @@ function initFoDashboard() {
     loadPelangganFo();
     loadTagihanFo();
     loadLaporanKas();
+    initDropdownArsipFo();
 }
 
 function simpanPelangganByFo() {
@@ -2803,6 +3055,300 @@ function simpanKas() {
     });
 }
 
+function hapusTransaksiKas(key) {
+    showConfirm("Apakah Anda yakin ingin menghapus catatan transaksi kas ini?", () => {
+        db.ref(`transaksi_kas/${key}`).remove().then(() => {
+            showAlert("Catatan transaksi kas berhasil dihapus!");
+        }).catch(err => {
+            showAlert("Gagal menghapus catatan transaksi kas: " + err.message);
+        });
+    });
+}
+
+function prosesTutupBukuAkhirTahun() {
+    const tahunSekarang = new Date().getFullYear();
+    const tahunDepan = tahunSekarang + 1;
+    const tanggalAwalTahun = `${tahunDepan}-01-01`;
+
+    showConfirm(`PERINGATAN TUTUP BUKU!\n\nAksi ini akan memindahkan semua data kas dan tagihan pelanggan tahun ${tahunSekarang} ke dalam ARSIP.\n\nSaldo akhir saat ini akan dijadikan "Saldo Awal" untuk tahun ${tahunDepan}. Apakah Anda yakin?`, () => {
+        
+        Promise.all([
+            db.ref('pengaturan/tarif').once('value'),
+            db.ref('pelanggan').once('value'),
+            db.ref('transaksi_kas').once('value')
+        ]).then(([tariffSnap, plgSnap, kasSnap]) => {
+            let hargaM3 = 3000;
+            let biayaBeban = 10000;
+            if (tariffSnap.exists()) {
+                hargaM3 = tariffSnap.val().hargaM3 || hargaM3;
+                biayaBeban = tariffSnap.val().biayaBeban || biayaBeban;
+            }
+
+            let totalSaldo = 0;
+            let arsipPelanggan = {};
+            let arsipKas = {};
+            let updateBatch = {};
+
+            if (plgSnap.exists()) {
+                plgSnap.forEach(child => {
+                    const id = child.key;
+                    const plg = child.val();
+                    
+                    if (plg.status_bayar === 'Sudah Bayar') {
+                        const meterAwal = parseDesimal(plg.meter_awal);
+                        const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterAwal;
+                        const pakai = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+                        const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
+                        
+                        totalSaldo += totalTagihanCalculated;
+                        arsipPelanggan[id] = plg;
+                    }
+
+                    updateBatch[`pelanggan/${id}/meter_awal`] = plg.angka_terakhir !== undefined ? plg.angka_terakhir : plg.meter_awal;
+                    updateBatch[`pelanggan/${id}/total_tagihan`] = 0;
+                    updateBatch[`pelanggan/${id}/status_bayar`] = 'Belum Bayar';
+                    updateBatch[`pelanggan/${id}/tanggal_bayar`] = null;
+                    updateBatch[`pelanggan/${id}/waktu_bayar_lengkap`] = null;
+                    updateBatch[`pelanggan/${id}/metode_pembayaran`] = null;
+                    updateBatch[`pelanggan/${id}/tgl_catat`] = null;
+                });
+            }
+
+            if (kasSnap.exists()) {
+                kasSnap.forEach(child => {
+                    const kas = child.val();
+                    if (kas.jenis === "PEMASUKAN") totalSaldo += Number(kas.nominal);
+                    if (kas.jenis === "PENGELUARAN") totalSaldo -= Number(kas.nominal);
+                    arsipKas[child.key] = kas;
+                });
+            }
+
+            updateBatch[`arsip_keuangan/${tahunSekarang}/saldo_akhir`] = totalSaldo;
+            updateBatch[`arsip_keuangan/${tahunSekarang}/kas_tersimpan`] = arsipKas;
+            updateBatch[`arsip_keuangan/${tahunSekarang}/tagihan_tersimpan`] = arsipPelanggan;
+            updateBatch[`arsip_keuangan/${tahunSekarang}/waktu_arsip`] = new Date().toISOString();
+
+            const idKasBaru = db.ref('transaksi_kas').push().key; 
+            updateBatch[`transaksi_kas`] = {
+                [idKasBaru]: {
+                    jenis: 'PEMASUKAN',
+                    nominal: totalSaldo,
+                    keterangan: `Sisa Saldo Pindahan (Tutup Buku ${tahunSekarang})`,
+                    tanggal: tanggalAwalTahun,
+                    isOtomatisTagihan: false
+                }
+            };
+
+            db.ref().update(updateBatch).then(() => {
+                showAlert(`Tutup buku tahun ${tahunSekarang} berhasil dieksekusi!\nSaldo akhir senilai ${formatRupiah(totalSaldo)} telah diubah menjadi Saldo Awal tahun ${tahunDepan}.`);
+            }).catch(err => {
+                showAlert("Terjadi kesalahan saat menyimpan arsip: " + err.message);
+            });
+
+        }).catch(err => {
+            showAlert("Gagal mengambil data dari server: " + err.message);
+        });
+    });
+}
+
+function initDropdownArsip() {
+    db.ref('arsip_keuangan').on('value', snapshot => {
+        const select = document.getElementById('filterTahunArsip');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Pilih Tahun Arsip...</option>';
+        if (snapshot.exists()) {
+            const years = Object.keys(snapshot.val()).sort((a,b) => b - a);
+            years.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = `Arsip Tahun ${year}`;
+                select.appendChild(opt);
+            });
+        } else {
+             select.innerHTML = '<option value="">Belum ada data arsip</option>';
+        }
+    });
+}
+
+function initDropdownArsipFo() {
+    db.ref('arsip_keuangan').on('value', snapshot => {
+        const select = document.getElementById('filterTahunArsipFo');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Pilih Tahun Arsip...</option>';
+        if (snapshot.exists()) {
+            const years = Object.keys(snapshot.val()).sort((a,b) => b - a);
+            years.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = `Arsip Tahun ${year}`;
+                select.appendChild(opt);
+            });
+        } else {
+             select.innerHTML = '<option value="">Belum ada data arsip</option>';
+        }
+    });
+}
+
+function loadDataArsipTahunan() {
+    const tahun = document.getElementById('filterTahunArsip').value;
+    const boxHasil = document.getElementById('boxHasilArsip');
+    const boxKosong = document.getElementById('boxArsipKosong');
+    
+    if (!tahun) {
+        showAlert("Silakan pilih tahun arsip terlebih dahulu!");
+        boxHasil.style.display = 'none';
+        boxKosong.style.display = 'block';
+        return;
+    }
+
+    db.ref(`arsip_keuangan/${tahun}`).once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+            boxHasil.style.display = 'none';
+            boxKosong.style.display = 'block';
+            boxKosong.innerHTML = "Data arsip untuk tahun tersebut tidak ditemukan.";
+            return;
+        }
+
+        const data = snapshot.val();
+        
+        document.getElementById('arsipSaldoAkhir').textContent = formatRupiah(data.saldo_akhir || 0);
+        document.getElementById('arsipWaktu').textContent = `Diarsipkan otomatis pada: ${data.waktu_arsip ? new Date(data.waktu_arsip).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-'}`;
+        
+        const tbodyKas = document.getElementById('tabelKasArsip');
+        tbodyKas.innerHTML = '';
+        if (data.kas_tersimpan) {
+            const arsipKas = Object.values(data.kas_tersimpan).sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+            arsipKas.forEach(kas => {
+                const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
+                const nominal = Number(kas.nominal || 0);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <b>${kas.tanggal}</b><br>
+                        <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
+                    </td>
+                    <td>
+                        <div style="margin-bottom:2px;"><b>${kas.keterangan || '-'}</b></div>
+                        <div style="color:${badgeColor}; font-weight:800;">
+                            ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                        </div>
+                    </td>
+                `;
+                tbodyKas.appendChild(tr);
+            });
+        } else {
+            tbodyKas.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Tidak ada catatan transaksi manual.</td></tr>';
+        }
+
+        const tbodyTagihan = document.getElementById('tabelTagihanArsip');
+        tbodyTagihan.innerHTML = '';
+        if (data.tagihan_tersimpan) {
+            const tagihanArr = Object.entries(data.tagihan_tersimpan);
+            tagihanArr.forEach(([id, plg]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <b>${plg.nama || '-'}</b><br>
+                        <small style="color:var(--text-secondary);">${id}</small>
+                    </td>
+                    <td style="color:var(--color-hijau); font-weight:800; vertical-align: middle;">
+                        ${formatRupiah(plg.total_tagihan || 0)}
+                    </td>
+                `;
+                tbodyTagihan.appendChild(tr);
+            });
+        } else {
+            tbodyTagihan.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Tidak ada tagihan lunas tersimpan.</td></tr>';
+        }
+
+        boxKosong.style.display = 'none';
+        boxHasil.style.display = 'block';
+    }).catch(err => {
+        showAlert("Gagal memuat arsip: " + err.message);
+    });
+}
+
+function loadDataArsipTahunanFo() {
+    const tahun = document.getElementById('filterTahunArsipFo').value;
+    const boxHasil = document.getElementById('boxHasilArsipFo');
+    const boxKosong = document.getElementById('boxArsipKosongFo');
+    
+    if (!tahun) {
+        showAlert("Silakan pilih tahun arsip terlebih dahulu!");
+        boxHasil.style.display = 'none';
+        boxKosong.style.display = 'block';
+        return;
+    }
+
+    db.ref(`arsip_keuangan/${tahun}`).once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+            boxHasil.style.display = 'none';
+            boxKosong.style.display = 'block';
+            boxKosong.innerHTML = "Data arsip untuk tahun tersebut tidak ditemukan.";
+            return;
+        }
+
+        const data = snapshot.val();
+        
+        document.getElementById('arsipSaldoAkhirFo').textContent = formatRupiah(data.saldo_akhir || 0);
+        document.getElementById('arsipWaktuFo').textContent = `Diarsipkan otomatis pada: ${data.waktu_arsip ? new Date(data.waktu_arsip).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-'}`;
+        
+        const tbodyKas = document.getElementById('tabelKasArsipFo');
+        tbodyKas.innerHTML = '';
+        if (data.kas_tersimpan) {
+            const arsipKas = Object.values(data.kas_tersimpan).sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+            arsipKas.forEach(kas => {
+                const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
+                const nominal = Number(kas.nominal || 0);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <b>${kas.tanggal}</b><br>
+                        <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
+                    </td>
+                    <td>
+                        <div style="margin-bottom:2px;"><b>${kas.keterangan || '-'}</b></div>
+                        <div style="color:${badgeColor}; font-weight:800;">
+                            ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                        </div>
+                    </td>
+                `;
+                tbodyKas.appendChild(tr);
+            });
+        } else {
+            tbodyKas.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Tidak ada catatan transaksi manual.</td></tr>';
+        }
+
+        const tbodyTagihan = document.getElementById('tabelTagihanArsipFo');
+        tbodyTagihan.innerHTML = '';
+        if (data.tagihan_tersimpan) {
+            const tagihanArr = Object.entries(data.tagihan_tersimpan);
+            tagihanArr.forEach(([id, plg]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <b>${plg.nama || '-'}</b><br>
+                        <small style="color:var(--text-secondary);">${id}</small>
+                    </td>
+                    <td style="color:var(--color-hijau); font-weight:800; vertical-align: middle;">
+                        ${formatRupiah(plg.total_tagihan || 0)}
+                    </td>
+                `;
+                tbodyTagihan.appendChild(tr);
+            });
+        } else {
+            tbodyTagihan.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Tidak ada tagihan lunas tersimpan.</td></tr>';
+        }
+
+        boxKosong.style.display = 'none';
+        boxHasil.style.display = 'block';
+    }).catch(err => {
+        showAlert("Gagal memuat arsip: " + err.message);
+    });
+}
+
 function loadLaporanKas() {
     db.ref('pengaturan/tarif').once('value').then(tariffSnap => {
         let hargaM3 = 3000;
@@ -2848,6 +3394,7 @@ function loadLaporanKas() {
                 }
 
                 let listKasHtml = '';
+                let listKasOfficeHtml = '';
                 let arrayKas = [];
 
                 if (kasSnap.exists()) {
@@ -2881,17 +3428,27 @@ function loadLaporanKas() {
                         }
 
                         const badgeColor = kas.jenis === "PEMASUKAN" ? "var(--color-hijau)" : "var(--color-merah)";
-                        listKasHtml += `
+                        
+                        const rowDataHtml = `
+                            <td>
+                                <b>${kas.tanggal}</b><br>
+                                <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
+                            </td>
+                            <td>
+                                <div style="margin-bottom:2px;"><b>${kas.keterangan || '-'}</b></div>
+                                <div style="color:${badgeColor}; font-weight:800;">
+                                    ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
+                                </div>
+                            </td>
+                        `;
+                        
+                        listKasHtml += `<tr>${rowDataHtml}</tr>`;
+                        
+                        listKasOfficeHtml += `
                             <tr>
+                                ${rowDataHtml}
                                 <td>
-                                    <b>${kas.tanggal}</b><br>
-                                    <small style="color:${badgeColor}; font-weight:700;">${kas.jenis}</small>
-                                </td>
-                                <td>
-                                    <div style="margin-bottom:2px;"><b>${kas.keterangan || '-'}</b></div>
-                                    <div style="color:${badgeColor}; font-weight:800;">
-                                        ${kas.jenis === "PEMASUKAN" ? "+ " : "- "}${formatRupiah(nominal)}
-                                    </div>
+                                    <button class="btn btn-merah btn-sm" onclick="hapusTransaksiKas('${kas.key}')">Hapus</button>
                                 </td>
                             </tr>
                         `;
@@ -2900,6 +3457,7 @@ function loadLaporanKas() {
 
                 if (!listKasHtml) {
                     listKasHtml = `<tr><td colspan="2" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas manual.</td></tr>`;
+                    listKasOfficeHtml = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi kas manual.</td></tr>`;
                 }
 
                 const saldoAkhir = saldoBulanLalu + pemasukanBulanIni - pengeluaranBulanIni;
@@ -2925,7 +3483,7 @@ function loadLaporanKas() {
                 });
 
                 const tabelKasEl = document.getElementById('tabelKas');
-                if (tabelKasEl) tabelKasEl.innerHTML = listKasHtml;
+                if (tabelKasEl) tabelKasEl.innerHTML = listKasOfficeHtml;
 
                 const tabelKasFoEl = document.getElementById('tabelKasFo');
                 if (tabelKasFoEl) tabelKasFoEl.innerHTML = listKasHtml;
