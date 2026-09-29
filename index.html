@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" id="metaThemeColor" content="#0B132B">
-    
-    <!-- PWA & Mobile Web App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" id="metaStatusBar" content="black-translucent">
@@ -26,7 +24,6 @@
     }
     </script>
     
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -783,7 +780,7 @@
 </head>
 <body>
 
-<!-- TOMBOL TEMA TUNGGAL DI KANAN BAWAH -->
+<!-- TEMA TUNGGAL DI KANAN BAWAH -->
 <div class="theme-switcher-float" id="themeSwitcherBtn" onclick="toggleTheme()" title="Ubah Tema">
     <span id="themeIcon">🌙</span>
     <span id="themeText" style="font-size: 11px;">Gelap</span>
@@ -799,7 +796,7 @@
     </div>
 </div>
 
-<!-- MODAL EDIT TRANSAKSI KAS -->
+<!-- EDIT TRANSAKSI KAS -->
 <div id="modalEditKas" class="custom-modal-backdrop">
     <div class="custom-modal-box" style="text-align: left;">
         <div style="font-size: 15px; font-weight: 800; color: var(--text-accent); margin-bottom: 12px; text-align: center;">Edit Transaksi Kas</div>
@@ -832,7 +829,7 @@
     </div>
 </div>
 
-<!-- MODAL PILIHAN METODE PEMBAYARAN KETIKA VERIFIKASI -->
+<!-- PILIHAN METODE PEMBAYARAN KETIKA VERIFIKASI -->
 <div id="modalMetodeBayar" class="custom-modal-backdrop">
     <div class="custom-modal-box">
         <div style="font-size: 15px; font-weight: 800; color: var(--text-accent); margin-bottom: 12px;">Pilih Metode Pembayaran</div>
@@ -888,7 +885,7 @@
     <div class="card">
         <div class="dashboard-header">
             <div class="dashboard-header-title">
-                <h1>CONTROL PANEL STAF OFFICE</h1>
+                <h1>PUSAT KONTROL STAF OFFICE</h1>
                 <p>TIRTA SARI GIRI</p>
                 <div class="dev-tag">Modul Utama Administrasi & Keuangan</div>
             </div>
@@ -899,31 +896,31 @@
         <div id="officeLauncher" class="launcher-grid">
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subPetugas')">
                 <div class="launcher-icon">👥</div>
-                <div class="launcher-title">Kelola Petugas</div>
+                <div class="launcher-title">MANAGE OFFICERS</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTarif')">
                 <div class="launcher-icon">⚙️</div>
-                <div class="launcher-title">Atur Tarif & Pembayaran</div>
+                <div class="launcher-title">SET RATES AND PAYMENTS</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTagihan')">
                 <div class="launcher-icon">📄</div>
-                <div class="launcher-title">Riwayat Tagihan</div>
+                <div class="launcher-title">BILLING HISTORY</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subKas')">
                 <div class="launcher-icon">💰</div>
-                <div class="launcher-title">Laporan Kas</div>
+                <div class="launcher-title">CASH REPORT</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subTeksBerjalan')">
                 <div class="launcher-icon">📢</div>
-                <div class="launcher-title">Videotron</div>
+                <div class="launcher-title">VIDEOTRON</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subAkun')">
                 <div class="launcher-icon">👤</div>
-                <div class="launcher-title">Pengaturan</div>
+                <div class="launcher-title">ADDITIONAL SETTINGS</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashOffice', 'subLaporanTahunan')" style="grid-column: span 2;">
                 <div class="launcher-icon">📊</div>
-                <div class="launcher-title">Laporan Tahunan (Arsip)</div>
+                <div class="launcher-title">ANNUAL REPORT (ARCHIVE)</div>
             </div>
         </div>
 
@@ -1607,19 +1604,19 @@
         <div id="plgLauncher" class="launcher-grid">
             <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgTagihan')">
                 <div class="launcher-icon">🧾</div>
-                <div class="launcher-title">Tagihan Saya</div>
+                <div class="launcher-title">MY BILL</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgRiwayat')">
                 <div class="launcher-icon">📋</div>
-                <div class="launcher-title">Riwayat Tagihan</div>
+                <div class="launcher-title">BILLING HISTORY</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgInfo')">
                 <div class="launcher-icon">📢</div>
-                <div class="launcher-title">Papan Informasi</div>
+                <div class="launcher-title">INFORMATION BOARDS</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashPelanggan', 'subPlgAkun')">
                 <div class="launcher-icon">👤</div>
-                <div class="launcher-title">Pengaturan</div>
+                <div class="launcher-title">ADDITIONAL SETTINGS</div>
             </div>
         </div>
 
