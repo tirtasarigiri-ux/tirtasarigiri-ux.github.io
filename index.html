@@ -451,7 +451,6 @@
         #subFoTagihan th:nth-child(1), #subFoTagihan td:nth-child(1) { width: 55%; }
         #subFoTagihan th:nth-child(2), #subFoTagihan td:nth-child(2) { width: 45%; }
 
-        /* FORMAT TABEL LAPORAN KAS, ARSIP & RIWAYAT PELANGGAN AGAR TEKS TURUN KE BAWAH TANPA HORIZONTAL SCROLL */
         #subKas .table-responsive, 
         #subFoKas .table-responsive,
         #subLaporanTahunan .table-responsive,
@@ -1324,7 +1323,7 @@
                     </select>
                 </div>
                 <div class="grup">
-                    <label>Meter Awal (m³)</label>
+                    <label>Meter Lalu / Angka Awal (m³)</label>
                     <input type="text" inputmode="decimal" id="plgMeterAwal" placeholder="0" value="0" required>
                 </div>
                 <div class="grup">
@@ -1369,6 +1368,10 @@
                 <div class="grup">
                     <label>Nama Pelanggan</label>
                     <input type="text" id="meterNamaPlg" readonly>
+                </div>
+                <div class="grup">
+                    <label>Tanggal Catat</label>
+                    <input type="date" id="meterTanggalCatat" required>
                 </div>
                 <div class="grup">
                     <label>Meter Lalu (m³)</label>
@@ -2105,7 +2108,7 @@ function prosesLogin() {
     const defaultAccounts = {
         'STAF01': { nama: 'Staf Office Demo', sandi: '12345', peran: 'STAF' },
         'FO01': { nama: 'Budi Santoso (FO)', sandi: '12345', wilayah: 'RT 1', peran: 'FO' },
-        'PLG001': { nama: 'Ahmad Subagja', sandi: 'PLG001', alamat: 'Sambeng RT 1', meter_awal: 0, angka_terakhir: 15, total_tagihan: 55000, status_bayar: 'Belum Bayar', didaftarkan_oleh: 'FO01' }
+        'PLG001': { nama: 'Ahmad Subagja', sandi: 'PLG001', alamat: 'Sambeng RT 1', angka_terakhir: 15, total_tagihan: 55000, status_bayar: 'Belum Bayar', didaftarkan_oleh: 'FO01' }
     };
 
     db.ref(`${nodePath}/${id}`).once('value').then(snapshot => {
@@ -2340,9 +2343,9 @@ function loadTagihanPelanggan() {
             }
 
             const data = snapshot.val();
-            const meterAwal = parseDesimal(data.meter_awal);
-            const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterAwal;
-            const pemakaian = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+            const meterLalu = data.meter_lalu !== undefined ? parseDesimal(data.meter_lalu) : (data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : 0);
+            const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterLalu;
+            const pemakaian = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
             const total = data.total_tagihan || 0;
             const isLunas = data.status_bayar === 'Sudah Bayar';
             const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
@@ -2409,12 +2412,12 @@ function loadTagihanPelanggan() {
             if (foId !== '-') {
                 db.ref(`staf_fo/${foId}`).once('value').then(foSnap => {
                     const foNama = (foSnap.exists() && foSnap.val().nama) ? foSnap.val().nama : foId;
-                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foNama);
+                    renderStruk(container, plgId, data, meterLalu, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foNama);
                 }).catch(() => {
-                    renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foId);
+                    renderStruk(container, plgId, data, meterLalu, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, foId);
                 });
             } else {
-                renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, 'Petugas Lapangan');
+                renderStruk(container, plgId, data, meterLalu, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, 'Petugas Lapangan');
             }
         });
     });
@@ -2435,9 +2438,9 @@ function loadRiwayatPelanggan() {
         }
 
         const data = snapshot.val();
-        const meterAwal = parseDesimal(data.meter_awal);
-        const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterAwal;
-        const pemakaian = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+        const meterLalu = data.meter_lalu !== undefined ? parseDesimal(data.meter_lalu) : (data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : 0);
+        const meterAkhir = data.angka_terakhir !== undefined ? parseDesimal(data.angka_terakhir) : meterLalu;
+        const pemakaian = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
         const total = data.total_tagihan || 0;
         const isLunas = data.status_bayar === 'Sudah Bayar';
         const tglStr = data.tgl_catat ? formatTanggalIndo(data.tgl_catat) : 'Belum Dicatat';
@@ -2459,7 +2462,7 @@ function loadRiwayatPelanggan() {
     });
 }
 
-function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, namaFo) {
+function renderStruk(container, plgId, data, meterLalu, meterAkhir, pemakaian, total, isLunas, tglStr, waktuBayarStr, metodeBayarStr, namaFo) {
     container.innerHTML = `
         <div class="struk-card" id="strukCardBox">
             <div class="struk-header">
@@ -2478,8 +2481,8 @@ function renderStruk(container, plgId, data, meterAwal, meterAkhir, pemakaian, t
 
             <div class="struk-section-title">📊 RINCIAN PEMAKAIAN</div>
             <div class="struk-box-inner">
-                <div class="struk-row"><span>Meter Awal</span><span>${meterAwal} m³</span></div>
-                <div class="struk-row"><span>Meter Akhir</span><span>${meterAkhir} m³</span></div>
+                <div class="struk-row"><span>Meter Lalu</span><span>${meterLalu} m³</span></div>
+                <div class="struk-row"><span>Meter Sekarang</span><span>${meterAkhir} m³</span></div>
                 <div class="struk-divider" style="margin:6px 0;"></div>
                 <div class="struk-row" style="font-weight:bold;"><span>Total Pemakaian</span><span style="color:#0284C7;">${pemakaian} m³</span></div>
             </div>
@@ -2637,7 +2640,6 @@ function simpanPelangganByFo() {
         alamat,
         wilayah,
         sandi,
-        meter_awal: meterAwal,
         angka_terakhir: meterAwal,
         total_tagihan: 0,
         status_bayar: 'Belum Bayar',
@@ -2753,7 +2755,13 @@ function cariPelangganMeter() {
 
         document.getElementById('cariPlgId').value = matchKey;
         document.getElementById('meterNamaPlg').value = matchData.nama || '';
-        document.getElementById('meterLalu').value = matchData.angka_terakhir !== undefined ? matchData.angka_terakhir : (matchData.meter_awal || 0);
+        
+        const meterTanggalCatatEl = document.getElementById('meterTanggalCatat');
+        if (meterTanggalCatatEl) {
+            meterTanggalCatatEl.value = new Date().toISOString().split('T')[0];
+        }
+
+        document.getElementById('meterLalu').value = matchData.angka_terakhir !== undefined ? parseDesimal(matchData.angka_terakhir) : 0;
         document.getElementById('meterSekarang').value = '';
         document.getElementById('formMeterBox').style.display = 'block';
     });
@@ -2761,6 +2769,8 @@ function cariPelangganMeter() {
 
 function simpanCatatMeter() {
     const id = document.getElementById('cariPlgId').value.trim().toUpperCase();
+    const meterTanggalCatatEl = document.getElementById('meterTanggalCatat');
+    const tglCatat = meterTanggalCatatEl && meterTanggalCatatEl.value ? meterTanggalCatatEl.value : new Date().toISOString().split('T')[0];
     const meterLalu = parseDesimal(document.getElementById('meterLalu').value);
     const meterSekarangVal = document.getElementById('meterSekarang').value.trim();
 
@@ -2789,12 +2799,13 @@ function simpanCatatMeter() {
         const totalTagihan = Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
 
         db.ref(`pelanggan/${id}`).update({
+            meter_lalu: meterLalu,
             angka_terakhir: meterSekarang,
             total_tagihan: totalTagihan,
             status_bayar: 'Belum Bayar',
-            tgl_catat: new Date().toISOString()
+            tgl_catat: new Date(tglCatat).toISOString()
         }).then(() => {
-            showAlert(`Catat meter berhasil!\nPemakaian: ${pakai} m³\nTotal Tagihan: ${formatRupiah(totalTagihan)}`);
+            showAlert(`Catat meter berhasil (${formatTanggalIndo(tglCatat)})!\nPemakaian: ${pakai} m³\nTotal Tagihan: ${formatRupiah(totalTagihan)}`);
             document.getElementById('formMeterBox').style.display = 'none';
             document.getElementById('cariPlgId').value = '';
             loadTagihanFo();
@@ -2836,7 +2847,7 @@ function loadTagihanFo() {
                 const plg = child.val();
                 if (plg && plg.didaftarkan_oleh === currentUser.id) {
                     count++;
-                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
                     const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
                     const pakai = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                     
@@ -2856,7 +2867,7 @@ function loadTagihanFo() {
                     tr.innerHTML = `
                         <td>
                             <b>${plg.nama || '-'}</b><br>
-                            <small style="color:var(--text-secondary);">${child.key}</small><br>
+                            <small style="color:var(--text-secondary);">${child.key} (${plg.tgl_catat ? formatTanggalIndo(plg.tgl_catat) : 'Belum Dicatat'})</small><br>
                             <span>Pemakaian: ${pakai} m³</span><br>
                             <b style="color:var(--text-accent);">${formatRupiah(totalTagihanCalculated)}</b>
                         </td>
@@ -3025,7 +3036,7 @@ function loadRiwayatTagihan() {
             snapshot.forEach(child => {
                 const plg = child.val();
                 if (filter === "SEMUA" || plg.wilayah === filter) {
-                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
                     const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
                     
                     const pemakaianM3 = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
@@ -3039,7 +3050,7 @@ function loadRiwayatTagihan() {
                     tr.innerHTML = `
                         <td>
                             <b>${plg.nama || '-'}</b><br>
-                            <span style="color:var(--text-accent); font-weight:700;">${child.key}</span><br>
+                            <span style="color:var(--text-accent); font-weight:700;">${child.key}</span> (${plg.tgl_catat ? formatTanggalIndo(plg.tgl_catat) : '-'})<br>
                             <code style="font-size:10px;">${plg.wilayah || '-'}</code>
                         </td>
                         <td>
@@ -3161,16 +3172,16 @@ function prosesTutupBukuAkhirTahun() {
                     const plg = child.val();
                     
                     if (plg.status_bayar === 'Sudah Bayar') {
-                        const meterAwal = parseDesimal(plg.meter_awal);
-                        const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterAwal;
-                        const pakai = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+                        const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
+                        const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
+                        const pakai = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                         const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
                         
                         totalSaldo += totalTagihanCalculated;
                         arsipPelanggan[id] = plg;
                     }
 
-                    updateBatch[`pelanggan/${id}/meter_awal`] = plg.angka_terakhir !== undefined ? plg.angka_terakhir : plg.meter_awal;
+                    updateBatch[`pelanggan/${id}/meter_lalu`] = plg.angka_terakhir !== undefined ? plg.angka_terakhir : 0;
                     updateBatch[`pelanggan/${id}/total_tagihan`] = 0;
                     updateBatch[`pelanggan/${id}/status_bayar`] = 'Belum Bayar';
                     updateBatch[`pelanggan/${id}/tanggal_bayar`] = null;
@@ -3445,9 +3456,9 @@ function loadLaporanKas() {
                             const thn = tglBayar.getFullYear();
                             const bln = tglBayar.getMonth();
                             
-                            const meterAwal = parseDesimal(plg.meter_awal);
-                            const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterAwal;
-                            const pakai = Math.max(0, Math.round((meterAkhir - meterAwal) * 100) / 100);
+                            const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
+                            const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
+                            const pakai = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                             const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
 
                             if ((thn < tahunSekarang) || (thn === tahunSekarang && bln < bulanSekarang)) {
@@ -3595,7 +3606,7 @@ function loadTagihanPerWilayahKas() {
                         rekap[wil] = { sudahBayar: 0, belumBayar: 0 };
                     }
 
-                    const meterLalu = parseDesimal(plg.meter_awal);
+                    const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
                     const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
                     const pemakaianM3 = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                     
