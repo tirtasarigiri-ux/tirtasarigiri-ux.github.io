@@ -799,6 +799,39 @@
     </div>
 </div>
 
+<!-- MODAL EDIT TRANSAKSI KAS -->
+<div id="modalEditKas" class="custom-modal-backdrop">
+    <div class="custom-modal-box" style="text-align: left;">
+        <div style="font-size: 15px; font-weight: 800; color: var(--text-accent); margin-bottom: 12px; text-align: center;">Edit Transaksi Kas</div>
+        <form onsubmit="event.preventDefault(); prosesSimpanEditKas();">
+            <input type="hidden" id="editKasKey">
+            <div class="grup">
+                <label>Tanggal Transaksi</label>
+                <input type="date" id="editKasTanggal" required>
+            </div>
+            <div class="grup">
+                <label>Jenis Transaksi</label>
+                <select id="editKasJenis" required>
+                    <option value="PEMASUKAN">Pemasukan</option>
+                    <option value="PENGELUARAN">Pengeluaran</option>
+                </select>
+            </div>
+            <div class="grup">
+                <label>Nominal (Rp)</label>
+                <input type="number" id="editKasNominal" placeholder="Contoh: 50000" required>
+            </div>
+            <div class="grup">
+                <label>Keterangan</label>
+                <input type="text" id="editKasKet" placeholder="Contoh: Beli Pipa PVC" required>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-hijau btn-sm" style="flex: 1;">Simpan</button>
+                <button type="button" class="btn btn-merah btn-sm" style="flex: 1;" onclick="document.getElementById('modalEditKas').style.display='none'">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- MODAL PILIHAN METODE PEMBAYARAN KETIKA VERIFIKASI -->
 <div id="modalMetodeBayar" class="custom-modal-backdrop">
     <div class="custom-modal-box">
@@ -3055,6 +3088,42 @@ function simpanKas() {
     });
 }
 
+function editTransaksiKas(key, tanggal, jenis, nominal, keterangan) {
+    document.getElementById('editKasKey').value = key;
+    document.getElementById('editKasTanggal').value = tanggal;
+    document.getElementById('editKasJenis').value = jenis;
+    document.getElementById('editKasNominal').value = nominal;
+    document.getElementById('editKasKet').value = keterangan;
+    
+    const modal = document.getElementById('modalEditKas');
+    if (modal) modal.style.display = 'flex';
+}
+
+function prosesSimpanEditKas() {
+    const key = document.getElementById('editKasKey').value;
+    const tanggal = document.getElementById('editKasTanggal').value;
+    const jenis = document.getElementById('editKasJenis').value;
+    const nominal = Number(document.getElementById('editKasNominal').value);
+    const keterangan = document.getElementById('editKasKet').value.trim();
+
+    if (!key || !tanggal || !nominal || !keterangan) {
+        showAlert("Lengkapi semua kolom edit transaksi kas!");
+        return;
+    }
+
+    db.ref(`transaksi_kas/${key}`).update({
+        tanggal,
+        jenis,
+        nominal,
+        keterangan
+    }).then(() => {
+        document.getElementById('modalEditKas').style.display = 'none';
+        showAlert("Riwayat transaksi kas berhasil diperbarui!");
+    }).catch(err => {
+        showAlert("Gagal memperbarui transaksi kas: " + err.message);
+    });
+}
+
 function hapusTransaksiKas(key) {
     showConfirm("Apakah Anda yakin ingin menghapus catatan transaksi kas ini?", () => {
         db.ref(`transaksi_kas/${key}`).remove().then(() => {
@@ -3448,7 +3517,10 @@ function loadLaporanKas() {
                             <tr>
                                 ${rowDataHtml}
                                 <td>
-                                    <button class="btn btn-merah btn-sm" onclick="hapusTransaksiKas('${kas.key}')">Hapus</button>
+                                    <div style="display: flex; gap: 4px; flex-direction: column;">
+                                        <button class="btn btn-kuning btn-sm" onclick="editTransaksiKas('${kas.key}', '${kas.tanggal}', '${kas.jenis}', ${kas.nominal}, '${kas.keterangan.replace(/'/g, "\\'")}')">Edit</button>
+                                        <button class="btn btn-merah btn-sm" onclick="hapusTransaksiKas('${kas.key}')">Hapus</button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
