@@ -1022,7 +1022,7 @@
                     <thead>
                         <tr>
                             <th>Nama / ID</th>
-                            <th>Pemakaian / Status</th>
+                            <th>Pemakaian</th>
                         </tr>
                     </thead>
                     <tbody id="tabelTagihan">
@@ -1035,7 +1035,7 @@
         <!-- SUB-MENU 4: LAPORAN KAS -->
         <div id="subKas" class="sub-view">
             <div class="subview-header">
-                <h3 style="font-size:12px; color:var(--text-accent);">Kas & Transaksi</h3>
+                <h3 style="font-size:12px; color:var(--text-accent);">Keuangan Per Bulan</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
             </div>
             
@@ -1045,11 +1045,11 @@
                     <div class="stat-value" id="kasSaldoLalu">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-label">Pemasukan</div>
                     <div class="stat-value hijau" id="kasPemasukan">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-label">Pengeluaran</div>
                     <div class="stat-value merah" id="kasPengeluaran">Rp 0</div>
                 </div>
                 <div class="stat-box">
@@ -1407,7 +1407,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nama / ID / Pemakaian / Total</th>
+                            <th>Nama / Pemakaian</th>
                             <th>Status / Aksi</th>
                         </tr>
                     </thead>
@@ -1421,7 +1421,7 @@
         <!-- FO SUB-MENU 4: LAPORAN KAS -->
         <div id="subFoKas" class="sub-view">
             <div class="subview-header">
-                <h3 style="font-size:12px; color:var(--text-accent);">Laporan Kas Tirta Sari</h3>
+                <h3 style="font-size:12px; color:var(--text-accent);">Laporan Kas</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashFo')">Dashboard</button>
             </div>
             <div class="grid-stats">
@@ -1430,11 +1430,11 @@
                     <div class="stat-value" id="kasSaldoLaluFo">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-label">Pemasukan</div>
                     <div class="stat-value hijau" id="kasPemasukanFo">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-label">Pengeluaran</div>
                     <div class="stat-value merah" id="kasPengeluaranFo">Rp 0</div>
                 </div>
                 <div class="stat-box">
@@ -1886,8 +1886,8 @@ function formatTanggalIndo(tglInput) {
     const parts = String(tglInput).split('T')[0].split('-');
     if (parts.length === 3) {
         const namaBulan = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'Sep', 'Oktober', 'November', 'Desember'
+            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
         ];
         return `${parseInt(parts[2], 10)} ${namaBulan[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
     }
