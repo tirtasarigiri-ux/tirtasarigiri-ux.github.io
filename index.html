@@ -785,6 +785,24 @@
     <span id="themeText" style="font-size: 11px;">Gelap</span>
 </div>
 
+<!-- VIDEOTRON FULLSCREEN INTRO OVERLAY -->
+<div id="videotronFullscreenModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(7, 11, 20, 0.96); z-index: 20000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(12px);">
+    <div style="background: var(--bg-card-solid); border: 2px solid var(--border-highlight); border-radius: 24px; padding: 28px 20px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
+        <div style="font-size: 38px; margin-bottom: 10px;">📢</div>
+        <h2 style="font-size: 17px; color: var(--text-accent); font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">PENGUMUMAN RESMI</h2>
+        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Tirta Sari Giri - Sambeng Bening</p>
+        
+        <!-- Kotak Videotron Fullscreen -->
+        <div class="videotron-box" style="height: 130px; margin-bottom: 16px;">
+            <div id="videotronFullscreenText" class="videotron-text" style="font-size: 12px;">Memuat pengumuman...</div>
+        </div>
+
+        <div id="videotronTimerCountdown" style="font-size: 11px; color: var(--text-secondary); margin-bottom: 14px; font-weight: 600;"></div>
+
+        <button class="btn btn-hijau" onclick="tutupVideotronFullscreen()">Masuk ke Launcher 🚀</button>
+    </div>
+</div>
+
 <div id="customModal" class="custom-modal-backdrop">
     <div class="custom-modal-box">
         <div id="customModalMsg" class="custom-modal-msg">Pemberitahuan</div>
@@ -1035,7 +1053,7 @@
         <!-- SUB-MENU 4: LAPORAN KAS -->
         <div id="subKas" class="sub-view">
             <div class="subview-header">
-                <h3 style="font-size:12px; color:var(--text-accent);">Keuangan Per Bulan</h3>
+                <h3 style="font-size:12px; color:var(--text-accent);">Kas & Transaksi</h3>
                 <button class="btn-back" onclick="kembaliKeLauncher('dashOffice')">Dashboard</button>
             </div>
             
@@ -1142,6 +1160,12 @@
                     </select>
                 </div>
 
+                <div class="grup">
+                    <label>Auto-Close Timer (Detik)</label>
+                    <input type="number" id="inputVideotronTimer" min="0" max="60" value="8" placeholder="Contoh: 8 (0 = Nonaktif/Manual)" required>
+                    <small style="color: var(--text-secondary); font-size: 10px; margin-top: 4px;">Durasi hitung mundur sebelum layar fullscreen tertutup otomatis setelah login.</small>
+                </div>
+
                 <button type="submit" class="btn btn-hijau">Simpan & Publikasikan</button>
             </form>
         </div>
@@ -1240,7 +1264,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>ID / Nama Pelanggan</th>
+                                <th>ID / Nama</th>
                                 <th>Total Tagihan</th>
                             </tr>
                         </thead>
@@ -1290,7 +1314,7 @@
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoLaporanTahunan')" style="grid-column: span 2;">
                 <div class="launcher-icon">📊</div>
-                <div class="launcher-title">ANNUAL REPORT(Arsip)</div>
+                <div class="launcher-title">ANNUAL REPORT(ARCHIVE)</div>
             </div>
             <div class="launcher-card" onclick="bukaSubView('dashFo', 'subFoAkun')" style="grid-column: span 2;">
                 <div class="launcher-icon">👤</div>
@@ -1323,7 +1347,7 @@
                     </select>
                 </div>
                 <div class="grup">
-                    <label>Meter Lalu / Angka Awal (m³)</label>
+                    <label>Angka Awal (m³)</label>
                     <input type="text" inputmode="decimal" id="plgMeterAwal" placeholder="0" value="0" required>
                 </div>
                 <div class="grup">
@@ -1408,7 +1432,7 @@
                     <thead>
                         <tr>
                             <th>Nama / Pemakaian</th>
-                            <th>Status / Aksi</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="tabelTagihanFo">
@@ -1443,7 +1467,7 @@
                 </div>
             </div>
 
-            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan Per Wilayah</h3>
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Total Tagihan</h3>
             <div class="table-responsive" style="margin-bottom: 16px;">
                 <table>
                     <thead>
@@ -1634,10 +1658,10 @@
             </div>
             <div id="actionStrukContainer" style="margin-top: 14px; display: none; flex-direction: column; gap: 8px; text-align: center;">
                 <button class="btn btn-hijau" style="gap: 6px;" onclick="downloadStrukGambar()">
-                    📥 Unduh Struk Gambar
+                    📥 Unduh Struk
                 </button>
                 <a id="btnKonfirmasiWa" href="#" target="_blank" class="btn btn-kuning" style="gap: 6px; text-decoration: none; display: none;">
-                    💬 Konfirmasi Pembayaran via WhatsApp
+                    💬 Konfirmasi Pembayaran
                 </a>
             </div>
         </div>
@@ -1681,11 +1705,11 @@
                     <div class="stat-value" id="kasSaldoLaluPlg">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pemasukan Bulan Ini</div>
+                    <div class="stat-label">Pemasukan</div>
                     <div class="stat-value hijau" id="kasPemasukanPlg">Rp 0</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Pengeluaran Bulan Ini</div>
+                    <div class="stat-label">Pengeluaran</div>
                     <div class="stat-value merah" id="kasPengeluaranPlg">Rp 0</div>
                 </div>
                 <div class="stat-box">
@@ -1837,11 +1861,12 @@ const db = firebase.database();
 let currentUser = null;
 let videotronTimer = null;
 let targetVerifikasiId = null;
+let fullscreenCountdownInterval = null;
 
 const DEFAULT_BANK_NO = "1234-5678-90";
 const DEFAULT_BANK_NAMA = "Tirta Sari Giri";
 const DEFAULT_EWALLET_NO = "0812-3456-7890";
-const DEFAULT_EWALLET_NAMA = "Tirta Sari Giri";
+const DEFAULT_EWALLET_NAMA = "PAMSIMAS Sambeng";
 
 function showAlert(msg) {
     const modal = document.getElementById('customModal');
@@ -1886,8 +1911,8 @@ function formatTanggalIndo(tglInput) {
     const parts = String(tglInput).split('T')[0].split('-');
     if (parts.length === 3) {
         const namaBulan = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
         ];
         return `${parseInt(parts[2], 10)} ${namaBulan[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
     }
@@ -1924,10 +1949,11 @@ function initLogoDinamis() {
     });
 }
 
-// SIMPAN TEKS DAN ANIMASI VIDEOTRON KE DATABASE
+// SIMPAN TEKS, ANIMASI, DAN TIMER VIDEOTRON KE DATABASE
 function simpanTeksBerjalan() {
     const teksInput = document.getElementById('inputTeksBerjalan').value.trim();
     const animasiInput = document.getElementById('inputAnimasiVideotron').value;
+    const timerInput = parseInt(document.getElementById('inputVideotronTimer').value) || 8;
 
     if (!teksInput) {
         showAlert("Teks pengumuman tidak boleh kosong!");
@@ -1936,9 +1962,10 @@ function simpanTeksBerjalan() {
 
     db.ref('pengaturan/videotron').set({
         teks: teksInput,
-        animasi: animasiInput
+        animasi: animasiInput,
+        autoCloseTimer: timerInput
     }).then(() => {
-        showAlert("Teks pengumuman dan jenis animasi berhasil diperbarui!");
+        showAlert("Teks pengumuman, jenis animasi, dan timer berhasil diperbarui!");
     }).catch(err => showAlert("Gagal menyimpan: " + err.message));
 }
 
@@ -1946,12 +1973,14 @@ function initVideotronPengumuman() {
     db.ref('pengaturan/videotron').on('value', snapshot => {
         let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
         let animasi = "slide";
+        let autoCloseTimer = 8;
 
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (typeof data === 'object') {
                 teks = data.teks || teks;
                 animasi = data.animasi || 'slide';
+                autoCloseTimer = data.autoCloseTimer !== undefined ? Number(data.autoCloseTimer) : 8;
             } else {
                 teks = data;
             }
@@ -1959,8 +1988,11 @@ function initVideotronPengumuman() {
 
         const inputTeksEl = document.getElementById('inputTeksBerjalan');
         const inputAnimasiEl = document.getElementById('inputAnimasiVideotron');
+        const inputTimerEl = document.getElementById('inputVideotronTimer');
+        
         if (inputTeksEl) inputTeksEl.value = teks;
         if (inputAnimasiEl) inputAnimasiEl.value = animasi;
+        if (inputTimerEl) inputTimerEl.value = autoCloseTimer;
 
         if (videotronTimer) clearInterval(videotronTimer);
 
@@ -1990,6 +2022,72 @@ function initVideotronPengumuman() {
     });
 }
 
+// =====================================
+// VIDEOTRON FULLSCREEN INTRO SETELAH LOGIN
+// =====================================
+function tampilkanVideotronFullscreen() {
+    db.ref('pengaturan/videotron').once('value').then(snapshot => {
+        let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
+        let autoCloseTimer = 8;
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (typeof data === 'object') {
+                teks = data.teks || teks;
+                autoCloseTimer = data.autoCloseTimer !== undefined ? Number(data.autoCloseTimer) : 8;
+            } else {
+                teks = data;
+            }
+        }
+
+        const elText = document.getElementById('videotronFullscreenText');
+        if (elText) {
+            elText.textContent = `📢 ${teks}`;
+        }
+
+        const modal = document.getElementById('videotronFullscreenModal');
+        const countdownEl = document.getElementById('videotronTimerCountdown');
+        
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+
+        if (fullscreenCountdownInterval) clearInterval(fullscreenCountdownInterval);
+
+        if (autoCloseTimer > 0) {
+            let sisaWaktu = autoCloseTimer;
+            if (countdownEl) {
+                countdownEl.textContent = `Tertutup otomatis dalam ${sisaWaktu} detik...`;
+                countdownEl.style.display = 'block';
+            }
+
+            fullscreenCountdownInterval = setInterval(() => {
+                sisaWaktu--;
+                if (countdownEl) {
+                    countdownEl.textContent = `Tertutup otomatis dalam ${sisaWaktu} detik...`;
+                }
+                if (sisaWaktu <= 0) {
+                    clearInterval(fullscreenCountdownInterval);
+                    tutupVideotronFullscreen();
+                }
+            }, 1000);
+        } else {
+            if (countdownEl) countdownEl.style.display = 'none';
+        }
+    }).catch(() => {
+        const modal = document.getElementById('videotronFullscreenModal');
+        if (modal) modal.style.display = 'flex';
+    });
+}
+
+function tutupVideotronFullscreen() {
+    if (fullscreenCountdownInterval) clearInterval(fullscreenCountdownInterval);
+    const modal = document.getElementById('videotronFullscreenModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     setKasTanggalDefault();
     initVideotronPengumuman();
@@ -2003,7 +2101,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (activeSession) {
         const sessionData = JSON.parse(activeSession);
         currentUser = sessionData.userData;
-        tampilkanDashboard(sessionData.viewId, sessionData.userData, sessionData.id, sessionData.roleTitle);
+        tampilkanDashboard(sessionData.viewId, sessionData.userData, sessionData.id, sessionData.roleTitle, false);
     } else if (isRemembered && savedId && savedSandi) {
         document.getElementById('loginId').value = savedId;
         document.getElementById('loginSandi').value = savedSandi;
@@ -2139,7 +2237,7 @@ function prosesLogin() {
                 localStorage.removeItem('tirta_saved_sandi');
             }
 
-            tampilkanDashboard(targetView, userData, id, roleTitle);
+            tampilkanDashboard(targetView, userData, id, roleTitle, true);
         } else {
             showAlert("Kata sandi salah!");
         }
@@ -2147,14 +2245,14 @@ function prosesLogin() {
         if (defaultAccounts[id] && defaultAccounts[id].sandi === sandi) {
             const userData = defaultAccounts[id];
             currentUser = { ...userData, id: id };
-            tampilkanDashboard(targetView, userData, id, roleTitle);
+            tampilkanDashboard(targetView, userData, id, roleTitle, true);
         } else {
             showAlert("Gagal koneksi DB: " + error.message);
         }
     });
 }
 
-function tampilkanDashboard(viewId, userData, id, roleTitle) {
+function tampilkanDashboard(viewId, userData, id, roleTitle, triggerVideotron = false) {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('aktif'));
     const targetViewEl = document.getElementById(viewId);
     if (targetViewEl) targetViewEl.classList.add('aktif');
@@ -2192,6 +2290,10 @@ function tampilkanDashboard(viewId, userData, id, roleTitle) {
         const profPelanggan = document.getElementById('profPelanggan');
         if (profPelanggan) profPelanggan.innerHTML = profileHtml;
         initPelangganDashboard();
+    }
+
+    if (triggerVideotron) {
+        tampilkanVideotronFullscreen();
     }
 }
 
