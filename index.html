@@ -1211,6 +1211,15 @@
                 <button type="submit" class="btn btn-hijau" style="margin-bottom: 12px;">Perbarui Akun</button>
             </form>
 
+            <div class="grup" style="margin-top: 14px;">
+                <label>🖼️ URL Logo Aplikasi</label>
+                <div class="flex-row">
+                    <input type="url" id="inputLogoUrl" placeholder="https://example.com/logo.png">
+                    <button class="btn btn-sm" style="width:80px;" onclick="simpanLogoUrl()">Simpan</button>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 10px; margin-top: 4px;">Masukkan link gambar logo online untuk mengubah ikon PWA dan logo aplikasi secara instan.</small>
+            </div>
+
             <div class="system-info-box" style="margin-top: 14px;">
                 <div style="text-align: center; margin-bottom: 12px;">
                     <div style="margin-bottom: 6px; display: flex; justify-content: center;">
@@ -1821,9 +1830,6 @@
 </div>
 
 <script>
-// =====================================
-// MANAJEMEN TEMA DINAMIS
-// =====================================
 function setTheme(themeName) {
     document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('tirta_theme_mode', themeName);
@@ -1858,11 +1864,9 @@ function toggleTheme() {
 const savedTheme = localStorage.getItem('tirta_theme_mode') || 'dark';
 setTheme(savedTheme);
 
-// =====================================
-// KONFIGURASI PWA & PENGAMANAN URL BAR
-// =====================================
-(function inisialisasiPWA() {
-    const defaultDataUriIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Crect width='512' height='512' fill='%23070B14' rx='120'/%3E%3Cpath d='M256 80c-70 110-140 180-140 260 0 77.3 62.7 140 140 140s140-62.7 140-140c0-80-70-150-140-260z' fill='%2338BDF8'/%3E%3C/svg%3E";
+function updatePwaManifest(logoUrl) {
+    let existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) existingManifest.remove();
 
     const manifestObj = {
         "name": "Tirta Sari Giri",
@@ -1875,9 +1879,9 @@ setTheme(savedTheme);
         "orientation": "portrait",
         "icons": [
             {
-                "src": defaultDataUriIcon,
+                "src": logoUrl,
                 "sizes": "192x192 512x512",
-                "type": "image/svg+xml",
+                "type": "image/png",
                 "purpose": "any maskable"
             }
         ]
@@ -1888,6 +1892,10 @@ setTheme(savedTheme);
     manifestLink.rel = 'manifest';
     manifestLink.href = manifestURL;
     document.head.appendChild(manifestLink);
+}
+
+(function inisialisasiPWA() {
+    updatePwaManifest("logo3.png");
 })();
 
 // Firebase Config
@@ -1983,9 +1991,6 @@ function setKasTanggalDefault() {
     }
 }
 
-// =====================================
-// PENGELOLAAN LOGO DINAMIS OLEH STAF
-// =====================================
 function initLogoDinamis() {
     db.ref('pengaturan/logo_url').on('value', snapshot => {
         let logoSrc = "logo3.png";
@@ -1996,12 +2001,31 @@ function initLogoDinamis() {
         const logoLoginEl = document.getElementById('logoLogin');
         if (logoLoginEl) logoLoginEl.src = logoSrc;
 
+        const inputLogoUrlEl = document.getElementById('inputLogoUrl');
+        if (inputLogoUrlEl && !inputLogoUrlEl.value) {
+            inputLogoUrlEl.value = logoSrc;
+        }
+
         document.querySelectorAll('.appLogoDynamic').forEach(img => {
             img.src = logoSrc;
         });
         
         window.currentAppLogo = logoSrc;
+        updatePwaManifest(logoSrc);
     });
+}
+
+function simpanLogoUrl() {
+    const logoUrl = document.getElementById('inputLogoUrl').value.trim();
+    if (!logoUrl) {
+        showAlert("URL Logo tidak boleh kosong!");
+        return;
+    }
+
+    db.ref('pengaturan/logo_url').set(logoUrl).then(() => {
+        showAlert("Logo aplikasi dan ikon PWA berhasil diperbarui!");
+        updatePwaManifest(logoUrl);
+    }).catch(err => showAlert("Gagal menyimpan logo: " + err.message));
 }
 
 // SIMPAN TEKS, ANIMASI, DAN TIMER VIDEOTRON KE DATABASE
@@ -3321,7 +3345,6 @@ function loadRiwayatTagihan() {
                 
                 const pemakaianM3 = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                 
-                // Akumulasi total pemakaian air sesuai dengan daftar tagihan yang difilter/ditampilkan
                 if (filter === "SEMUA" || plg.wilayah === filter || plg.alamat === filter) {
                     totalPemakaianSum += pemakaianM3;
                     countRows++;
