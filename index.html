@@ -802,11 +802,15 @@
         <h2 style="font-size: 16px; color: var(--text-accent); font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px;">🎬 SELAMAT DATANG</h2>
         
         <!-- Elemen Video 5 Detik -->
-        <div style="position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 14px; border: 1px solid var(--border-color);">
-            <video id="introVideoPlayer" width="100%" height="200" style="object-fit: cover; display: block;" muted playsinline autoplay>
+        <div style="position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 14px; border: 1px solid var(--border-color); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+            <video id="introVideoPlayer" width="100%" height="200" style="object-fit: cover; display: block;" muted playsinline autoplay preload="auto">
                 <source src="intro.mp4" type="video/mp4">
-                Video tidak didukung oleh browser Anda.
+                <source src="./intro.mp4" type="video/mp4">
+                Maaf, browser Anda tidak mendukung pemutaran video.
             </video>
+            <div id="videoErrorFallback" style="display: none; position: absolute; color: #F87171; font-size: 11px; padding: 10px; font-weight: 600;">
+                ⚠️ File "intro.mp4" belum ditemukan di folder yang sama dengan index.html.
+            </div>
         </div>
 
         <div id="videoTimerCountdown" style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600;">Masuk ke dashboard dalam 5 detik...</div>
@@ -2121,19 +2125,31 @@ function initVideotronPengumuman() {
 function tampilkanVideoFullscreen() {
     const modal = document.getElementById('videoFullscreenModal');
     const videoEl = document.getElementById('introVideoPlayer');
+    const fallbackEl = document.getElementById('videoErrorFallback');
     const countdownEl = document.getElementById('videoTimerCountdown');
 
     if (!modal || !videoEl) return;
 
     modal.style.display = 'flex';
     videoEl.currentTime = 0;
+    if (fallbackEl) fallbackEl.style.display = 'none';
+
+    videoEl.onerror = function() {
+        console.warn("Gagal memuat file intro.mp4. Menampilkan pesan fallback.");
+        if (fallbackEl) fallbackEl.style.display = 'block';
+        videoEl.style.display = 'none';
+    };
 
     const playPromise = videoEl.play();
     if (playPromise !== undefined) {
         playPromise.catch(error => {
             console.log("Autoplay video dicegah oleh browser, memutar dengan mute...", error);
             videoEl.muted = true;
-            videoEl.play().catch(e => console.log("Gagal memutar video:", e));
+            videoEl.play().catch(e => {
+                console.log("Gagal memutar video secara otomatis:", e);
+                if (fallbackEl) fallbackEl.style.display = 'block';
+                videoEl.style.display = 'none';
+            });
         });
     }
 
@@ -4134,6 +4150,5 @@ function logout() {
     document.getElementById('roleDetected').style.display = 'none';
 }
 </script>
-
 </body>
 </html>
