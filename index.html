@@ -1520,6 +1520,30 @@
                 </table>
             </div>
 
+            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Pemasukan Bulan Ini</h3>
+            <form onsubmit="event.preventDefault(); simpanPemasukanFo();" style="margin-bottom:16px;">
+                <div class="grup">
+                    <label>Pilih Sumber Pemasukan / Tagihan Pelanggan</label>
+                    <select id="foInputSumber" onchange="handlePilihSumberPemasukan(this)" required>
+                        <option value="">-- Pilih Sumber Pemasukan --</option>
+                        <option value="MANUAL">➕ Input Manual (Bebas)</option>
+                    </select>
+                </div>
+                <div class="grup" id="grupFoManualKet" style="display:none;">
+                    <label>Keterangan Pemasukan Manual</label>
+                    <input type="text" id="foInputManualKet" placeholder="Contoh: Donasi / Sumbangan Warga">
+                </div>
+                <div class="grup">
+                    <label>Tanggal Pemasukan</label>
+                    <input type="date" id="foInputTanggal" required>
+                </div>
+                <div class="grup">
+                    <label>Nominal Pemasukan (Rp)</label>
+                    <input type="number" id="foInputNominal" placeholder="Contoh: 50000" required>
+                </div>
+                <button type="submit" class="btn btn-hijau">Simpan Pemasukan Bulan Ini</button>
+            </form>
+
             <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
             <div class="table-responsive">
                 <table>
@@ -1989,6 +2013,10 @@ function setKasTanggalDefault() {
     if (kasTanggalEl && !kasTanggalEl.value) {
         kasTanggalEl.value = new Date().toISOString().split('T')[0];
     }
+    const foInputTanggal = document.getElementById('foInputTanggal');
+    if (foInputTanggal && !foInputTanggal.value) {
+        foInputTanggal.value = new Date().toISOString().split('T')[0];
+    }
 }
 
 function initLogoDinamis() {
@@ -2028,7 +2056,6 @@ function simpanLogoUrl() {
     }).catch(err => showAlert("Gagal menyimpan logo: " + err.message));
 }
 
-// SIMPAN TEKS, ANIMASI, DAN TIMER VIDEOTRON KE DATABASE
 function simpanTeksBerjalan() {
     const teksInput = document.getElementById('inputTeksBerjalan').value.trim();
     const animasiInput = document.getElementById('inputAnimasiVideotron').value;
@@ -2101,9 +2128,6 @@ function initVideotronPengumuman() {
     });
 }
 
-// =====================================
-// VIDEOTRON FULLSCREEN INTRO SETELAH LOGIN
-// =====================================
 function tampilkanVideotronFullscreen() {
     db.ref('pengaturan/videotron').once('value').then(snapshot => {
         let teks = "Selamat datang di Sistem Informasi Tirta Sari Giri. Bersama Untuk Sambeng Bening.";
@@ -2400,6 +2424,7 @@ function bukaSubView(dashId, subViewId) {
     } else if (subViewId === 'subFoKas') {
         loadLaporanKas();
         loadAkumulasiPemakaianAirFo();
+        populateDropdownSumberFo();
     }
 }
 
@@ -2458,7 +2483,6 @@ function prosesVerifikasiDenganMetode(metodeBayar) {
 
         db.ref(`pelanggan/${id}`).update({ 
             status_bayar: 'Sudah Bayar',
-            tanggal_bayar: tglHariIni,
             waktu_bayar_lengkap: waktuOtomatis,
             metode_pembayaran: metodeBayar
         }).then(() => {
@@ -3192,8 +3216,142 @@ function loadTagihanFo() {
             const elBelum = document.getElementById('foTotalBelumBayar');
             if (elSudah) elSudah.textContent = formatRupiah(totalSudah);
             if (elBelum) elBelum.textContent = formatRupiah(totalBelum);
+
+            populateDropdownSumberFo();
         });
     });
+}
+
+function populateDropdownSumberFo() {
+    if (!currentUser) return;
+    const select = document.getElementById('foInputSumber');
+    if (!select) return;
+
+    db.ref('pelanggan').once('value').then(snapshot => {
+        let currentValue = select.value;
+        select.innerHTML = `
+            <option value="">-- Pilih Sumber Pemasukan --</option>
+            <option value="MANUAL">➕ Input Manual (Bebas)</option>
+        `;
+
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const plg = child.val();
+                if (plg && plg.didaftarkan_oleh === currentUser.id) {
+                    const plgId = child.key;
+                    const namaPlg = plg.nama || plgId;
+                    const nominal = plg.total_tagihan || 0;
+                    const status = plg.status_bayar || 'Belum Bayar';
+
+                    const opt = document.createElement('option');
+                    opt.value = plgId;
+                    opt.textContent = `Tagihan ${plgId} - ${namaPlg} (${formatRupiah(nominal)}) [${status}]`;
+                    select.appendChild(opt);
+                }
+            });
+        }
+        select.value = currentValue;
+    });
+}
+
+function handlePilihSumberPemasukan(select) {
+    const manualGrup = document.getElementById('grupFoManualKet');
+    const nominalInput = document.getElementById('foInputNominal');
+    const val = select.value;
+
+    if (val === 'MANUAL') {
+        if (manualGrup) manualGrup.style.display = 'flex';
+        if (nominalInput) {
+            nominalInput.value = '';
+            nominalInput.readOnly = false;
+        }
+    } else if (val) {
+        if (manualGrup) manualGrup.style.display = 'none';
+        db.ref(`pelanggan/${val}`).once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                const plg = snapshot.val();
+                if (nominalInput) {
+                    nominalInput.value = plg.total_tagihan || 0;
+                    nominalInput.readOnly = true;
+                }
+            }
+        });
+    } else {
+        if (manualGrup) manualGrup.style.display = 'none';
+        if (nominalInput) {
+            nominalInput.value = '';
+            nominalInput.readOnly = false;
+        }
+    }
+}
+
+function simpanPemasukanFo() {
+    if (!currentUser) return;
+    const select = document.getElementById('foInputSumber');
+    const sumber = select ? select.value : '';
+    const tanggal = document.getElementById('foInputTanggal').value;
+    const nominal = Number(document.getElementById('foInputNominal').value);
+    
+    if (!sumber || !tanggal || !nominal) {
+        showAlert("Lengkapi seluruh form input pemasukan!");
+        return;
+    }
+
+    if (sumber === 'MANUAL') {
+        const ketManual = document.getElementById('foInputManualKet').value.trim();
+        if (!ketManual) {
+            showAlert("Isi keterangan pemasukan manual!");
+            return;
+        }
+
+        db.ref('transaksi_kas').push({
+            jenis: 'PEMASUKAN',
+            nominal: nominal,
+            keterangan: ketManual,
+            tanggal: tanggal,
+            isOtomatisTagihan: false
+        }).then(() => {
+            showAlert("Pemasukan manual berhasil dicatat ke laporan kas!");
+            document.getElementById('foInputSumber').value = '';
+            document.getElementById('foInputManualKet').value = '';
+            document.getElementById('foInputNominal').value = '';
+            document.getElementById('grupFoManualKet').style.display = 'none';
+            setKasTanggalDefault();
+        });
+    } else {
+        const plgId = sumber;
+        db.ref(`pelanggan/${plgId}`).once('value').then(snapshot => {
+            if (!snapshot.exists()) {
+                showAlert("Data pelanggan tidak ditemukan!");
+                return;
+            }
+            const plg = snapshot.val();
+            const namaPlg = plg.nama || plgId;
+            const wilayahPlg = plg.wilayah || plg.alamat || 'Umum';
+            const waktuOtomatis = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+            db.ref(`pelanggan/${plgId}`).update({
+                status_bayar: 'Sudah Bayar',
+                waktu_bayar_lengkap: waktuOtomatis,
+                metode_pembayaran: 'Cash (Petugas FO)'
+            }).then(() => {
+                db.ref('transaksi_kas').push({
+                    jenis: 'PEMASUKAN',
+                    nominal: nominal,
+                    keterangan: `Pembayaran Air (Cash FO) - (${plgId} - ${namaPlg} / ${wilayahPlg})`,
+                    tanggal: tanggal,
+                    isOtomatisTagihan: true
+                }).then(() => {
+                    showAlert(`Pemasukan tagihan ${plgId} (${namaPlg}) berhasil dicatat dan status pelanggan diubah menjadi LUNAS!`);
+                    select.value = '';
+                    document.getElementById('foInputNominal').value = '';
+                    document.getElementById('foInputNominal').readOnly = false;
+                    setKasTanggalDefault();
+                    populateDropdownSumberFo();
+                });
+            });
+        });
+    }
 }
 
 function updateProfilFo() {
@@ -3500,7 +3658,6 @@ function prosesTutupBukuAkhirTahun() {
                     updateBatch[`pelanggan/${id}/meter_lalu`] = plg.angka_terakhir !== undefined ? plg.angka_terakhir : 0;
                     updateBatch[`pelanggan/${id}/total_tagihan`] = 0;
                     updateBatch[`pelanggan/${id}/status_bayar`] = 'Belum Bayar';
-                    updateBatch[`pelanggan/${id}/tanggal_bayar`] = null;
                     updateBatch[`pelanggan/${id}/waktu_bayar_lengkap`] = null;
                     updateBatch[`pelanggan/${id}/metode_pembayaran`] = null;
                     updateBatch[`pelanggan/${id}/tgl_catat`] = null;
@@ -3765,23 +3922,13 @@ function loadLaporanKas() {
                     plgSnap.forEach(child => {
                         const plg = child.val();
                         if (plg.status_bayar === 'Sudah Bayar') {
-                            const tglRef = plg.tanggal_bayar || plg.tgl_catat;
-                            if (!tglRef) return;
-
-                            const tglBayar = new Date(tglRef);
-                            const thn = tglBayar.getFullYear();
-                            const bln = tglBayar.getMonth();
-                            
                             const meterLalu = plg.meter_lalu !== undefined ? parseDesimal(plg.meter_lalu) : (plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : 0);
                             const meterAkhir = plg.angka_terakhir !== undefined ? parseDesimal(plg.angka_terakhir) : meterLalu;
                             const pakai = Math.max(0, Math.round((meterAkhir - meterLalu) * 100) / 100);
                             const totalTagihanCalculated = (plg.total_tagihan !== undefined && plg.total_tagihan > 0) ? plg.total_tagihan : Math.round(((pakai * hargaM3) + biayaBeban) * 100) / 100;
 
-                            if ((thn < tahunSekarang) || (thn === tahunSekarang && bln < bulanSekarang)) {
-                                saldoBulanLalu += totalTagihanCalculated;
-                            } else if (thn === tahunSekarang && bln === bulanSekarang) {
-                                pemasukanBulanIni += totalTagihanCalculated;
-                            }
+                            // Berdasarkan periode berjalan (bukan tanggal bayar, melainkan seluruh tagihan lunas dihitung dalam siklus/bulan ini)
+                            pemasukanBulanIni += totalTagihanCalculated;
                         }
                     });
                 }
