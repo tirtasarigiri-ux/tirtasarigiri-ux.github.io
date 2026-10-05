@@ -1520,30 +1520,6 @@
                 </table>
             </div>
 
-            <h3 style="font-size:13px; margin: 12px 0 8px 0; color:var(--text-accent);">Input Pemasukan Bulan Ini</h3>
-            <form onsubmit="event.preventDefault(); simpanPemasukanFo();" style="margin-bottom:16px;">
-                <div class="grup">
-                    <label>Pilih Sumber Pemasukan / Tagihan Pelanggan</label>
-                    <select id="foInputSumber" onchange="handlePilihSumberPemasukan(this)" required>
-                        <option value="">-- Pilih Sumber Pemasukan --</option>
-                        <option value="MANUAL">➕ Input Manual (Bebas)</option>
-                    </select>
-                </div>
-                <div class="grup" id="grupFoManualKet" style="display:none;">
-                    <label>Keterangan Pemasukan Manual</label>
-                    <input type="text" id="foInputManualKet" placeholder="Contoh: Donasi / Sumbangan Warga">
-                </div>
-                <div class="grup">
-                    <label>Tanggal Pemasukan</label>
-                    <input type="date" id="foInputTanggal" required>
-                </div>
-                <div class="grup">
-                    <label>Nominal Pemasukan (Rp)</label>
-                    <input type="number" id="foInputNominal" placeholder="Contoh: 50000" required>
-                </div>
-                <button type="submit" class="btn btn-hijau">Simpan Pemasukan Bulan Ini</button>
-            </form>
-
             <h3 style="font-size:13px; margin-bottom:8px; color:var(--text-accent);">Riwayat Transaksi Kas</h3>
             <div class="table-responsive">
                 <table>
